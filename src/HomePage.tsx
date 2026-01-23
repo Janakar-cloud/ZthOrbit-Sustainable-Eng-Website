@@ -76,8 +76,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <section className="hero-section">
           <div className="hero-background">
             <img 
-              src="/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" 
-              alt="Sustainable Leadership Background" 
+              src="/assets/images/seetharaman/Seetharaman1.jpg" 
+              alt="Dr. R. Seetharaman - Sustainable Leadership" 
               className="hero-bg-image"
             />
             <div className="hero-overlay-bg"></div>

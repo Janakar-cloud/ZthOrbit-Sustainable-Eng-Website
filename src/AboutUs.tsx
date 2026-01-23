@@ -95,13 +95,13 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
         <section className="hero-banner">
           <div className="hero-slideshow">
             <div className="slideshow-image active">
-              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'%3E%3Crect width='1200' height='400' fill='%232ecc71'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='48' fill='white' font-weight='bold'%3ELeadership Excellence%3C/text%3E%3C/svg%3E" alt="Leadership" />
+              <img src="/assets/images/seetharaman/Seetharaman1.jpg" alt="Dr. Seetharaman - Leadership Excellence" />
             </div>
             <div className="slideshow-image">
-              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'%3E%3Crect width='1200' height='400' fill='%2327ae60'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='48' fill='white' font-weight='bold'%3ESustainability Vision%3C/text%3E%3C/svg%3E" alt="Sustainability" />
+              <img src="/assets/images/seetharaman/Seetharaman2.jpg" alt="Dr. Seetharaman - Sustainability Vision" />
             </div>
             <div className="slideshow-image">
-              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'%3E%3Crect width='1200' height='400' fill='%23229954'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='48' fill='white' font-weight='bold'%3EFuture Ready Leadership%3C/text%3E%3C/svg%3E" alt="Vision" />
+              <img src="/assets/images/seetharaman/Seetharaman3.jpg" alt="Dr. Seetharaman - Future Ready Leadership" />
             </div>
           </div>
         </section>
@@ -112,7 +112,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
               <div className="bio-image-column">
                 <div className="bio-image-frame">
                   <img 
-                    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232ecc71;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2327ae60;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='500' fill='url(%23grad)'/%3E%3Ccircle cx='200' cy='150' r='80' fill='white' opacity='0.3'/%3E%3Ctext x='50%25' y='320' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' fill='white' font-weight='bold'%3EDr. R. Seetharaman%3C/text%3E%3Ctext x='50%25' y='360' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='white' opacity='0.9'%3EGlobal Banking Leader%3C/text%3E%3Ctext x='50%25' y='390' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='white' opacity='0.9'%3ESustainability Advocate%3C/text%3E%3C/svg%3E" 
+                    src="/assets/images/seetharaman/Seetharaman4.jpg" 
                     alt="Dr. R. Seetharaman" 
                     className="bio-main-image"
                   />

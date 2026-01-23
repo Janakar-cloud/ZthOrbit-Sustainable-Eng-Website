@@ -1,52 +1,376 @@
+import { useState } from 'react'
 import './HomePage.css'
 
-function HomePage() {
-  return (
-    <div className="home-page">
-      <section className="hero">
-        <div className="hero-content">
-          <h1>Green Generation TV</h1>
-          <p className="hero-subtitle">Sustainable Engineering Media Platform</p>
-          <p className="hero-description">
-            Empowering the next generation with knowledge and insights on sustainable engineering,
-            eco-friendly innovations, and environmental solutions.
-          </p>
-          <div className="hero-cta">
-            <button className="btn-primary">Explore Content</button>
-            <button className="btn-secondary">Watch Live</button>
-          </div>
-        </div>
-      </section>
+interface HomePageProps {
+  onNavigate: (page: string) => void
+}
 
-      <section className="features">
-        <div className="container">
-          <h2>What We Offer</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <span className="material-icons">article</span>
-              <h3>Articles</h3>
-              <p>In-depth analysis and research on sustainable engineering practices</p>
+export default function HomePage({ onNavigate }: HomePageProps) {
+  const [darkMode, setDarkMode] = useState(false)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [isAdmin] = useState(false) // Set to true for admin users
+
+  return (
+    <div className={`homepage ${darkMode ? 'dark' : ''}`}>
+      <header className="header">
+        <div className="header-content">
+          <div className="logo-container">
+            <div className="logo-icon">
+              <span className="material-icons">eco</span>
             </div>
-            <div className="feature-card">
-              <span className="material-icons">mic</span>
-              <h3>Podcast</h3>
-              <p>Expert interviews and discussions on environmental innovations</p>
+            <h1 className="logo">
+              Green Generation <span className="logo-highlight">TV</span>
+            </h1>
+          </div>
+          
+          <nav className="desktop-nav">
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('livetv'); }}>LiveTV</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>Podcast</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>Articles</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
+          </nav>
+          
+          <div className="header-actions">
+            <div className="user-profile-container">
+              <button className="user-profile-btn" onClick={() => setShowProfileMenu(!showProfileMenu)}>
+                <span className="material-icons">account_circle</span>
+              </button>
+              {showProfileMenu && (
+                <div className="profile-dropdown">
+                  <button className="dropdown-item" onClick={() => setDarkMode(!darkMode)}>
+                    <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
+                    <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  </button>
+                  <button className="dropdown-item">
+                    <span className="material-icons">settings</span>
+                    <span>Settings</span>
+                  </button>
+                  <button className="dropdown-item">
+                    <span className="material-icons">lock_reset</span>
+                    <span>Forgot Password</span>
+                  </button>
+                  <button className="dropdown-item logout">
+                    <span className="material-icons">logout</span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="feature-card">
-              <span className="material-icons">video_library</span>
-              <h3>Case Stories</h3>
-              <p>Real-world success stories of sustainable engineering projects</p>
+            {isAdmin && (
+              <button className="admin-btn" onClick={() => onNavigate('admin')}>
+                <span className="material-icons">admin_panel_settings</span>
+                <span>Admin</span>
+              </button>
+            )}
+            <button className="login-btn" onClick={() => onNavigate('login')}>
+              <span>Login</span>
+            </button>
+            <button className="mobile-menu">
+              <span className="material-icons">menu</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="main-container">
+        <section className="hero-section">
+          <div className="hero-background">
+            <img 
+              src="/TemplateScreens/Seetharaman/Seetharaman 22Aug3575.jpg" 
+              alt="Sustainable Leadership Background" 
+              className="hero-bg-image"
+            />
+            <div className="hero-overlay-bg"></div>
+          </div>
+          <div className="hero-content-container">
+            <div className="hero-text-box-home">
+              <div className="hero-icon-home">
+                <span className="material-icons">eco</span>
+              </div>
+              <h1 className="hero-heading-home">EMPOWERING SUSTAINABILITY</h1>
+              <p className="hero-subheading-home">Through Conscious Leadership and Media</p>
+              <div className="hero-stats-home">
+                <div className="hero-stat-home">
+                  <span className="stat-number-home">20+</span>
+                  <span className="stat-label-home">Years Leadership</span>
+                </div>
+                <div className="hero-stat-home">
+                  <span className="stat-number-home">Global</span>
+                  <span className="stat-label-home">Impact</span>
+                </div>
+                <div className="hero-stat-home">
+                  <span className="stat-number-home">Future</span>
+                  <span className="stat-label-home">Generation</span>
+                </div>
+              </div>
             </div>
-            <div className="feature-card">
-              <span className="material-icons">live_tv</span>
-              <h3>Live TV</h3>
-              <p>Live broadcasts featuring sustainability experts and innovators</p>
+          </div>
+        </section>
+
+        <section id="insights" className="work-section">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Our Work</h2>
+              <p className="section-subtitle">Discover our latest productions and featured content.</p>
+            </div>
+            <a href="#" className="view-all">
+              View All <span className="material-icons">arrow_forward</span>
+            </a>
+          </div>
+          
+          <div className="work-grid">
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" alt="Latest Videos" className="work-image" />
+              </div>
+              <h4 className="work-title">Latest Videos</h4>
+              <p className="work-description">Check out our newest visual creations.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/AI & Sustainability.jpeg" alt="Featured Podcasts" className="work-image" />
+              </div>
+              <h4 className="work-title">Featured Podcasts</h4>
+              <p className="work-description">Tune in to our most popular series.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/delivering the sdg through the technology, governance and measurable impact.png" alt="Recent Productions" className="work-image" />
+              </div>
+              <h4 className="work-title">Recent Productions</h4>
+              <p className="work-description">Explore the work we're most proud of.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Governance-Risk-Management-and-Compliance.webp" alt="Top Documentaries" className="work-image" />
+              </div>
+              <h4 className="work-title">Top Documentaries</h4>
+              <p className="work-description">Stories that matter, told visually.</p>
+            </div>
+          </div>
+        </section>
+        <section id="insights" className="work-section">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Live TV</h2>
+              <p className="section-subtitle">Discover our latest live broadcasts and streaming content.</p>
+            </div>
+            <a href="#" className="view-all">
+              View All <span className="material-icons">arrow_forward</span>
+            </a>
+          </div>
+          
+          <div className="work-grid">
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/digital ecosystem as a new driver of sustainable economic growth .png" alt="Latest Videos" className="work-image" />
+              </div>
+              <h4 className="work-title">Latest Videos</h4>
+              <p className="work-description">Check out our newest visual creations.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/From Waste to Worth.png" alt="Featured Podcasts" className="work-image" />
+              </div>
+              <h4 className="work-title">Featured Podcasts</h4>
+              <p className="work-description">Tune in to our most popular series.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Recent Productions" className="work-image" />
+              </div>
+              <h4 className="work-title">Recent Productions</h4>
+              <p className="work-description">Explore the work we're most proud of.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png" alt="Top Documentaries" className="work-image" />
+              </div>
+              <h4 className="work-title">Top Documentaries</h4>
+              <p className="work-description">Stories that matter, told visually.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="podcasts" className="work-section">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Podcasts</h2>
+              <p className="section-subtitle">Listen to inspiring conversations and insights on sustainability.</p>
+            </div>
+            <a href="#" className="view-all" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>
+              View All <span className="material-icons">arrow_forward</span>
+            </a>
+          </div>
+          
+          <div className="work-grid">
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/AI & Sustainability.jpeg" alt="AI & Sustainable Development" className="work-image" />
+              </div>
+              <h4 className="work-title">AI & Sustainable Development</h4>
+              <p className="work-description">How AI is enabling sustainability efforts globally.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/From Waste to Worth.png" alt="Waste to Value Opportunities" className="work-image" />
+              </div>
+              <h4 className="work-title">Waste to Value Opportunities</h4>
+              <p className="work-description">Transforming waste into valuable business ventures.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Finance & Responsibility" className="work-image" />
+              </div>
+              <h4 className="work-title">Finance & Responsibility</h4>
+              <p className="work-description">Understanding financial responsibility beyond profit.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Governance-Risk-Management-and-Compliance.webp" alt="Governance & Risk Management" className="work-image" />
+              </div>
+              <h4 className="work-title">Governance & Risk Management</h4>
+              <p className="work-description">Building resilient sustainable organizations.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="articles" className="work-section">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Articles</h2>
+              <p className="section-subtitle">Read thought leadership on sustainable development and innovation.</p>
+            </div>
+            <a href="#" className="view-all" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>
+              View All <span className="material-icons">arrow_forward</span>
+            </a>
+          </div>
+          
+          <div className="work-grid">
+            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" alt="Latest Insights" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+              </div>
+              <h4 className="work-title">Latest Insights</h4>
+              <p className="work-description">Fresh perspectives on sustainability.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/digital ecosystem as a new driver of sustainable economic growth .png" alt="Technology & Innovation" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+              </div>
+              <h4 className="work-title">Technology & Innovation</h4>
+              <p className="work-description">Digital transformation for sustainability.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/Aligning Sustainabillity, ethics and governence for the future .png" alt="Leadership & Strategy" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+              </div>
+              <h4 className="work-title">Leadership & Strategy</h4>
+              <p className="work-description">Conscious leadership in action.</p>
+            </div>
+            
+            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+              <div className="work-image-container">
+                <img src="/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png" alt="Global Economics" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
+              </div>
+              <h4 className="work-title">Global Economics</h4>
+              <p className="work-description">Economic insights for a sustainable future.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div className="footer-container">
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <div className="logo-container">
+                <div className="logo-icon">
+                  <span className="material-icons">eco</span>
+                </div>
+                <h1 className="logo">
+                  Green Generation <span className="logo-highlight">TV</span>
+                </h1>
+              </div>
+              <p className="footer-description">
+                Leading the way in sustainable engineering and environmental innovation for a greener future.
+              </p>
+            </div>
+            
+            <div className="footer-links">
+              <h5 className="footer-heading">Explore</h5>
+              <ul className="footer-list">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Videos</a></li>
+                <li><a href="#">Productions</a></li>
+                <li><a href="#case-stories">Case Stories</a></li>
+              </ul>
+            </div>
+            
+            <div className="footer-links">
+              <h5 className="footer-heading">Company</h5>
+              <ul className="footer-list">
+                <li><a onClick={() => onNavigate('about')}>About Us</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#">Careers</a></li>
+              </ul>
+            </div>
+            
+            <div className="footer-newsletter">
+              <h5 className="footer-heading">Engineering Insights</h5>
+              <p className="newsletter-description">
+                Get the latest sustainability updates from our team.
+              </p>
+              <form className="newsletter-form">
+                <input type="email" placeholder="Enter your email" className="newsletter-input" />
+                <button type="submit" className="newsletter-button">Subscribe</button>
+              </form>
+            </div>
+          </div>
+          
+          <div className="footer-bottom">
+            <p>© 2026 Green Generation TV. All rights reserved.</p>
+            <div className="footer-bottom-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
             </div>
           </div>
         </div>
-      </section>
+      </footer>
+
+      <div className="mobile-nav">
+        <button className="mobile-nav-button active">
+          <span className="material-icons">grid_view</span>
+          <span className="mobile-nav-label">Home</span>
+        </button>
+        <button className="mobile-nav-button">
+          <span className="material-icons">bar_chart</span>
+          <span className="mobile-nav-label">Stats</span>
+        </button>
+        <button className="mobile-nav-fab">
+          <span className="material-icons">add</span>
+        </button>
+        <button className="mobile-nav-button">
+          <span className="material-icons">article</span>
+          <span className="mobile-nav-label">Blog</span>
+        </button>
+        <button className="mobile-nav-button" onClick={() => onNavigate('about')}>
+          <span className="material-icons">settings</span>
+          <span className="mobile-nav-label">Tools</span>
+        </button>
+      </div>
     </div>
   )
 }
-
-export default HomePage

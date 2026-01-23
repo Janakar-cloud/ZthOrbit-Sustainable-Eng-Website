@@ -95,13 +95,13 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
         <section className="hero-banner">
           <div className="hero-slideshow">
             <div className="slideshow-image active">
-              <img src="/TemplateScreens/Seetharaman/Seetharaman 22Aug3575.jpg" alt="Leadership" />
+              <img src="https://via.placeholder.com/1200x400/2ecc71/ffffff?text=Leadership+Excellence" alt="Leadership" />
             </div>
             <div className="slideshow-image">
-              <img src="/TemplateScreens/Seetharaman/Seetharaman 22Aug3425.jpg" alt="Sustainability" />
+              <img src="https://via.placeholder.com/1200x400/27ae60/ffffff?text=Sustainability+Vision" alt="Sustainability" />
             </div>
             <div className="slideshow-image">
-              <img src="/TemplateScreens/Seetharaman/Seetharaman 22Aug3566.jpg" alt="Vision" />
+              <img src="https://via.placeholder.com/1200x400/229954/ffffff?text=Future+Ready+Leadership" alt="Vision" />
             </div>
           </div>
         </section>
@@ -112,7 +112,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
               <div className="bio-image-column">
                 <div className="bio-image-frame">
                   <img 
-                    src="/TemplateScreens/Seetharaman/Seetharaman 22Aug3425.jpg" 
+                    src="https://via.placeholder.com/400x500/2ecc71/ffffff?text=Dr.+R.+Seetharaman" 
                     alt="Dr. R. Seetharaman" 
                     className="bio-main-image"
                   />

@@ -76,7 +76,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <section className="hero-section">
           <div className="hero-background">
             <img 
-              src="/assets/images/seetharaman/Seetharaman1.jpg" 
+              src="/assets/images/seetharaman/Seetharaman2.jpg" 
               alt="Dr. R. Seetharaman - Sustainable Leadership" 
               className="hero-bg-image"
             />

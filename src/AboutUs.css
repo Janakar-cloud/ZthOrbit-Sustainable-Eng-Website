@@ -1157,7 +1157,7 @@
 }
 
 .contact-value {
-  font-size: 0.6rem;
+  font-size: 1.1rem;
   color: #555555;
   margin: 0 0 1.5rem 0;
   line-height: 1.6;
@@ -1467,7 +1467,7 @@
 
 /* Logo Image Styles */
 .logo-image {
-  width: 50px;
-  height: 50px;
+  width: 85px;
+  height: 85px;
   object-fit: contain;
 }

@@ -171,7 +171,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <p className="work-description">Explore the work we're most proud of.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>
+            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
               <div className="work-image-container">
                 <img src="/assets/images/Governance-Risk-Management-and-Compliance.webp" alt="Top Documentaries" className="work-image" />
               </div>
@@ -200,7 +200,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <p className="work-description">Check out our newest visual creations.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
+            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
               <div className="work-image-container">
                 <img src="/assets/images/From Waste to Worth.png" alt="Featured Podcasts" className="work-image" />
               </div>
@@ -337,20 +337,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <div className="footer-links">
               <h5 className="footer-heading">Explore</h5>
               <ul className="footer-list">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Videos</a></li>
-                <li><a href="#">Productions</a></li>
-                <li><a href="#case-stories">Case Stories</a></li>
+                <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Home</a></li>
+                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Videos</a></li>
+                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Productions</a></li>
+                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Case Stories</a></li>
               </ul>
             </div>
             
             <div className="footer-links">
               <h5 className="footer-heading">Company</h5>
               <ul className="footer-list">
-                <li><a onClick={() => onNavigate('about')}>About Us</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#">Careers</a></li>
+                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>About Us</a></li>
+                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Blog</a></li>
+                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Contact</a></li>
+                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Careers</a></li>
               </ul>
             </div>
             

@@ -459,6 +459,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
 
 .episode-header {
@@ -516,6 +517,7 @@
   line-height: 1.6;
   margin: 0 0 1.5rem 0;
   font-size: 0.95rem;
+  flex: 1;
 }
 
 .dark .episode-description {
@@ -551,6 +553,7 @@
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  margin-top: auto;
 }
 
 .play-btn {

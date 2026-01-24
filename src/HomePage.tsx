@@ -32,8 +32,48 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
   }
 
-  const handlePlayVideo = () => {
-    setSelectedVideo(latestVideo)
+  // Live TV videos
+  const liveTVVideos: Video[] = [
+    {
+      id: 1,
+      title: 'Digital Ecosystem Growth',
+      description: 'Exploring digital ecosystems as drivers of sustainable economic growth.',
+      videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
+      category: 'technology',
+      publishDate: 'Jan 20, 2026',
+      thumbnail: '/assets/images/digital ecosystem as a new driver of sustainable economic growth .png'
+    },
+    {
+      id: 2,
+      title: 'Waste to Worth',
+      description: 'Transforming waste into valuable resources through innovative solutions.',
+      videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
+      category: 'sustainability',
+      publishDate: 'Jan 18, 2026',
+      thumbnail: '/assets/images/From Waste to Worth.png'
+    },
+    {
+      id: 3,
+      title: 'Finance & Responsibility',
+      description: 'Balancing financial growth with environmental responsibility.',
+      videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',
+      category: 'finance',
+      publishDate: 'Jan 15, 2026',
+      thumbnail: '/assets/images/Finance&Responsibilty.jpg'
+    },
+    {
+      id: 4,
+      title: 'Digital Convergence in India',
+      description: 'India\'s digital transformation and financial inclusion in 2026.',
+      videoId: '1RFsLTZ8tI6z8-C9JgLfVhE7QGz9vXdqN',
+      category: 'technology',
+      publishDate: 'Jan 12, 2026',
+      thumbnail: '/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png'
+    }
+  ]
+
+  const handlePlayVideo = (video?: Video) => {
+    setSelectedVideo(video || latestVideo)
   }
 
   const handleCloseModal = () => {
@@ -186,42 +226,42 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <h2 className="section-title">Live TV</h2>
               <p className="section-subtitle">Discover our latest live broadcasts and streaming content.</p>
             </div>
-            <a href="#" className="view-all">
+            <a href="#" className="view-all" onClick={(e) => { e.preventDefault(); onNavigate('livetv'); }}>
               View All <span className="material-icons">arrow_forward</span>
             </a>
           </div>
           
           <div className="work-grid">
-            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[0])}>
                 <img src="/assets/images/digital ecosystem as a new driver of sustainable economic growth .png" alt="Latest Videos" className="work-image" />
               </div>
               <h4 className="work-title">Latest Videos</h4>
               <p className="work-description">Check out our newest visual creations.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/From Waste to Worth.png" alt="Featured Podcasts" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[1])}>
+                <img src="/assets/images/From Waste to Worth.png" alt="Environmental Videos" className="work-image" />
               </div>
-              <h4 className="work-title">Featured Podcasts</h4>
-              <p className="work-description">Tune in to our most popular series.</p>
+              <h4 className="work-title">Environmental Videos</h4>
+              <p className="work-description">Sustainability solutions in action.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Recent Productions" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[2])}>
+                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Finance Videos" className="work-image" />
               </div>
-              <h4 className="work-title">Recent Productions</h4>
-              <p className="work-description">Explore the work we're most proud of.</p>
+              <h4 className="work-title">Finance Videos</h4>
+              <p className="work-description">Responsible finance and growth.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png" alt="Top Documentaries" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[3])}>
+                <img src="/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png" alt="Technology Videos" className="work-image" />
               </div>
-              <h4 className="work-title">Top Documentaries</h4>
-              <p className="work-description">Stories that matter, told visually.</p>
+              <h4 className="work-title">Technology Videos</h4>
+              <p className="work-description">Digital innovation stories.</p>
             </div>
           </div>
         </section>

@@ -188,7 +188,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           
           <div className="work-grid">
             <div className="work-card" style={{ cursor: 'pointer' }}>
-              <div className="work-image-container" onClick={handlePlayVideo}>
+              <div className="work-image-container" onClick={() => handlePlayVideo()}>
                 <img src="/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" alt="Latest Videos" className="work-image" />
               </div>
               <h4 className="work-title" onClick={() => onNavigate('livetv')}>Latest Videos</h4>

@@ -25,7 +25,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const videos: Video[] = [
     {
       id: 1,
-      title: 'Sustainable Engineering Innovation',
+      title: 'Sustainable Development Goals: A Strategic Framework',
       description: 'Exploring cutting-edge sustainable engineering solutions and innovations for a greener future.',
       videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
       category: 'sustainability',
@@ -34,7 +34,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 2,
-      title: 'Green Technology Insights',
+      title: 'Delivering the SDGs Through Technology & Governance',
       description: 'Deep dive into green technology applications and their impact on environmental conservation.',
       videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
       category: 'technology',
@@ -43,7 +43,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 3,
-      title: 'Digital Transformation for Sustainability',
+      title: 'Digital Ecosystem: Driver of Economic Growth',
       description: 'How digital transformation is driving sustainable business practices across industries.',
       videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',
       category: 'technology',
@@ -52,7 +52,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 4,
-      title: 'Economic Growth & Sustainability',
+      title: 'Finance & Responsibility: Beyond Profit',
       description: 'Balancing economic development with environmental responsibility and sustainable practices.',
       videoId: '1SYOtz1TxW_iXmLd1PmVIMi6Ynqhj2Vh9',
       category: 'economy',
@@ -61,7 +61,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 5,
-      title: 'Leadership in Sustainable Development',
+      title: 'Aligning Sustainability, Ethics & Governance',
       description: 'Conscious leadership strategies for driving sustainable transformation in organizations.',
       videoId: '1Gxx8aFxFXFkmUc5jM94EC4orJJE_WMw0',
       category: 'leadership',
@@ -70,7 +70,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 6,
-      title: 'AI & Sustainable Development',
+      title: 'AI & Sustainability: Technology for Change',
       description: 'Leveraging artificial intelligence for achieving sustainable development goals.',
       videoId: '1ZdEmNMQpkBhRIzfMf_BCERdnTQJgyqa6',
       category: 'technology',
@@ -79,7 +79,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 7,
-      title: 'Waste Management Innovation',
+      title: 'From Waste to Worth: Circular Economy',
       description: 'Transforming waste into valuable resources through innovative management strategies.',
       videoId: '1_vqRWG1-m9-yqzQl-bLcxldQqUEJwUkh',
       category: 'sustainability',
@@ -88,7 +88,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 8,
-      title: 'Financial Responsibility & Ethics',
+      title: 'Financial Markets: Meaning Beyond Money',
       description: 'Understanding the role of finance in driving responsible and ethical business practices.',
       videoId: '1_ERDjEswCOTLWObPLA6T7cdgJK6IO-Hp',
       category: 'economy',
@@ -97,7 +97,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 9,
-      title: 'Governance & Risk Management',
+      title: 'Governance & Risk: Building Resilience',
       description: 'Building resilient organizations through effective governance and risk management frameworks.',
       videoId: '15t9-nTlOgIMCyCBV-PzyxcnRAEa6nCCp',
       category: 'leadership',
@@ -106,7 +106,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 10,
-      title: 'Sustainable Development Goals',
+      title: 'Opportunities in the New World Order',
       description: 'Strategic approaches to achieving UN Sustainable Development Goals in business.',
       videoId: '1aqR59K66ZBXGn6yJAk1X6_SiVC6zOu_V',
       category: 'sustainability',
@@ -115,7 +115,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 11,
-      title: 'India\'s Digital Economy',
+      title: 'India\'s Digital Convergence & Financial Inclusion',
       description: 'Exploring India\'s digital convergence and its role in economic transformation.',
       videoId: '1nSNoRvalFMOjYnAPEAP5WkpneuEuqY2a',
       category: 'economy',
@@ -124,7 +124,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 12,
-      title: 'Green Banking Solutions',
+      title: 'Global Markets vs India: Economic Eminence',
       description: 'Innovation in banking sector driving sustainable financial solutions.',
       videoId: '199MXOMc2WKPW1EoO7qg-2TFCMTR6qLC4',
       category: 'economy',
@@ -133,7 +133,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 13,
-      title: 'Technology for SDGs',
+      title: 'Technology, Governance & Measurable Impact',
       description: 'Using technology, governance, and measurable impact to deliver sustainable development goals.',
       videoId: '19uh2THvg-NP7sq5yt4HwmHpTB5HJb7lZ',
       category: 'technology',
@@ -142,7 +142,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 14,
-      title: 'Circular Economy Principles',
+      title: 'Circular Economy: Sustainable Business Models',
       description: 'Implementing circular economy principles for sustainable business models.',
       videoId: '1dxlSxij_Sy1crUUITUq6ujQyW4ug46Xa',
       category: 'sustainability',
@@ -151,7 +151,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 15,
-      title: 'Climate Risk Management',
+      title: 'Climate Risk Management Strategies',
       description: 'Strategic approaches to managing climate risks in business operations.',
       videoId: '1P5qt6TBLcT-r9O-zt3-LQYtqWB0Hx6M4',
       category: 'sustainability',
@@ -160,31 +160,13 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     },
     {
       id: 16,
-      title: 'Ethical Leadership',
+      title: 'Sustainable Leadership & Ethics',
       description: 'Building ethical leadership frameworks for sustainable organizational growth.',
       videoId: '1HwDAbDruhmVpBm-lTJck3_i2hFImoZ7e',
       category: 'leadership',
       publishDate: 'Dec 10, 2025',
       thumbnail: '/assets/livetv/yoga part 2 (1).jpg'
     },
-    {
-      id: 17,
-      title: 'Global Financial Markets',
-      description: 'Understanding global financial markets and their impact on sustainable development.',
-      videoId: '1d_nv4187CWh5OyPZJQOU0V00qW2uUcHE',
-      category: 'economy',
-      publishDate: 'Dec 8, 2025',
-      thumbnail: '/assets/images/Global Investor confiedence and qoatar_s reaffirmed financial credibility.png'
-    },
-    {
-      id: 18,
-      title: 'Future of Sustainable Engineering',
-      description: 'Vision for the future of sustainable engineering and environmental innovation.',
-      videoId: '1LbHMMWP0PpfcbihotbbpTg2CtzqC8CM0',
-      category: 'sustainability',
-      publishDate: 'Dec 5, 2025',
-      thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
-    }
   ]
 
   // Auto-rotate videos every 15 minutes to allow full-length playback

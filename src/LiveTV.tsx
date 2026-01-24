@@ -156,7 +156,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1P5qt6TBLcT-r9O-zt3-LQYtqWB0Hx6M4',
       category: 'sustainability',
       publishDate: 'Dec 12, 2025',
-      thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
+      thumbnail: '/assets/livetv/Black and Purple Modern Business Podcast Youtube Thumbnail.jpg'
     },
     {
       id: 16,
@@ -165,7 +165,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1HwDAbDruhmVpBm-lTJck3_i2hFImoZ7e',
       category: 'leadership',
       publishDate: 'Dec 10, 2025',
-      thumbnail: '/assets/images/Aligning Sustainabillity, ethics and governence for the future .png'
+      thumbnail: '/assets/livetv/yoga part 2 (1).jpg'
     },
     {
       id: 17,

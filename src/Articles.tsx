@@ -542,7 +542,6 @@ export default function Articles({ onNavigate }: ArticlesProps) {
               <ul className="footer-list">
                 <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Home</a></li>
                 <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Videos</a></li>
-                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Productions</a></li>
                 <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Case Stories</a></li>
               </ul>
             </div>

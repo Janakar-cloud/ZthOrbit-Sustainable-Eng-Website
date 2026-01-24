@@ -396,7 +396,6 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
               <ul className="footer-list">
                 <li><a onClick={() => onNavigate('home')}>Home</a></li>
                 <li><a href="#">Videos</a></li>
-                <li><a href="#">Productions</a></li>
                 <li><a href="#case-stories">Case Stories</a></li>
               </ul>
             </div>

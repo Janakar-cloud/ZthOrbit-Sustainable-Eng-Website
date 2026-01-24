@@ -15,11 +15,23 @@ interface Video {
   thumbnail: string
 }
 
+interface Podcast {
+  id: number
+  title: string
+  description: string
+  audioFile: string
+  image: string
+  duration: string
+  category: string
+  publishDate: string
+}
+
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isAdmin] = useState(false) // Set to true for admin users
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
 
   // Latest video (same as in LiveTV.tsx)
   const latestVideo: Video = {
@@ -72,12 +84,64 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
   ]
 
+  // Podcast episodes
+  const podcastEpisodes: Podcast[] = [
+    {
+      id: 2,
+      title: 'Artificial Intelligence: A Great Enabler Towards Sustainable Development',
+      description: 'How AI is revolutionizing sustainability efforts across industries.',
+      audioFile: '/assets/podcast/ARTIFICIAL INTELLIGENCE IS A GREAT ENABLER TOWARDS SUSTAINABLE DEVELOPMENT.m4a',
+      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg',
+      duration: '52:15',
+      category: 'technology',
+      publishDate: 'Jan 12, 2026'
+    },
+    {
+      id: 11,
+      title: 'From Waste to Value: Opportunities Unveiled',
+      description: 'Transforming waste streams into valuable resources.',
+      audioFile: '/assets/podcast/OPPORTUNITIES FROM WASTE TO VALUES.m4a',
+      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg',
+      duration: '42:30',
+      category: 'sustainability',
+      publishDate: 'Dec 18, 2025'
+    },
+    {
+      id: 5,
+      title: 'Finance is Not Just Profit: It is Responsibility',
+      description: 'Understanding financial responsibility beyond profit.',
+      audioFile: '/assets/podcast/FINANCE IS NOT JUST PROFIT. IT IS RESPONSIBILITY.m4a',
+      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg',
+      duration: '39:30',
+      category: 'economy',
+      publishDate: 'Jan 5, 2026'
+    },
+    {
+      id: 9,
+      title: 'Governance & Risk Management are Integral',
+      description: 'Building resilient, sustainable organizations.',
+      audioFile: '/assets/podcast/GOVERNANCE & RISK MANAGEMENT ARE INTEGRAL.m4a',
+      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg',
+      duration: '43:40',
+      category: 'leadership',
+      publishDate: 'Dec 22, 2025'
+    }
+  ]
+
   const handlePlayVideo = (video?: Video) => {
     setSelectedVideo(video || latestVideo)
   }
 
   const handleCloseModal = () => {
     setSelectedVideo(null)
+  }
+
+  const handlePlayPodcast = (podcast: Podcast) => {
+    setSelectedPodcast(podcast)
+  }
+
+  const handleClosePodcast = () => {
+    setSelectedPodcast(null)
   }
 
   return (
@@ -234,7 +298,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="work-grid">
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[0])}>
-                <img src="/assets/images/digital ecosystem as a new driver of sustainable economic growth .png" alt="Latest Videos" className="work-image" />
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg" alt="Latest Videos" className="work-image" />
               </div>
               <h4 className="work-title">Latest Videos</h4>
               <p className="work-description">Check out our newest visual creations.</p>
@@ -242,7 +306,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[1])}>
-                <img src="/assets/images/From Waste to Worth.png" alt="Environmental Videos" className="work-image" />
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg" alt="Environmental Videos" className="work-image" />
               </div>
               <h4 className="work-title">Environmental Videos</h4>
               <p className="work-description">Sustainability solutions in action.</p>
@@ -250,7 +314,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[2])}>
-                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Finance Videos" className="work-image" />
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg" alt="Finance Videos" className="work-image" />
               </div>
               <h4 className="work-title">Finance Videos</h4>
               <p className="work-description">Responsible finance and growth.</p>
@@ -258,7 +322,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[3])}>
-                <img src="/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png" alt="Technology Videos" className="work-image" />
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg" alt="Technology Videos" className="work-image" />
               </div>
               <h4 className="work-title">Technology Videos</h4>
               <p className="work-description">Digital innovation stories.</p>
@@ -278,33 +342,33 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
           
           <div className="work-grid">
-            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/AI & Sustainability.jpeg" alt="AI & Sustainable Development" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[0])}>
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg" alt="AI & Sustainable Development" className="work-image" />
               </div>
               <h4 className="work-title">AI & Sustainable Development</h4>
               <p className="work-description">How AI is enabling sustainability efforts globally.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/From Waste to Worth.png" alt="Waste to Value Opportunities" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[1])}>
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg" alt="Waste to Value Opportunities" className="work-image" />
               </div>
               <h4 className="work-title">Waste to Value Opportunities</h4>
               <p className="work-description">Transforming waste into valuable business ventures.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/Finance&Responsibilty.jpg" alt="Finance & Responsibility" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[2])}>
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg" alt="Finance & Responsibility" className="work-image" />
               </div>
               <h4 className="work-title">Finance & Responsibility</h4>
               <p className="work-description">Understanding financial responsibility beyond profit.</p>
             </div>
             
-            <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
-                <img src="/assets/images/Governance-Risk-Management-and-Compliance.webp" alt="Governance & Risk Management" className="work-image" />
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[3])}>
+                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg" alt="Governance & Risk Management" className="work-image" />
               </div>
               <h4 className="work-title">Governance & Risk Management</h4>
               <p className="work-description">Building resilient sustainable organizations.</p>
@@ -379,7 +443,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <ul className="footer-list">
                 <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Home</a></li>
                 <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Videos</a></li>
-                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Productions</a></li>
                 <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Case Stories</a></li>
               </ul>
             </div>
@@ -456,6 +519,30 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <h3>{selectedVideo.title}</h3>
               <p className="modal-date">{selectedVideo.publishDate}</p>
               <p className="modal-description">{selectedVideo.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Podcast Modal */}
+      {selectedPodcast && (
+        <div className="video-modal" onClick={handleClosePodcast}>
+          <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleClosePodcast}>
+              <span className="material-icons">close</span>
+            </button>
+            <div className="modal-video-wrapper">
+              <img src={selectedPodcast.image} alt={selectedPodcast.title} style={{ width: '100%', borderRadius: '8px', marginBottom: '20px' }} />
+              <audio controls style={{ width: '100%' }} autoPlay>
+                <source src={selectedPodcast.audioFile} type="audio/mp4" />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+            <div className="modal-info">
+              <h3>{selectedPodcast.title}</h3>
+              <p className="modal-date">{selectedPodcast.publishDate} • {selectedPodcast.duration}</p>
+              <p className="modal-description">{selectedPodcast.description}</p>
+              <span className="podcast-category" style={{ display: 'inline-block', padding: '4px 12px', backgroundColor: '#00ff88', color: '#0a0a0a', borderRadius: '12px', fontSize: '0.85rem', marginTop: '10px' }}>{selectedPodcast.category}</span>
             </div>
           </div>
         </div>

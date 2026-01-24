@@ -30,7 +30,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
       category: 'sustainability',
       publishDate: 'Jan 20, 2026',
-      thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (5).jpg'
     },
     {
       id: 2,
@@ -39,7 +39,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
       category: 'technology',
       publishDate: 'Jan 18, 2026',
-      thumbnail: '/assets/images/delivering the sdg through the technology, governance and measurable impact.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg'
     },
     {
       id: 3,
@@ -48,7 +48,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',
       category: 'technology',
       publishDate: 'Jan 15, 2026',
-      thumbnail: '/assets/images/digital ecosystem as a new driver of sustainable economic growth .png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (7).jpg'
     },
     {
       id: 4,
@@ -57,7 +57,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1SYOtz1TxW_iXmLd1PmVIMi6Ynqhj2Vh9',
       category: 'economy',
       publishDate: 'Jan 12, 2026',
-      thumbnail: '/assets/images/Global Investor confiedence and qoatar_s reaffirmed financial credibility.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (9).jpg'
     },
     {
       id: 5,
@@ -66,7 +66,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1Gxx8aFxFXFkmUc5jM94EC4orJJE_WMw0',
       category: 'leadership',
       publishDate: 'Jan 10, 2026',
-      thumbnail: '/assets/images/Aligning Sustainabillity, ethics and governence for the future .png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg'
     },
     {
       id: 6,
@@ -75,7 +75,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1ZdEmNMQpkBhRIzfMf_BCERdnTQJgyqa6',
       category: 'technology',
       publishDate: 'Jan 8, 2026',
-      thumbnail: '/assets/images/AI & Sustainability.jpeg'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (11).jpg'
     },
     {
       id: 7,
@@ -84,7 +84,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1_vqRWG1-m9-yqzQl-bLcxldQqUEJwUkh',
       category: 'sustainability',
       publishDate: 'Jan 5, 2026',
-      thumbnail: '/assets/images/From Waste to Worth.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (16).jpg'
     },
     {
       id: 8,
@@ -93,7 +93,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1_ERDjEswCOTLWObPLA6T7cdgJK6IO-Hp',
       category: 'economy',
       publishDate: 'Jan 3, 2026',
-      thumbnail: '/assets/images/Finance&Responsibilty.jpg'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (17).jpg'
     },
     {
       id: 9,
@@ -102,7 +102,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '15t9-nTlOgIMCyCBV-PzyxcnRAEa6nCCp',
       category: 'leadership',
       publishDate: 'Dec 28, 2025',
-      thumbnail: '/assets/images/Governance-Risk-Management-and-Compliance.webp'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg'
     },
     {
       id: 10,
@@ -111,7 +111,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1aqR59K66ZBXGn6yJAk1X6_SiVC6zOu_V',
       category: 'sustainability',
       publishDate: 'Dec 25, 2025',
-      thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (19).jpg'
     },
     {
       id: 11,
@@ -120,7 +120,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1nSNoRvalFMOjYnAPEAP5WkpneuEuqY2a',
       category: 'economy',
       publishDate: 'Dec 22, 2025',
-      thumbnail: '/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg'
     },
     {
       id: 12,
@@ -129,7 +129,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '199MXOMc2WKPW1EoO7qg-2TFCMTR6qLC4',
       category: 'economy',
       publishDate: 'Dec 20, 2025',
-      thumbnail: '/assets/images/banking transformation in qatar from crisis response to strategic reinvention.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (21).jpg'
     },
     {
       id: 13,
@@ -138,7 +138,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '19uh2THvg-NP7sq5yt4HwmHpTB5HJb7lZ',
       category: 'technology',
       publishDate: 'Dec 18, 2025',
-      thumbnail: '/assets/images/delivering the sdg through the technology, governance and measurable impact.png'
+      thumbnail: '/assets/livetv/Black Orange Modern Podcast YouTube Thumbnail.jpg'
     },
     {
       id: 14,
@@ -147,7 +147,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       videoId: '1dxlSxij_Sy1crUUITUq6ujQyW4ug46Xa',
       category: 'sustainability',
       publishDate: 'Dec 15, 2025',
-      thumbnail: '/assets/images/digital ecosystem as a new driver of sustainable economic growth .png'
+      thumbnail: '/assets/livetv/Black Orange Modern Podcast YouTube Thumbnail (1).jpg'
     },
     {
       id: 15,

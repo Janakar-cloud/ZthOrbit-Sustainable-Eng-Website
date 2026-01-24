@@ -53,7 +53,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
       category: 'technology',
       publishDate: 'Jan 20, 2026',
-      thumbnail: '/assets/images/digital ecosystem as a new driver of sustainable economic growth .png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg'
     },
     {
       id: 2,
@@ -62,7 +62,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
       category: 'sustainability',
       publishDate: 'Jan 18, 2026',
-      thumbnail: '/assets/images/From Waste to Worth.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg'
     },
     {
       id: 3,
@@ -71,7 +71,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',
       category: 'finance',
       publishDate: 'Jan 15, 2026',
-      thumbnail: '/assets/images/Finance&Responsibilty.jpg'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg'
     },
     {
       id: 4,
@@ -80,7 +80,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       videoId: '1RFsLTZ8tI6z8-C9JgLfVhE7QGz9vXdqN',
       category: 'technology',
       publishDate: 'Jan 12, 2026',
-      thumbnail: '/assets/images/India_s digital convergence and the imperative  of financial inclusion in 2026.png'
+      thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg'
     }
   ]
 
@@ -298,7 +298,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="work-grid">
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[0])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg" alt="Latest Videos" className="work-image" />
+                <img src="/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg" alt="Latest Videos" className="work-image" />
               </div>
               <h4 className="work-title">Latest Videos</h4>
               <p className="work-description">Check out our newest visual creations.</p>
@@ -306,7 +306,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[1])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg" alt="Environmental Videos" className="work-image" />
+                <img src="/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg" alt="Environmental Videos" className="work-image" />
               </div>
               <h4 className="work-title">Environmental Videos</h4>
               <p className="work-description">Sustainability solutions in action.</p>
@@ -314,7 +314,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[2])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg" alt="Finance Videos" className="work-image" />
+                <img src="/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg" alt="Finance Videos" className="work-image" />
               </div>
               <h4 className="work-title">Finance Videos</h4>
               <p className="work-description">Responsible finance and growth.</p>
@@ -322,7 +322,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayVideo(liveTVVideos[3])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg" alt="Technology Videos" className="work-image" />
+                <img src="/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg" alt="Technology Videos" className="work-image" />
               </div>
               <h4 className="work-title">Technology Videos</h4>
               <p className="work-description">Digital innovation stories.</p>

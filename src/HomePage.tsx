@@ -350,7 +350,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>About Us</a></li>
                 <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Blog</a></li>
                 <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Contact</a></li>
-                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Careers</a></li>
               </ul>
             </div>
             

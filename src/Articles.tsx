@@ -521,6 +521,62 @@ export default function Articles({ onNavigate }: ArticlesProps) {
           </div>
         </div>
       </section>
+
+      <footer className="footer">
+        <div className="footer-container">
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <div className="logo-container">
+                <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
+                <h1 className="logo">
+                  Green Generation <span className="logo-highlight">TV</span>
+                </h1>
+              </div>
+              <p className="footer-description">
+                Leading the way in sustainable engineering and environmental innovation for a greener future.
+              </p>
+            </div>
+            
+            <div className="footer-links">
+              <h5 className="footer-heading">Explore</h5>
+              <ul className="footer-list">
+                <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Home</a></li>
+                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Videos</a></li>
+                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Productions</a></li>
+                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Case Stories</a></li>
+              </ul>
+            </div>
+            
+            <div className="footer-links">
+              <h5 className="footer-heading">Company</h5>
+              <ul className="footer-list">
+                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>About Us</a></li>
+                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Blog</a></li>
+                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Contact</a></li>
+              </ul>
+            </div>
+            
+            <div className="footer-newsletter">
+              <h5 className="footer-heading">Engineering Insights</h5>
+              <p className="newsletter-description">
+                Get the latest sustainability updates from our team.
+              </p>
+              <form className="newsletter-form">
+                <input type="email" placeholder="Enter your email" className="newsletter-input" />
+                <button type="submit" className="newsletter-button">Subscribe</button>
+              </form>
+            </div>
+          </div>
+          
+          <div className="footer-bottom">
+            <p>© 2026 Green Generation TV. All rights reserved.</p>
+            <div className="footer-bottom-links">
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

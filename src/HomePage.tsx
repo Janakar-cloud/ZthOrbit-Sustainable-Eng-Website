@@ -91,7 +91,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       title: 'Artificial Intelligence: A Great Enabler Towards Sustainable Development',
       description: 'How AI is revolutionizing sustainability efforts across industries.',
       audioFile: '/assets/podcast/ARTIFICIAL INTELLIGENCE IS A GREAT ENABLER TOWARDS SUSTAINABLE DEVELOPMENT.m4a',
-      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg',
+      image: '/assets/podcast/back-view-happy-young-man-looking-opportunity-door-wooden-background-success-future-abstraction-concept_670147-37595.jpg',
       duration: '52:15',
       category: 'technology',
       publishDate: 'Jan 12, 2026'
@@ -101,7 +101,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       title: 'From Waste to Value: Opportunities Unveiled',
       description: 'Transforming waste streams into valuable resources.',
       audioFile: '/assets/podcast/OPPORTUNITIES FROM WASTE TO VALUES.m4a',
-      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg',
+      image: '/assets/podcast/ecommerce-companie-lose-revenue.jpg',
       duration: '42:30',
       category: 'sustainability',
       publishDate: 'Dec 18, 2025'
@@ -111,7 +111,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       title: 'Finance is Not Just Profit: It is Responsibility',
       description: 'Understanding financial responsibility beyond profit.',
       audioFile: '/assets/podcast/FINANCE IS NOT JUST PROFIT. IT IS RESPONSIBILITY.m4a',
-      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg',
+      image: '/assets/podcast/blog_financial_markets.jpg',
       duration: '39:30',
       category: 'economy',
       publishDate: 'Jan 5, 2026'
@@ -121,7 +121,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       title: 'Governance & Risk Management are Integral',
       description: 'Building resilient, sustainable organizations.',
       audioFile: '/assets/podcast/GOVERNANCE & RISK MANAGEMENT ARE INTEGRAL.m4a',
-      image: '/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg',
+      image: '/assets/podcast/Risk-Management-shutterstock_1490634692-scaled.jpg',
       duration: '43:40',
       category: 'leadership',
       publishDate: 'Dec 22, 2025'
@@ -344,7 +344,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="work-grid">
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[0])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg" alt="AI & Sustainable Development" className="work-image" />
+                <img src="/assets/podcast/back-view-happy-young-man-looking-opportunity-door-wooden-background-success-future-abstraction-concept_670147-37595.jpg" alt="AI & Sustainable Development" className="work-image" />
               </div>
               <h4 className="work-title">AI & Sustainable Development</h4>
               <p className="work-description">How AI is enabling sustainability efforts globally.</p>
@@ -352,7 +352,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[1])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg" alt="Waste to Value Opportunities" className="work-image" />
+                <img src="/assets/podcast/ecommerce-companie-lose-revenue.jpg" alt="Waste to Value Opportunities" className="work-image" />
               </div>
               <h4 className="work-title">Waste to Value Opportunities</h4>
               <p className="work-description">Transforming waste into valuable business ventures.</p>
@@ -360,7 +360,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[2])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg" alt="Finance & Responsibility" className="work-image" />
+                <img src="/assets/podcast/blog_financial_markets.jpg" alt="Finance & Responsibility" className="work-image" />
               </div>
               <h4 className="work-title">Finance & Responsibility</h4>
               <p className="work-description">Understanding financial responsibility beyond profit.</p>
@@ -368,7 +368,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             
             <div className="work-card" style={{ cursor: 'pointer' }}>
               <div className="work-image-container" onClick={() => handlePlayPodcast(podcastEpisodes[3])}>
-                <img src="/assets/podcast/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg" alt="Governance & Risk Management" className="work-image" />
+                <img src="/assets/podcast/Risk-Management-shutterstock_1490634692-scaled.jpg" alt="Governance & Risk Management" className="work-image" />
               </div>
               <h4 className="work-title">Governance & Risk Management</h4>
               <p className="work-description">Building resilient sustainable organizations.</p>

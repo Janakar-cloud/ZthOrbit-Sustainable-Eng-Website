@@ -753,7 +753,7 @@
 
 /* Logo Image Styles */
 .logo-image {
-  width: 85px;
-  height: 85px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
 }

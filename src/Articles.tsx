@@ -275,9 +275,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         <header className="header">
           <div className="header-content">
             <div className="logo-container">
-              <div className="logo-icon">
-                <span className="material-icons">eco</span>
-              </div>
+              <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
               <h1 className="logo" onClick={() => { setSelectedArticle(null); onNavigate('articles'); }} style={{ cursor: 'pointer' }}>
                 Green Generation <span className="logo-highlight">TV</span>
               </h1>
@@ -386,9 +384,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       <header className="header">
         <div className="header-content">
           <div className="logo-container">
-            <div className="logo-icon">
-              <span className="material-icons">eco</span>
-            </div>
+            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
             <h1 className="logo" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
               Green Generation <span className="logo-highlight">TV</span>
             </h1>

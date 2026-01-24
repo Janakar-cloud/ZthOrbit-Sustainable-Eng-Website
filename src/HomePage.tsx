@@ -5,19 +5,47 @@ interface HomePageProps {
   onNavigate: (page: string) => void
 }
 
+interface Video {
+  id: number
+  title: string
+  description: string
+  videoId: string
+  category: string
+  publishDate: string
+  thumbnail: string
+}
+
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isAdmin] = useState(false) // Set to true for admin users
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+
+  // Latest video (same as in LiveTV.tsx)
+  const latestVideo: Video = {
+    id: 1,
+    title: 'Sustainable Engineering Innovation',
+    description: 'Exploring cutting-edge sustainable engineering solutions and innovations for a greener future.',
+    videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
+    category: 'sustainability',
+    publishDate: 'Jan 20, 2026',
+    thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
+  }
+
+  const handlePlayVideo = () => {
+    setSelectedVideo(latestVideo)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedVideo(null)
+  }
 
   return (
     <div className={`homepage ${darkMode ? 'dark' : ''}`}>
       <header className="header">
         <div className="header-content">
           <div className="logo-container">
-            <div className="logo-icon">
-              <span className="material-icons">eco</span>
-            </div>
+            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
             <h1 className="logo">
               Green Generation <span className="logo-highlight">TV</span>
             </h1>
@@ -85,7 +113,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="hero-content-container">
             <div className="hero-text-box-home">
               <div className="hero-icon-home">
-                <span className="material-icons">eco</span>
+                <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="hero-logo-image" />
               </div>
               <h1 className="hero-heading-home">EMPOWERING SUSTAINABILITY</h1>
               <p className="hero-subheading-home">Through Conscious Leadership and Media</p>
@@ -119,12 +147,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
           
           <div className="work-grid">
-            <div className="work-card" onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>
-              <div className="work-image-container">
+            <div className="work-card" style={{ cursor: 'pointer' }}>
+              <div className="work-image-container" onClick={handlePlayVideo}>
                 <img src="/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" alt="Latest Videos" className="work-image" />
               </div>
-              <h4 className="work-title">Latest Videos</h4>
-              <p className="work-description">Check out our newest visual creations.</p>
+              <h4 className="work-title" onClick={() => onNavigate('livetv')}>Latest Videos</h4>
+              <p className="work-description" onClick={() => onNavigate('livetv')}>Check out our newest visual creations.</p>
             </div>
             
             <div className="work-card" onClick={() => onNavigate('podcast')} style={{ cursor: 'pointer' }}>
@@ -296,9 +324,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="footer-grid">
             <div className="footer-brand">
               <div className="logo-container">
-                <div className="logo-icon">
-                  <span className="material-icons">eco</span>
-                </div>
+                <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
                 <h1 className="logo">
                   Green Generation <span className="logo-highlight">TV</span>
                 </h1>
@@ -371,6 +397,30 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <span className="mobile-nav-label">Tools</span>
         </button>
       </div>
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <div className="video-modal" onClick={handleCloseModal}>
+          <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>
+              <span className="material-icons">close</span>
+            </button>
+            <div className="modal-video-wrapper">
+              <iframe
+                src={`https://drive.google.com/file/d/${selectedVideo.videoId}/preview`}
+                allow="autoplay"
+                allowFullScreen
+                className="modal-video"
+              />
+            </div>
+            <div className="modal-info">
+              <h3>{selectedVideo.title}</h3>
+              <p className="modal-date">{selectedVideo.publishDate}</p>
+              <p className="modal-description">{selectedVideo.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

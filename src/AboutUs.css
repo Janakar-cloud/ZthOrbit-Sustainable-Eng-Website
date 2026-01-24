@@ -43,6 +43,12 @@
   height: 40px;
 }
 
+.logo-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
 .logo-icon {
   width: 40px;
   height: 40px;
@@ -1151,7 +1157,7 @@
 }
 
 .contact-value {
-  font-size: 1rem;
+  font-size: 0.6rem;
   color: #555555;
   margin: 0 0 1.5rem 0;
   line-height: 1.6;
@@ -1159,6 +1165,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0 1rem;
+  word-break: break-all;
 }
 
 .contact-value a {
@@ -1166,6 +1174,7 @@
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 500;
+  word-break: break-all;
 }
 
 .contact-value a:hover {
@@ -1454,4 +1463,11 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Logo Image Styles */
+.logo-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
 }

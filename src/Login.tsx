@@ -45,7 +45,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
         <div className="login-left">
           <div className="login-brand">
             <div className="brand-icon">
-              <span className="material-icons">eco</span>
+              <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="brand-logo-image" />
             </div>
             <h1>Green Generation TV</h1>
             <p className="brand-tagline">Empowering Sustainability Through Conscious Leadership</p>

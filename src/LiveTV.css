@@ -865,3 +865,10 @@
     display: none;
   }
 }
+
+/* Logo Image Styles */
+.logo-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}

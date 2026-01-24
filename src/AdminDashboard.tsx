@@ -400,7 +400,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="admin-header-content">
           <div className="admin-logo-section">
             <div className="admin-logo-icon">
-              <span className="material-icons">eco</span>
+              <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="admin-logo-image" />
             </div>
             <h1 className="admin-logo">Admin Dashboard</h1>
           </div>

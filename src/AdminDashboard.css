@@ -1246,3 +1246,11 @@
     text-align: center;
   }
 }
+
+/* Admin Logo Image Styles */
+.admin-logo-image {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}

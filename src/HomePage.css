@@ -55,6 +55,12 @@
   height: 40px;
 }
 
+.logo-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
 .logo-icon {
   width: 40px;
   height: 40px;
@@ -415,6 +421,13 @@
 .hero-icon-home .material-icons {
   font-size: 36px;
   color: white;
+}
+
+.hero-logo-image {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .hero-heading-home {
@@ -1195,4 +1208,108 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 1rem;
+}
+
+/* Video Modal */
+.video-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.video-modal-content {
+  background: white;
+  border-radius: 1rem;
+  max-width: 1000px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.homepage.dark .video-modal-content {
+  background: #1e293b;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.3s;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.modal-close .material-icons {
+  font-size: 1.5rem;
+}
+
+.modal-video-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 1rem 1rem 0 0;
+  overflow: hidden;
+}
+
+.modal-video {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.modal-info {
+  padding: 2rem;
+}
+
+.modal-info h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.homepage.dark .modal-info h3 {
+  color: #f1f5f9;
+}
+
+.modal-date {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.homepage.dark .modal-date {
+  color: #94a3b8;
+}
+
+.modal-description {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.8;
+}
+
+.homepage.dark .modal-description {
+  color: #94a3b8;
 }

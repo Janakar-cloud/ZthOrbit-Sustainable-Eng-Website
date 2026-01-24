@@ -78,7 +78,7 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
             Back to Login
           </button>
           <div className="logo-small">
-            <span className="material-icons">eco</span>
+            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-small-image" />
             <span>Green Generation TV</span>
           </div>
         </div>

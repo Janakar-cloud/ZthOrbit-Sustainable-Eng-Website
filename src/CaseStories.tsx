@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './CaseStories.css'
+import Header from './components/header/Header'
+import Footer from './components/footer/Footer'
 
 interface CaseStoriesProps {
   onNavigate: (page: string) => void
@@ -24,6 +26,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
   const [darkMode, setDarkMode] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isAdmin] = useState(false) // Set to true for admin users
+  const [activePage, setActivePage] = useState('');
 
   const categories = [
     { id: 'all', name: 'All Stories', icon: 'apps' },
@@ -120,70 +123,25 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
     }
   ]
 
-  const filteredStories = selectedCategory === 'all' 
-    ? stories 
+  const filteredStories = selectedCategory === 'all'
+    ? stories
     : stories.filter(story => story.category === selectedCategory)
 
   return (
     <div className={`case-stories ${darkMode ? 'dark' : ''}`}>
-      <header className="header">
-        <div className="header-content">
-          <div className="logo-container">
-            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
-            <h1 className="logo" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
-              Green Generation <span className="logo-highlight">TV</span>
-            </h1>
-          </div>
-          
-          <nav className="desktop-nav">
-            <a href="#" className="nav-link">LiveTV</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>Podcast</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>Articles</a>
-            <a href="#" className="nav-link active" onClick={(e) => { e.preventDefault(); onNavigate('cases'); }}>Case Stories</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
-          </nav>
-          
-          <div className="header-actions">
-            <div className="user-profile-container">
-              <button className="user-profile-btn" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                <span className="material-icons">account_circle</span>
-              </button>
-              {showProfileMenu && (
-                <div className="profile-dropdown">
-                  <button className="dropdown-item" onClick={() => setDarkMode(!darkMode)}>
-                    <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
-                    <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">settings</span>
-                    <span>Settings</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">lock_reset</span>
-                    <span>Forgot Password</span>
-                  </button>
-                  <button className="dropdown-item logout">
-                    <span className="material-icons">logout</span>
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
-            {isAdmin && (
-              <button className="admin-btn" onClick={() => onNavigate('admin')}>
-                <span className="material-icons">admin_panel_settings</span>
-                <span>Admin</span>
-              </button>
-            )}
-            <button className="login-btn" onClick={() => onNavigate('login')}>
-              <span>Login</span>
-            </button>
-            <button className="mobile-menu">
-              <span className="material-icons">menu</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* <Header
+        onNavigate={onNavigate}
+        darkMode={darkMode}
+        activePage={activePage}
+        showProfileMenu={showProfileMenu}
+        isAdmin={isAdmin}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        onToggleshowProfileMenu={() => setShowProfileMenu(!showProfileMenu)}
+        onToggleActivePage={(activePage) => setActivePage(activePage)}
+      /> */}
+
+      <Header onNavigate={onNavigate}/>
+      
 
       <section className="case-hero">
         <div className="case-hero-overlay"></div>
@@ -298,7 +256,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
         </div>
       </section>
 
-      <footer className="case-footer">
+      {/* <footer className="case-footer">
         <div className="case-container">
           <div className="footer-grid">
             <div className="footer-column">
@@ -335,7 +293,9 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
             <p>&copy; 2026 Green Generation TV. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
+      <Footer onNavigate={onNavigate}/>
+      
     </div>
   )
 }

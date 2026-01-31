@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import HomePage from './HomePage'
+import HomePage from './pages/HomePage/HomePage'
 import AboutUs from './AboutUs'
 import Login from './Login'
 import Signup from './Signup'
 import AdminDashboard from './AdminDashboard'
-import Articles from './Articles'
-import Podcast from './Podcast'
-import LiveTV from './LiveTV'
+import Articles from './pages/Articles/Articles'
+import Podcast from './pages/Podcast/Podcast'
+import LiveTV from './pages/LiveTv/LiveTV'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')

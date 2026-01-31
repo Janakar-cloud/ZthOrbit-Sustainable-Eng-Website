@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import './Articles.css'
+import '../../style/Articles.css'
+import Header from '../../components/header/Header'
+import { useAppContext } from '../../context/AppContext'
+import Footer from '../../components/footer/Footer'
+import CategoryFilter from '../Podcast/components/CategoryFilter'
+import PodcastHero from '../Podcast/components/PodcastHero'
 
 interface ArticlesProps {
   onNavigate: (page: string) => void
@@ -20,10 +25,8 @@ interface Article {
 export default function Articles({ onNavigate }: ArticlesProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
-  const [darkMode, setDarkMode] = useState(false)
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
-  const [isAdmin] = useState(false) // Set to true for admin users
-
+  const { darkMode, showProfileMenu, isAdmin } = useAppContext()
+  
   const categories = [
     { id: 'all', name: 'All Articles', icon: 'article' },
     { id: 'economy', name: 'Economy', icon: 'trending_up' },
@@ -265,71 +268,15 @@ export default function Articles({ onNavigate }: ArticlesProps) {
     }
   ]
 
-  const filteredArticles = selectedCategory === 'all' 
-    ? articles 
+  const filteredArticles = selectedCategory === 'all'
+    ? articles
     : articles.filter(article => article.category === selectedCategory)
 
   if (selectedArticle) {
     return (
       <div className={`articles-page ${darkMode ? 'dark' : ''}`}>
-        <header className="header">
-          <div className="header-content">
-            <div className="logo-container">
-              <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
-              <h1 className="logo" onClick={() => { setSelectedArticle(null); onNavigate('articles'); }} style={{ cursor: 'pointer' }}>
-                Green Generation <span className="logo-highlight">TV</span>
-              </h1>
-            </div>
-            
-            <nav className="desktop-nav">
-              <a href="#" className="nav-link">LiveTV</a>
-              <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>Podcast</a>
-              <a href="#" className="nav-link active" onClick={(e) => { e.preventDefault(); setSelectedArticle(null); }}>Articles</a>
-              <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
-            </nav>
-            
-            <div className="header-actions">
-              <div className="user-profile-container">
-                <button className="user-profile-btn" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                  <span className="material-icons">account_circle</span>
-                </button>
-                {showProfileMenu && (
-                  <div className="profile-dropdown">
-                    <button className="dropdown-item" onClick={() => setDarkMode(!darkMode)}>
-                      <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
-                      <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                    </button>
-                    <button className="dropdown-item">
-                      <span className="material-icons">settings</span>
-                      <span>Settings</span>
-                    </button>
-                    <button className="dropdown-item">
-                      <span className="material-icons">lock_reset</span>
-                      <span>Forgot Password</span>
-                    </button>
-                    <button className="dropdown-item logout">
-                      <span className="material-icons">logout</span>
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              {isAdmin && (
-                <button className="admin-btn" onClick={() => onNavigate('admin')}>
-                  <span className="material-icons">admin_panel_settings</span>
-                  <span>Admin</span>
-                </button>
-              )}
-              <button className="login-btn" onClick={() => onNavigate('login')}>
-                <span>Login</span>
-              </button>
-              <button className="mobile-menu">
-                <span className="material-icons">menu</span>
-              </button>
-            </div>
-          </div>
-        </header>
 
+   
         <article className="article-full">
           <div className="article-container">
             <div className="article-header-section">
@@ -381,90 +328,19 @@ export default function Articles({ onNavigate }: ArticlesProps) {
 
   return (
     <div className={`articles-page ${darkMode ? 'dark' : ''}`}>
-      <header className="header">
-        <div className="header-content">
-          <div className="logo-container">
-            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
-            <h1 className="logo" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
-              Green Generation <span className="logo-highlight">TV</span>
-            </h1>
-          </div>
-          
-          <nav className="desktop-nav">
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('livetv'); }}>LiveTV</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>Podcast</a>
-            <a href="#" className="nav-link active" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>Articles</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
-          </nav>
-          
-          <div className="header-actions">
-            <div className="user-profile-container">
-              <button className="user-profile-btn" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                <span className="material-icons">account_circle</span>
-              </button>
-              {showProfileMenu && (
-                <div className="profile-dropdown">
-                  <button className="dropdown-item" onClick={() => setDarkMode(!darkMode)}>
-                    <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
-                    <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">settings</span>
-                    <span>Settings</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">lock_reset</span>
-                    <span>Forgot Password</span>
-                  </button>
-                  <button className="dropdown-item logout">
-                    <span className="material-icons">logout</span>
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
-            {isAdmin && (
-              <button className="admin-btn" onClick={() => onNavigate('admin')}>
-                <span className="material-icons">admin_panel_settings</span>
-                <span>Admin</span>
-              </button>
-            )}
-            <button className="login-btn" onClick={() => onNavigate('login')}>
-              <span>Login</span>
-            </button>
-            <button className="mobile-menu">
-              <span className="material-icons">menu</span>
-            </button>
-          </div>
-        </div>
-      </header>
+     <Header onNavigate={onNavigate}/>
 
-      <section className="articles-hero">
-        <div className="articles-hero-content">
-          <h1 className="articles-hero-title">Thought Leadership in Sustainable Development</h1>
-          <p className="articles-hero-subtitle">
-            Deep insights on global economics, technology, sustainability, and conscious leadership
-          </p>
-        </div>
-      </section>
+      <PodcastHero
+        title="Thought Leadership in Sustainable Development"
+        subtitle="Deep insights on global economics, technology, sustainability, and conscious leadership" 
+        imgStatus={false} 
+        className='articles-hero'/>
 
-      <section className="articles-filter-section">
-        <div className="articles-container">
-          <h2 className="filter-heading">Browse by Category</h2>
-          <div className="articles-category-filters">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                className={`articles-filter-btn ${selectedCategory === category.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                <span className="material-icons">{category.icon}</span>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+       <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
 
       <section className="articles-list-section">
         <div className="articles-container">
@@ -484,18 +360,18 @@ export default function Articles({ onNavigate }: ArticlesProps) {
                   <h3 className="article-card-title">{article.title}</h3>
                   <p className="article-card-excerpt">{article.content[0].substring(0, 150)}...</p>
                   <div className="article-card-footer">
-                  <div className="article-card-meta">
-                    <span>{article.date}</span>
-                    <span>•</span>
-                    <span>{article.readTime}</span>
+                    <div className="article-card-meta">
+                      <span>{article.date}</span>
+                      <span>•</span>
+                      <span>{article.readTime}</span>
+                    </div>
+                    <button className="article-card-btn">
+                      <span>Read</span>
+                      <span className="material-icons">arrow_forward</span>
+                    </button>
                   </div>
-                  <button className="article-card-btn">
-                    <span>Read</span>
-                    <span className="material-icons">arrow_forward</span>
-                  </button>
                 </div>
               </div>
-            </div>
             ))}
           </div>
         </div>
@@ -522,60 +398,8 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <div className="logo-container">
-                <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
-                <h1 className="logo">
-                  Green Generation <span className="logo-highlight">TV</span>
-                </h1>
-              </div>
-              <p className="footer-description">
-                Leading the way in sustainable engineering and environmental innovation for a greener future.
-              </p>
-            </div>
-            
-            <div className="footer-links">
-              <h5 className="footer-heading">Explore</h5>
-              <ul className="footer-list">
-                <li><a onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>Home</a></li>
-                <li><a onClick={() => onNavigate('livetv')} style={{ cursor: 'pointer' }}>Videos</a></li>
-                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Case Stories</a></li>
-              </ul>
-            </div>
-            
-            <div className="footer-links">
-              <h5 className="footer-heading">Company</h5>
-              <ul className="footer-list">
-                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>About Us</a></li>
-                <li><a onClick={() => onNavigate('articles')} style={{ cursor: 'pointer' }}>Blog</a></li>
-                <li><a onClick={() => onNavigate('about')} style={{ cursor: 'pointer' }}>Contact</a></li>
-              </ul>
-            </div>
-            
-            <div className="footer-newsletter">
-              <h5 className="footer-heading">Engineering Insights</h5>
-              <p className="newsletter-description">
-                Get the latest sustainability updates from our team.
-              </p>
-              <form className="newsletter-form">
-                <input type="email" placeholder="Enter your email" className="newsletter-input" />
-                <button type="submit" className="newsletter-button">Subscribe</button>
-              </form>
-            </div>
-          </div>
-          
-          <div className="footer-bottom">
-            <p>© 2026 Green Generation TV. All rights reserved.</p>
-            <div className="footer-bottom-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer onNavigate={onNavigate}/>
+      
     </div>
   )
 }

@@ -56,13 +56,13 @@
 main {
   flex: 1;
 }
-
+/* 
 .footer {
   background: var(--dark-bg);
   color: white;
   padding: 2rem 0;
   margin-top: auto;
-}
+} */
 
 .footer-content {
   max-width: 1200px;

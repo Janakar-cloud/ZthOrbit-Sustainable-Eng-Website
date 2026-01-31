@@ -1,14 +1,33 @@
 ﻿import { useEffect, useState } from 'react';
 import './AboutUs.css';
+import Header from './components/header/Header';
+import { useAppContext } from './context/AppContext';
+import Footer from './components/footer/Footer';
 
 interface AboutUsProps {
   onNavigate: (page: string) => void;
 }
 
 export default function AboutUs({ onNavigate }: AboutUsProps) {
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
-  const [isAdmin] = useState(false) // Set to true for admin users
+
+  const { darkMode, showProfileMenu, isAdmin } = useAppContext()
+
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const images = [
+    {url:'/assets/images/seetharaman/Seetharaman1.jpg',name:'Dr. Seetharaman - Leadership Excellence'},
+    {url:'/assets/images/seetharaman/Seetharaman2.jpg',name:'Dr. Seetharaman - Leadership Excellence'},
+    {url:'/assets/images/seetharaman/Seetharaman3.jpg',name:'Dr. Seetharaman - Leadership Excellence'}
+  ]
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % images.length)
+    }, 4000) // 4 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach(entry => {
@@ -30,93 +49,38 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
   }, []);
 
   return (
-    <div className="about-us">
-      <header className="header">
-        <div className="header-content">
-          <div className="logo-container">
-            <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-image" />
-            <h1 className="logo" onClick={() => onNavigate('home')} style={{ cursor: 'pointer' }}>
-              Green Generation <span className="logo-highlight">TV</span>
-            </h1>
-          </div>
-          
-          <nav className="desktop-nav">
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('livetv'); }}>LiveTV</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('podcast'); }}>Podcast</a>
-            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('articles'); }}>Articles</a>
-            <a href="#" className="nav-link active" onClick={(e) => { e.preventDefault(); onNavigate('about'); }}>About Us</a>
-          </nav>
-          
-          <div className="header-actions">
-            <div className="user-profile-container">
-              <button className="user-profile-btn" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                <span className="material-icons">account_circle</span>
-              </button>
-              {showProfileMenu && (
-                <div className="profile-dropdown">
-                  <button className="dropdown-item" onClick={() => setDarkMode(!darkMode)}>
-                    <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
-                    <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">settings</span>
-                    <span>Settings</span>
-                  </button>
-                  <button className="dropdown-item">
-                    <span className="material-icons">lock_reset</span>
-                    <span>Forgot Password</span>
-                  </button>
-                  <button className="dropdown-item logout">
-                    <span className="material-icons">logout</span>
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
-            {isAdmin && (
-              <button className="admin-btn" onClick={() => onNavigate('admin')}>
-                <span className="material-icons">admin_panel_settings</span>
-                <span>Admin</span>
-              </button>
-            )}
-            <button className="login-btn" onClick={() => onNavigate('login')}>
-              <span>Login</span>
-            </button>
-            <button className="mobile-menu">
-              <span className="material-icons">menu</span>
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className={`about-us ${darkMode ? 'dark' : ''}`}>
+
+      <Header onNavigate={onNavigate} />
 
       <main className="main-content">
         <section className="hero-banner">
           <div className="hero-slideshow">
-            <div className="slideshow-image active">
-              <img src="/assets/images/seetharaman/Seetharaman1.jpg" alt="Dr. Seetharaman - Leadership Excellence" />
-            </div>
-            <div className="slideshow-image">
-              <img src="/assets/images/seetharaman/Seetharaman2.jpg" alt="Dr. Seetharaman - Sustainability Vision" />
-            </div>
-            <div className="slideshow-image">
-              <img src="/assets/images/seetharaman/Seetharaman3.jpg" alt="Dr. Seetharaman - Future Ready Leadership" />
-            </div>
+            {images.map((img, index) => (
+              <div
+                key={img.url}
+                className={`slideshow-image ${index === currentSlide ? 'active' : ''}`}
+              >
+                <img src={img.url} alt={img.name} />
+              </div>
+            ))}
           </div>
         </section>
+
 
         <section className="bio-section">
           <div className="bio-hero">
             <div className="bio-hero-content">
               <div className="bio-image-column">
                 <div className="bio-image-frame">
-                  <img 
-                    src="/assets/images/seetharaman/Seetharaman4.jpg" 
-                    alt="Dr. R. Seetharaman" 
+                  <img
+                    src="/assets/images/seetharaman/Seetharaman4.jpg"
+                    alt="Dr. R. Seetharaman"
                     className="bio-main-image"
                   />
                 </div>
               </div>
-              
+
               <div className="bio-intro-column">
                 <h2 className="bio-main-heading">Dr. R. Seetharaman</h2>
                 <div className="bio-intro-card">
@@ -197,9 +161,9 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                     <span className="material-icons">format_quote</span>
                   </div>
                   <p className="manifesto-text">
-                    A purpose-driven media platform created to translate sustainability from concept into everyday practice. 
-                    It exists on a simple but powerful belief: <strong>sustainability must move beyond classrooms, conferences, 
-                    and policy documents—and become part of how people think, choose, and live every day.</strong>
+                    A purpose-driven media platform created to translate sustainability from concept into everyday practice.
+                    It exists on a simple but powerful belief: <strong>sustainability must move beyond classrooms, conferences,
+                      and policy documents—and become part of how people think, choose, and live every day.</strong>
                   </p>
                 </div>
               </div>
@@ -265,8 +229,8 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                   <div className="mission-text">
                     <h3>Transforming Learning into Living</h3>
                     <p>
-                      Green Generation TV transforms learning into living and ideas into action. It serves as a space for 
-                      individuals, professionals, and institutions seeking clarity, balance, and purpose in a rapidly changing 
+                      Green Generation TV transforms learning into living and ideas into action. It serves as a space for
+                      individuals, professionals, and institutions seeking clarity, balance, and purpose in a rapidly changing
                       world—<span className="highlight">empowering a generation defined not by age, but by awareness.</span>
                     </p>
                   </div>
@@ -284,13 +248,13 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 <p>Education, leadership development, and real-world application of sustainability principles</p>
                 <a href="https://seetharaman.com/about/" target="_blank" rel="noopener noreferrer" className="cta-button">LEARN MORE</a>
               </div>
-              
+
               <div className="cta-card">
                 <h3>PUBLISHED WORKS & THOUGHT LEADERSHIP</h3>
                 <p>Bridging banking, sustainability, corporate consciousness, and value-based leadership</p>
                 <a href="https://seetharaman.com/about/" target="_blank" rel="noopener noreferrer" className="cta-button">EXPLORE</a>
               </div>
-              
+
               <div className="cta-card">
                 <h3>CONNECT WITH US</h3>
                 <p>Join the movement for conscious living and sustainable development</p>
@@ -312,7 +276,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 We'd love to hear from you. Reach out to us through any of these channels.
               </p>
             </div>
-            
+
             <div className="contact-grid">
               <div className="contact-item" data-aos="fade-up" data-aos-delay="0">
                 <div className="contact-icon">
@@ -327,7 +291,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                   <span className="material-icons">arrow_forward</span>
                 </button>
               </div>
-              
+
               <div className="contact-item" data-aos="fade-up" data-aos-delay="100">
                 <div className="contact-icon">
                   <span className="material-icons">phone</span>
@@ -341,7 +305,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                   <span className="material-icons">arrow_forward</span>
                 </button>
               </div>
-              
+
               <div className="contact-item" data-aos="fade-up" data-aos-delay="200">
                 <div className="contact-icon">
                   <span className="material-icons">location_on</span>
@@ -357,7 +321,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                   <span className="material-icons">arrow_forward</span>
                 </button>
               </div>
-              
+
               <div className="contact-item" data-aos="fade-up" data-aos-delay="300">
                 <div className="contact-icon">
                   <span className="material-icons">language</span>
@@ -376,7 +340,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
         </section>
       </main>
 
-      <footer className="footer">
+      {/* <footer className="footer">
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-brand">
@@ -390,7 +354,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 Leading the way in sustainable engineering and environmental innovation for a greener future.
               </p>
             </div>
-            
+
             <div className="footer-links">
               <h5 className="footer-heading">Explore</h5>
               <ul className="footer-list">
@@ -399,7 +363,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 <li><a href="#case-stories">Case Stories</a></li>
               </ul>
             </div>
-            
+
             <div className="footer-links">
               <h5 className="footer-heading">Company</h5>
               <ul className="footer-list">
@@ -409,7 +373,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 <li><a href="#">Careers</a></li>
               </ul>
             </div>
-            
+
             <div className="footer-newsletter">
               <h5 className="footer-heading">Engineering Insights</h5>
               <p className="newsletter-description">
@@ -421,7 +385,7 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
               </form>
             </div>
           </div>
-          
+
           <div className="footer-bottom">
             <p>© 2026 Green Generation TV. All rights reserved.</p>
             <div className="footer-bottom-links">
@@ -430,7 +394,9 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
             </div>
           </div>
         </div>
-      </footer>
+      </footer> */}
+      <Footer onNavigate={onNavigate}/>
+      
     </div>
   );
 }

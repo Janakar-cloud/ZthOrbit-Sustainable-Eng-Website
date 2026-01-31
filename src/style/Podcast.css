@@ -26,7 +26,7 @@
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 }
 
-.header-content {
+/* .header-content {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
@@ -35,7 +35,7 @@
   align-items: center;
   height: 80px;
   gap: 2rem;
-}
+} */
 
 .logo-container {
   display: flex;
@@ -59,12 +59,12 @@
   font-size: 24px;
 }
 
-.logo {
+/* .logo {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-}
+} */
 
 .dark .logo {
   color: #f1f5f9;
@@ -672,6 +672,7 @@
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.3s ease;
+  padding: 2rem;
 }
 
 .dark .podcast-modal {
@@ -1052,13 +1053,6 @@
 }
 
 /* Footer */
-.footer {
-  background: #1e293b;
-  color: #94a3b8;
-  padding: 4rem 2rem 2rem;
-  margin-top: 4rem;
-}
-
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

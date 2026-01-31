@@ -1,0 +1,274 @@
+/* =========================
+   HEADER STYLES
+========================= */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 72px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #eaeaea;
+  display: flex;
+  align-items: center;
+}
+
+/* Dark Mode */
+.homepage.dark .header {
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom-color: #334155;
+}
+
+/* =========================
+   HEADER CONTENT
+========================= */
+
+.header-content {
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* =========================
+   LOGO
+========================= */
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #008000;
+  white-space: nowrap;
+}
+
+.logo-highlight {
+  color: #5CB039;
+}
+
+/* =========================
+   DESKTOP NAV
+========================= */
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #008000;
+}
+
+/* =========================
+   HEADER ACTIONS
+========================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Login Button */
+.login-btn {
+  background: linear-gradient(135deg, #5CB039, #7dcc5c);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Profile Button */
+.user-profile-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #e9f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.user-profile-btn .material-icons {
+  color: #5CB039;
+}
+
+/* =========================
+   MOBILE MENU BUTTON
+========================= */
+
+.mobile-menu {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* =========================
+   RESPONSIVE STYLES
+========================= */
+
+/* -------- MOBILE -------- */
+@media (max-width: 767px) {
+  .header {
+    height: 64px;
+  }
+
+  .header-content {
+    padding: 0 1rem;
+    gap: 1rem;
+    flex-direction: row;
+    max-width: 100%;   /* ✅ Full width on mobile */
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .logo-image {
+    height: 36px;
+  }
+
+  .login-btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .mobile-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* -------- TABLET -------- */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .header-content {
+    padding: 0 1.5rem;
+    flex-direction: row;
+    max-width: 1024px;   /* ✅ Constrain tablet width */
+  }
+
+  .desktop-nav {
+    gap: 1.25rem;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+  }
+}
+
+/* -------- DESKTOP -------- */
+@media (min-width: 1025px) {
+  .header-content {
+    max-width: 1280px;   /* ✅ Standard desktop width */
+    flex-direction: row;
+  }
+}
+
+/* -------- LARGE DESKTOP -------- */
+@media (min-width: 1440px) {
+  .header-content {
+    padding: 0 3rem;
+    max-width: 1440px;   /* ✅ Large screens */
+    flex-direction: row;
+  }
+}
+
+/* ================= MOBILE NAV ================= */
+/* MOBILE NAV CONTAINER */
+.mobile-nav {
+  position: fixed;
+  top: 70px; /* height of header */
+  left: 0;
+  width: 100%;
+  background: var(--bg-color, #ffffff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  /* Animation */
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.35s ease-in-out;
+
+  z-index: 1000;
+  flex-direction: column;
+}
+
+/* OPEN STATE */
+.mobile-nav.open {
+  max-height: 400px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* NAV LINKS */
+/* .mobile-nav a {
+  display: block;
+  padding: 16px 20px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.mobile-nav a:hover {
+  background: #f5f5f5;
+} */
+
+/* DARK MODE SUPPORT */
+body.dark .mobile-nav {
+  background: #1e1e1e;
+}
+
+body.dark .mobile-nav a {
+  color: #fff;
+  border-bottom: 1px solid #333;
+}
+
+body.dark .mobile-nav a:hover {
+  background: #2a2a2a;
+}

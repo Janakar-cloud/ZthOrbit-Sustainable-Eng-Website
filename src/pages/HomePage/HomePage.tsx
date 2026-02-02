@@ -8,7 +8,6 @@ import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
 import {ArticleItem,LiveTvItem,PodcastItem,Video, Podcast, HomePageProps} from './type/type'
 import {latestVideo,articlesData,liveTVVideos,liveTv,ourVideo,podcast,podcastEpisodes} from './data/data'
-import { it } from 'node:test'
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)

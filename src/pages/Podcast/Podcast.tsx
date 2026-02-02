@@ -65,7 +65,9 @@ export default function Podcast({ onNavigate }: PodcastProps) {
         title="Green Generation Podcast"
         subtitle="Conversations that inspire sustainable action and conscious leadership"
         imgStatus={true}  
-        className='podcast-hero'/>
+        className='podcast-hero'
+        buttonStatus={false}
+        onHandleNavigate={() => undefined}/>
 
       <CategoryFilter
         categories={categories}

@@ -33,9 +33,9 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
             <img
               src="/assets/images/GREENTVLOGO.png"
               alt="Green TV Logo"
-              className="logo-image"
+              className="header-logo-image"
             />
-            <h1 className="logo">
+            <h1 className="Header-logo">
               Green Generation <span className="logo-highlight">TV</span>
             </h1>
           </div>

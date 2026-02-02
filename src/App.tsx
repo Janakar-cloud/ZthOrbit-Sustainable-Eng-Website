@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import HomePage from './pages/HomePage/HomePage'
-import AboutUs from './AboutUs'
+import AboutUs from './pages/AboutUs/AboutUs'
 import Login from './Login'
 import Signup from './Signup'
 import AdminDashboard from './AdminDashboard'

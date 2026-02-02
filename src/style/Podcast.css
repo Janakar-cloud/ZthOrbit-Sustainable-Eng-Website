@@ -1079,29 +1079,6 @@
   margin: 0 0 1rem 0;
 }
 
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footer-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.footer-links a:hover,
-.footer-links a.active {
-  color: #10b981;
-}
-
-.footer-links li {
-  color: #94a3b8;
-}
 
 .social-icons {
   display: flex;
@@ -1171,10 +1148,10 @@
 }
 
 /* Logo Image Styles */
-.logo-image {
+/* .logo-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
   transform: scale(1.5);
   transform-origin: center;
-}
+} */

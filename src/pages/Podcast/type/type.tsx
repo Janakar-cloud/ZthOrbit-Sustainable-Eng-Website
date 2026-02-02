@@ -25,11 +25,14 @@ export interface PodcastEpisode {
 }
 
 
+
 export interface PodcastHeroProps {
-  imgStatus: boolean
+  imgStatus?: boolean
   title: string
   subtitle: string
   className?: string
+  buttonStatus: boolean
+  onHandleNavigate: (page: string) => void
 }
 
 

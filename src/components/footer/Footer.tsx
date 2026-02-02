@@ -11,14 +11,14 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="footer-grid">
           {/* Brand */}
           <div className="footer-brand">
-            <div className="logo-container">
+            <div className="footer-logo-container">
               <img
                 src="/assets/images/GREENTVLOGO.png"
                 alt="Green TV Logo"
-                className="logo-image"
+                className="footer-logo-image"
               />
-              <h1 className="logo">
-                Green Generation <span className="logo-highlight">TV</span>
+              <h1 className="footer-logo">
+                Green Generation <span className="footer-logo-highlight">TV</span>
               </h1>
             </div>
             <p className="footer-description">

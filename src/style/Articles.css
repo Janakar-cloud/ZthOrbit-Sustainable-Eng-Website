@@ -261,13 +261,13 @@
   margin: 0 auto;
 }
 
-.section-heading {
+/* .section-heading {
   font-size: 2rem;
   font-weight: 800;
   color: #1a1a1a;
   margin-bottom: 3rem;
   text-align: center;
-}
+} */
 
 .featured-grid {
   display: grid;
@@ -430,7 +430,6 @@
 }
 
 .article-card {
-  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   border: 2px solid #f1f5f9;
@@ -493,7 +492,6 @@
 .article-card-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1a1a1a;
   margin-bottom: 1rem;
   line-height: 1.4;
 }
@@ -748,6 +746,7 @@
   font-weight: 700;
   font-size: 1.125rem;
   cursor: pointer;
+  margin-top: 3rem;
   transition: all 0.3s ease;
 }
 
@@ -863,10 +862,10 @@
 }
 
 /* Logo Image Styles */
-.logo-image {
+/* .logo-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
   transform: scale(1.5);
   transform-origin: center;
-}
+} */

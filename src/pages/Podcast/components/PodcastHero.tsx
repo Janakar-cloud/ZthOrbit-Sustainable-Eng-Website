@@ -5,16 +5,18 @@ const PodcastHero = React.memo(function PodcastHero({
   imgStatus,
   title,
   subtitle,
-  className = ''
+  className = '',
+  buttonStatus,
+  onHandleNavigate,
 }: PodcastHeroProps) {
   return (
     <section className={`${className}`}>
       <div className="podcast-hero-overlay" />
       <div className="podcast-hero-content">
-        { imgStatus && (
-        <div className="podcast-icon-large">
-          <span className="material-icons">podcasts</span>
-        </div> )}
+        {imgStatus && (
+          <div className="podcast-icon-large">
+            <span className="material-icons">podcasts</span>
+          </div>)}
 
         <h1 className="podcast-hero-title">{title}</h1>
 
@@ -22,6 +24,18 @@ const PodcastHero = React.memo(function PodcastHero({
           {subtitle}
         </p>
       </div>
+      {buttonStatus && (
+        <div className="cta-action-buttons">
+          <button className="cta-action-btn primary" onClick={() => onHandleNavigate('about')}>
+            <span>Contact Us</span>
+            <span className="material-icons">send</span>
+          </button>
+          <button className="cta-action-btn secondary" onClick={() => onHandleNavigate('home')}>
+            <span>Explore More</span>
+            <span className="material-icons">explore</span>
+          </button>
+        </div>
+      )}
     </section>
   )
 })

@@ -64,11 +64,11 @@
   height: 40px;
 }
 
-.logo-image {
+/* .logo-image {
   width: 50px;
   height: 50px;
   object-fit: contain;
-}
+} */
 
 .logo-icon {
   width: 40px;
@@ -396,28 +396,27 @@
 }
 
 /* Bio Section */
-.bio-section {
+/* .bio-section {
   padding: 4rem 2rem;
   background: #f8f9fa;
-}
+} */
 
 /* Section Heading */
 .section-heading {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333333;
   text-align: center;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
 }
 
 /* Bio Section */
-.bio-section {
+/* .bio-section {
   background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-}
+} */
 
 .bio-hero {
-  padding: 4rem 2rem;
-  background: #ffffff;
+  padding: 3rem 2rem;
+  /* background: #ffffff; */
 }
 
 .bio-hero-content {
@@ -480,13 +479,10 @@
 .bio-main-heading {
   font-size: 3rem;
   font-weight: 800;
-  color: #1a1a1a;
   margin-bottom: 2rem;
   letter-spacing: -1px;
   line-height: 1.1;
 }
-
-
 
 .dropdown-item {
   display: flex;
@@ -711,16 +707,22 @@
 /* Green TV Section */
 .greentv-section {
   padding: 0;
-  background: #ffffff;
   position: relative;
   overflow: hidden;
 }
 
 .greentv-hero {
   position: relative;
-  padding: 6rem 2rem;
+  padding: 2rem 2rem;
   background: linear-gradient(135deg, #f8fffe 0%, #e8f5e9 50%, #f1f8e9 100%);
 }
+
+.greentv-hero-dark {
+  position: relative;
+  padding: 2rem 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #0f172a 50%, #0f172a 100%);
+}
+
 
 .greentv-background-pattern {
   position: absolute;
@@ -828,7 +830,6 @@
   font-size: 2rem;
   font-weight: 800;
   text-align: center;
-  color: #1a1a1a;
   margin-bottom: 3rem;
   position: relative;
 }
@@ -1019,8 +1020,8 @@
 
 /* CTA Section */
 .cta-section {
-  padding: 6rem 2rem;
-  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  padding: 2rem 2rem;
+  /* background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); */
 }
 
 .cta-grid {
@@ -1102,8 +1103,15 @@
 /* Contact Section */
 /* Contact Section */
 .contact-section {
-  padding: 8rem 2rem;
+  padding: 4rem 2rem;
   background: linear-gradient(135deg, #f8fcf6 0%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-section-dark {
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #0f172a 0%, #0f172a 100%);
   position: relative;
   overflow: hidden;
 }
@@ -1119,11 +1127,25 @@
   pointer-events: none;
 }
 
+.contact-section-dark::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, #0f172a 0%, transparent 100%);
+  pointer-events: none;
+}
+
+
 .section-header-center {
   text-align: center;
   max-width: 700px;
-  margin: 0 auto 4rem;
+  margin: 0 auto 3rem;
 }
+
+
 
 .section-badge {
   display: inline-flex;
@@ -1245,6 +1267,7 @@
   letter-spacing: 0.5px;
   font-weight: 600;
   margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .contact-value {

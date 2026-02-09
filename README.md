@@ -25,6 +25,20 @@ ZthOrbit Sustainable Eng Website is an **AI‑infused, content‑driven digital 
 
 ---
 
+## Current Status (Build & Tests)
+- `npm run test:run` currently fails because several component imports cannot be resolved (e.g., `AboutUs`, `HomePage`, and `header.css` case mismatch). The Live TV data mapping tests pass.
+- `npm run build` currently fails on TypeScript unused-variable errors in `CaseStories.tsx`, `pages/Articles/Articles.tsx`, and `pages/HomePage/HomePage.tsx`.
+- UI flows (Home, About, Articles, Live TV, Podcast, Login/Signup, Admin shell) render from static data with simulated auth; no backend/APIs are wired up yet.
+
+## Pending Work
+- Fix the TypeScript build blockers by removing unused state/handlers in the files noted above.
+- Correct component exports/import paths so `AboutUs`, `HomePage`, and header styles resolve in tests.
+- Replace simulated authentication with a real provider (e.g., Clerk/Supabase) and connect forms to live APIs and persistence (MongoDB/Cloudinary/S3 as designed).
+- Wire video/podcast/article content to backend/CMS sources instead of static lists; ensure asset URLs and env vars are configured.
+- Add routing (React Router or Next.js pages), deployment pipeline (Vercel/Netlify), and CI to run build/tests on each push.
+
+---
+
 ## Design Theme
 - Corporate professional look blended with eco‑friendly visuals  
 - Use of greens, earthy tones, and sustainability imagery  

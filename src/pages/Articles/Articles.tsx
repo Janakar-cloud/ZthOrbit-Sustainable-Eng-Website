@@ -14,8 +14,7 @@ import ArticleDetails from './components/ArticleDetilas'
 export default function Articles({ onNavigate }: ArticlesProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
-  const { darkMode, showProfileMenu, isAdmin } = useAppContext()
-
+  const { darkMode, setActivePage } = useAppContext()
 
   const filteredArticles = selectedCategory === 'all'
     ? articles
@@ -63,9 +62,9 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         title="Stay Updated"
         subtitle="Subscribe to receive the latest insights on sustainable development, technology, and conscious leadership"
         imgStatus={false}
-        className='articles-hero'
+        className='articles-cta-section'
         buttonStatus={true}
-        onHandleNavigate={(page) => onNavigate(page)} />
+        onHandleNavigate={(page) => { setActivePage(page); onNavigate(page) }} />
 
       <Footer onNavigate={onNavigate} />
 

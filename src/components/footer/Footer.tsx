@@ -1,10 +1,13 @@
 import '../../style/Footer.css'
-
+import LogoImage from "../../../assets/images/GREENTVLOGOHEADER.png"
+import { useAppContext } from '../../context/AppContext'
 interface FooterProps {
   onNavigate: (page: string) => void
 }
 
 export default function Footer({ onNavigate }: FooterProps) {
+
+  const {setActivePage } = useAppContext()
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -13,9 +16,10 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="footer-brand">
             <div className="footer-logo-container">
               <img
-                src="/assets/images/GREENTVLOGO.png"
+                src={LogoImage}
                 alt="Green TV Logo"
                 className="footer-logo-image"
+                key={Date.now()}
               />
               <h1 className="footer-logo">
                 Green Generation <span className="footer-logo-highlight">TV</span>
@@ -31,9 +35,9 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="footer-links">
             <h5 className="footer-heading">Explore</h5>
             <ul className="footer-list">
-              <li><a onClick={() => onNavigate('home')}>Home</a></li>
-              <li><a onClick={() => onNavigate('livetv')}>Videos</a></li>
-              <li><a onClick={() => onNavigate('articles')}>Case Stories</a></li>
+              <li><a onClick={() =>{ setActivePage('home'); onNavigate('home')}}>Home</a></li>
+              <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv')}}>Videos</a></li>
+              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles')}}>Case Stories</a></li>
             </ul>
           </div>
 
@@ -41,9 +45,9 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="footer-links">
             <h5 className="footer-heading">Company</h5>
             <ul className="footer-list">
-              <li><a onClick={() => onNavigate('about')}>About Us</a></li>
-              <li><a onClick={() => onNavigate('articles')}>Blog</a></li>
-              <li><a onClick={() => onNavigate('about')}>Contact</a></li>
+              <li><a onClick={() => { setActivePage('about');onNavigate('about')}}>About Us</a></li>
+              <li><a onClick={() => {setActivePage('articles');onNavigate('articles')}}>Blog</a></li>
+              <li><a onClick={() => {setActivePage('about'); onNavigate('about')}}>Contact</a></li>
             </ul>
           </div>
 

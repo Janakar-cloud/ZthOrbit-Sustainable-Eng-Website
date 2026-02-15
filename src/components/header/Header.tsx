@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import '../../style/header.css'
 import {useAppContext} from '../../context/AppContext'
+import LogoImage from '../../../assets/images/GREENTVLOGOHEADER.png'
 
 export default function Header({ onNavigate }: { onNavigate: (page: string) => void }) {
   const {

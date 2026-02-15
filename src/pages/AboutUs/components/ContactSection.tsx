@@ -19,7 +19,7 @@ const ContactSection: React.FC = () => {
             label: 'Drop us a line',
             value: (
                     <a href="mailto:greengenerationtvofficial@gmail.com">
-                        greengenerationtvofficial@gmail.com
+                        <p>greengenerationtvofficial@gmail.com</p>
                     </a>
             ),
             action: () =>
@@ -61,7 +61,7 @@ const ContactSection: React.FC = () => {
             label: 'Explore online',
             value: (
                 <a href="https://greengen.tv" target="_blank" rel="noopener noreferrer">
-                    greengen.tv
+                   <p> greengen.tv</p>
                 </a>
             ),
             action: () => window.open('https://greengen.tv', '_blank'),

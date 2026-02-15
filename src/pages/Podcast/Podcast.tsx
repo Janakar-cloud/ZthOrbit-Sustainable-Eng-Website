@@ -93,9 +93,9 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       </section>
     
       {selectedPodcast && (
-        <div className="podcast-modal-overlay" onClick={() => setSelectedPodcast(null)}>
+        <div className="podcast-modal-overlay" onClick={() =>{ setSelectedPodcast(null); setCurrentlyPlaying(null)}}>
           <div className="podcast-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedPodcast(null)}>
+            <button className="modal-close" onClick={() =>{ setSelectedPodcast(null); setCurrentlyPlaying(null)}}>
               <span className="material-icons">close</span>
             </button>
             <PodcastComments

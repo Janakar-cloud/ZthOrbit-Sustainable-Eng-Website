@@ -11,14 +11,14 @@ const PodcastHero = React.memo(function PodcastHero({
 }: PodcastHeroProps) {
   return (
     <section className={`${className}`}>
-      <div className="podcast-hero-overlay" />
-      <div className="podcast-hero-content">
+      {buttonStatus? <div></div> : <div className="podcast-hero-overlay" />}
+      <div className={`${buttonStatus?"articles-cta-content":"podcast-hero-content"}`}>
         {imgStatus && (
           <div className="podcast-icon-large">
             <span className="material-icons">podcasts</span>
           </div>)}
 
-        <h1 className="podcast-hero-title">{title}</h1>
+        <h1 className={`${buttonStatus?"cta-heading":"podcast-hero-title"}`}>{title}</h1>
 
         <p className="podcast-hero-subtitle">
           {subtitle}

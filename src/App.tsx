@@ -16,7 +16,7 @@ function App() {
   }
 
   const handleLogin = () => {
-    setCurrentPage('home')
+    setCurrentPage('admin')
   }
 
   const handleSignupComplete = () => {

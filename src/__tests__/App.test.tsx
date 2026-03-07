@@ -1,60 +1,44 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
+import { AppProvider } from '../context/AppContext'
 
 describe('App Component', () => {
+  const renderApp = () =>
+    render(
+      <AppProvider>
+        <App />
+      </AppProvider>,
+    )
+
+  beforeEach(() => {
+    // reset DOM between tests handled by RTL
+  })
+
   it('renders HomePage by default', () => {
-    render(<App />)
-    expect(screen.getByText(/Green Generation/i)).toBeInTheDocument()
-    expect(screen.getByText(/Project Genesis/i)).toBeInTheDocument()
-  })
-
-  it('navigates to About Us page when About is clicked', async () => {
-    const user = userEvent.setup()
-    render(<App />)
-    
-    // Find and click the Watch Now button which navigates to about
-    const watchButton = screen.getByRole('button', { name: /Watch Now/i })
-    await user.click(watchButton)
-    
-    // Check if AboutUs page is rendered
+    renderApp()
     expect(screen.getByText(/EMPOWERING SUSTAINABILITY/i)).toBeInTheDocument()
-    expect(screen.getByText(/Dr. R. Seetharaman/i)).toBeInTheDocument()
   })
 
-  it('navigates back to HomePage from About Us', async () => {
+  it('navigates to About Us when nav link is clicked', async () => {
     const user = userEvent.setup()
-    render(<App />)
-    
-    // Navigate to About
-    const watchButton = screen.getByRole('button', { name: /Watch Now/i })
-    await user.click(watchButton)
-    
-    // Verify we're on About Us page
+    renderApp()
+
+    await user.click(screen.getAllByText('About Us')[0])
+
     expect(screen.getByText(/Dr. R. Seetharaman/i)).toBeInTheDocument()
-    
-    // Click logo/home link to go back
-    const homeLinks = screen.getAllByText(/Green Generation TV/i)
-    await user.click(homeLinks[0])
-    
-    // Check if HomePage is rendered again
-    expect(screen.getByText(/Project Genesis/i)).toBeInTheDocument()
+    expect(screen.getByText(/Contact Information/i)).toBeInTheDocument()
   })
 
-  it('maintains correct routing state', async () => {
+  it('navigates to Podcasts and back home via logo', async () => {
     const user = userEvent.setup()
-    render(<App />)
-    
-    // Start on home page
-    expect(screen.getByText(/Project Genesis/i)).toBeInTheDocument()
-    
-    // Navigate to about using sidebar button
-    const listenButton = screen.getByRole('button', { name: /Listen Now/i })
-    await user.click(listenButton)
-    
-    // Should be on About Us page
+    renderApp()
+
+    await user.click(screen.getAllByText('Podcast')[0])
+    expect(screen.getByText(/Green Generation Podcast/i)).toBeInTheDocument()
+
+    await user.click(screen.getAllByText(/Green Generation/i)[0])
     expect(screen.getByText(/EMPOWERING SUSTAINABILITY/i)).toBeInTheDocument()
-    expect(screen.queryByText(/Project Genesis/i)).not.toBeInTheDocument()
   })
 })

@@ -18,9 +18,9 @@ const ContactSection: React.FC = () => {
             title: 'Email',
             label: 'Drop us a line',
             value: (
-                    <a href="mailto:greengenerationtvofficial@gmail.com">
-                        <p>greengenerationtvofficial@gmail.com</p>
-                    </a>
+                <a href="mailto:greengenerationtvofficial@gmail.com">
+                    greengenerationtvofficial@gmail.com
+                </a>
             ),
             action: () =>
             (window.location.href =
@@ -61,7 +61,7 @@ const ContactSection: React.FC = () => {
             label: 'Explore online',
             value: (
                 <a href="https://greengen.tv" target="_blank" rel="noopener noreferrer">
-                   <p> greengen.tv</p>
+                    greengen.tv
                 </a>
             ),
             action: () => window.open('https://greengen.tv', '_blank'),
@@ -94,10 +94,10 @@ const ContactSection: React.FC = () => {
                             </div>
                             <h2>{item.title}</h2>
                             <p className="contact-label">{item.label}</p>
-                            <p className="contact-value">
-                                <a href="https://greengen.tv" target="_blank" rel="noopener noreferrer">{item.value}</a>
-                            </p>
-                            <button className="contact-action" onClick={() => window.open('https://greengen.tv', '_blank')}>
+                            <div className="contact-value">
+                                {item.value}
+                            </div>
+                            <button className="contact-action" onClick={item.action}>
                                 <span className="material-icons">arrow_forward</span>
                             </button>
                         </div>

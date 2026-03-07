@@ -44,7 +44,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         imgStatus={false}
         className='articles-hero'
         buttonStatus={false}
-        onHandleNavigate={(page) => undefined} />
+        onHandleNavigate={() => undefined} />
 
       <CategoryFilter
         categories={categories}

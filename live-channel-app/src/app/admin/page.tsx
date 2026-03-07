@@ -13,6 +13,11 @@ function setStoredToken(token: string) {
   window.localStorage.setItem("admin-token", token);
 }
 
+function toMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
   const [tokenInput, setTokenInput] = useState("");
@@ -78,8 +83,8 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to save live config");
       }
       setLiveStatus("Live channel settings saved.");
-    } catch (error: any) {
-      setLiveStatus(error.message || "Could not save live channel settings.");
+    } catch (error: unknown) {
+      setLiveStatus(toMessage(error, "Could not save live channel settings."));
     }
   }
 
@@ -117,8 +122,8 @@ export default function AdminPage() {
       setEpisodes((prev) => [...prev, created]);
       e.currentTarget.reset();
       setPodcastStatus("New podcast episode added.");
-    } catch (error: any) {
-      setPodcastStatus(error.message || "Could not add podcast episode.");
+    } catch (error: unknown) {
+      setPodcastStatus(toMessage(error, "Could not add podcast episode."));
     }
   }
 

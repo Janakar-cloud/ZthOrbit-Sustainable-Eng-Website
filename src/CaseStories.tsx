@@ -23,10 +23,7 @@ interface Story {
 
 export default function CaseStories({ onNavigate }: CaseStoriesProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [darkMode, setDarkMode] = useState(false)
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
-  const [isAdmin] = useState(false) // Set to true for admin users
-  const [activePage, setActivePage] = useState('');
+  const [darkMode] = useState(false)
 
   const categories = [
     { id: 'all', name: 'All Stories', icon: 'apps' },

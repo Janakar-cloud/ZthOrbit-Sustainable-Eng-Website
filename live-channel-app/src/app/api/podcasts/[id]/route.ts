@@ -17,7 +17,7 @@ async function writeEpisodes(episodes: PodcastEpisode[]): Promise<void> {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!ADMIN_TOKEN) {
@@ -29,17 +29,18 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = Number(params.id);
+    const { id } = await context.params
+    const numericId = Number(id);
     const body = (await request.json()) as Partial<PodcastEpisode>;
 
     const episodes = await readEpisodes();
-    const index = episodes.findIndex((e) => e.id === id);
+    const index = episodes.findIndex((e) => e.id === numericId);
 
     if (index === -1) {
       return NextResponse.json({ error: "Episode not found" }, { status: 404 });
     }
 
-    const updated: PodcastEpisode = { ...episodes[index], ...body, id };
+    const updated: PodcastEpisode = { ...episodes[index], ...body, id: numericId };
     episodes[index] = updated;
 
     await writeEpisodes(episodes);
@@ -53,7 +54,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     if (!ADMIN_TOKEN) {
@@ -65,9 +66,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = Number(params.id);
+    const { id } = await context.params
+    const numericId = Number(id);
     const episodes = await readEpisodes();
-    const remaining = episodes.filter((e) => e.id !== id);
+    const remaining = episodes.filter((e) => e.id !== numericId);
 
     if (remaining.length === episodes.length) {
       return NextResponse.json({ error: "Episode not found" }, { status: 404 });

@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "title": "Welcome to the Sustainable Engineering Podcast",
+    "description": "Introduction to the channel and what listeners can expect.",
+    "audioUrl": "https://example.com/audio/episode1.mp3",
+    "imageUrl": "https://example.com/images/episode1.jpg",
+    "publishedAt": "2026-01-01T00:00:00.000Z",
+    "duration": "12:34"
+  }
+]

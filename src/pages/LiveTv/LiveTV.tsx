@@ -18,21 +18,50 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const { darkMode } = useAppContext()
+  const [currentTime, setCurrentTime] = useState(new Date());
 
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(new Date());
+  //   }, 1000);
+
+  //   return () => clearInterval(timer);
+  // }, []);
+
+
+  // useEffect(() => {
+  //   setCurrentHeroVideoIndex(0); // first video
+  // }, []);
+
+  // // Auto-rotate videos every 15 minutes to allow full-length playback
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
+  //   }, 900000) // Change video every 15 minutes (900000ms)
+
+  //   return () => clearInterval(interval)
+  // }, [videos.length])
 
   useEffect(() => {
-    setCurrentHeroVideoIndex(0); // first video
-  }, []);
+    // Set first video
+    setCurrentHeroVideoIndex(0);
 
-  // Auto-rotate videos every 15 minutes to allow full-length playback
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
-    }, 900000) // Change video every 15 minutes (900000ms)
+    // Clock timer (updates every second)
+    const clockTimer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [videos.length])
+    // Video rotation timer (every 15 minutes)
+    const videoInterval = setInterval(() => {
+      setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+    }, 900000);
 
+    // Cleanup
+    return () => {
+      clearInterval(clockTimer);
+      clearInterval(videoInterval);
+    };
+  }, [videos.length]);
 
 
   const filteredVideos = selectedCategory === 'all'
@@ -61,7 +90,14 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           ></iframe>
 
           {/* LIVE Tag Overlay */}
-          <div className="live-tag">LIVE</div>
+          {/* <div className="live-tag">LIVE</div> */}
+              {/* LIVE Tag Overlay */}
+          <div className="live-container">
+            <div className="live-tag">LIVE</div>
+            <div className="live-time">
+              {currentTime.toLocaleTimeString()}
+            </div>
+          </div>
 
           <div className="hero-video-overlay">
             <div className="hero-video-info">

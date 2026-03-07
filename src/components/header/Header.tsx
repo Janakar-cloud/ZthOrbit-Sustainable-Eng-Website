@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import '../../style/header.css'
+import '../../style/Header.css'
 import {useAppContext} from '../../context/AppContext'
 
 export default function Header({ onNavigate }: { onNavigate: (page: string) => void }) {

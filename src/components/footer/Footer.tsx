@@ -19,7 +19,6 @@ export default function Footer({ onNavigate }: FooterProps) {
                 src={LogoImage}
                 alt="Green TV Logo"
                 className="footer-logo-image"
-                key={Date.now()}
               />
               <h1 className="footer-logo">
                 Green Generation <span className="footer-logo-highlight">TV</span>
@@ -37,7 +36,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="footer-list">
               <li><a onClick={() =>{ setActivePage('home'); onNavigate('home')}}>Home</a></li>
               <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv')}}>Videos</a></li>
-              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles')}}>Case Stories</a></li>
+              <li><a onClick={() => { setActivePage('casestories'); onNavigate('casestories')}}>Case Stories</a></li>
             </ul>
           </div>
 

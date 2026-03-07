@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import './CaseStories.css'
-import Header from './components/header/Header'
-import Footer from './components/footer/Footer'
+import Header from '../../components/header/Header'
+import Footer from '../../components/footer/Footer'
+import { useAppContext } from '../../context/AppContext'
 
 interface CaseStoriesProps {
   onNavigate: (page: string) => void
@@ -23,7 +24,7 @@ interface Story {
 
 export default function CaseStories({ onNavigate }: CaseStoriesProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [darkMode] = useState(false)
+  const { darkMode } = useAppContext()
 
   const categories = [
     { id: 'all', name: 'All Stories', icon: 'apps' },
@@ -41,7 +42,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Implemented comprehensive waste reduction program across major metropolitan areas, achieving zero-waste certification for 15 facilities.',
       impact: 'Reduced landfill waste by 85% and created 200+ green jobs',
       duration: '18 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3566.jpg',
+      image: '/assets/images/seetharaman/Seetharaman1.jpg',
       metrics: [
         { label: 'CO₂ Reduced', value: '50K tons' },
         { label: 'Recycling Rate', value: '85%' },
@@ -55,7 +56,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Led a Fortune 500 company through complete transition to renewable energy sources, establishing solar and wind infrastructure.',
       impact: 'Achieved 100% renewable energy across 50+ facilities',
       duration: '24 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3575.jpg',
+      image: '/assets/images/seetharaman/Seetharaman2.jpg',
       metrics: [
         { label: 'Energy Clean', value: '100%' },
         { label: 'Facilities', value: '50+' },
@@ -69,7 +70,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Redesigned global supply chain operations to prioritize sustainability, ethical sourcing, and carbon neutrality.',
       impact: 'Carbon-neutral supply chain serving 3 continents',
       duration: '36 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3425.jpg',
+      image: '/assets/images/seetharaman/Seetharaman3.jpg',
       metrics: [
         { label: 'Carbon Offset', value: '100%' },
         { label: 'Suppliers', value: '200+' },
@@ -83,7 +84,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Developed machine learning platform to monitor and predict environmental impact across industrial operations.',
       impact: 'Real-time monitoring of 1000+ environmental data points',
       duration: '12 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3566.jpg',
+      image: '/assets/images/seetharaman/Seetharaman1.jpg',
       metrics: [
         { label: 'Data Points', value: '1000+' },
         { label: 'Accuracy', value: '97%' },
@@ -97,7 +98,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Achieved LEED Platinum certification for 20 corporate buildings through innovative design and sustainability practices.',
       impact: 'Energy consumption reduced by 60% per building',
       duration: '30 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3575.jpg',
+      image: '/assets/images/seetharaman/Seetharaman2.jpg',
       metrics: [
         { label: 'Buildings', value: '20' },
         { label: 'Energy Saved', value: '60%' },
@@ -111,7 +112,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
       description: 'Mobilized local communities to protect and restore 10,000 acres of critical ecosystems and wildlife habitats.',
       impact: '10,000 acres restored, 50 species protected',
       duration: '48 months',
-      image: '/TemplateScreens/Seetharaman/Seetharaman 22Aug3425.jpg',
+      image: '/assets/images/seetharaman/Seetharaman3.jpg',
       metrics: [
         { label: 'Acres Restored', value: '10K' },
         { label: 'Species', value: '50+' },

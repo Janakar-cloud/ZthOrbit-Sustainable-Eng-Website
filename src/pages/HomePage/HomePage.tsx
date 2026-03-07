@@ -6,13 +6,13 @@ import Footer from '../../components/footer/Footer'
 import PodcastModal from '../../components/PodcastModal'
 import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
-import {ArticleItem,LiveTvItem,PodcastItem,Video, Podcast, HomePageProps} from './type/type'
+import {Video, Podcast, HomePageProps} from './type/type'
 import {latestVideo,articlesData,liveTVVideos,liveTv,ourVideo,podcast,podcastEpisodes} from './data/data'
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
-  const { darkMode, showProfileMenu, isAdmin,setActivePage } = useAppContext()
+  const { darkMode,setActivePage } = useAppContext()
 
   
   /* -------------------- HANDLERS -------------------- */
@@ -131,7 +131,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
              onNavigate('livetv')
              setActivePage('livetv')
           }}
-          onItemClick={(item, poistion) => playVideo(liveTVVideos[poistion])}
+          onItemClick={(_, poistion) => playVideo(liveTVVideos[poistion])}
         />
 
        {/* Podcasts */}
@@ -144,7 +144,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             setActivePage('podcast')
             }
           }
-          onItemClick={(item, poistion) => playPodcast(podcastEpisodes[poistion])}
+          onItemClick={(_, poistion) => playPodcast(podcastEpisodes[poistion])}
         />
 
 

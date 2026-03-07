@@ -8,7 +8,7 @@ import PodcastHero from '../Podcast/components/PodcastHero'
 import { ArticlesProps, Article } from './type/type'
 import ArticlesList from './components/ArticlesList'
 import { articles, categories } from './data/data'
-import ArticleDetails from './components/ArticleDetilas'
+import ArticleDetails from './components/ArticleDetails'
 
 
 export default function Articles({ onNavigate }: ArticlesProps) {

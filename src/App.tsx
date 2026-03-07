@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import HomePage from './pages/HomePage/HomePage'
 import AboutUs from './pages/AboutUs/AboutUs'
-import Login from './Login'
-import Signup from './Signup'
-import AdminDashboard from './AdminDashboard'
+import Login from './pages/Login/Login'
+import Signup from './pages/Signup/Signup'
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Articles from './pages/Articles/Articles'
 import Podcast from './pages/Podcast/Podcast'
 import LiveTV from './pages/LiveTv/LiveTV'
+import CaseStories from './pages/CaseStories/CaseStories'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -33,6 +34,7 @@ function App() {
       {currentPage === 'articles' && <Articles onNavigate={handleNavigate} />}
       {currentPage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
       {currentPage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
+      {currentPage === 'casestories' && <CaseStories onNavigate={handleNavigate} />}
     </>
   )
 }

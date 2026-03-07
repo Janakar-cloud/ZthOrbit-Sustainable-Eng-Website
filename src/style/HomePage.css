@@ -107,8 +107,8 @@
 }
 
 .hero-logo-image {
-  width: 44px;
-  height: 44px;
+  /* width: 44px; */
+  height: 55px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }

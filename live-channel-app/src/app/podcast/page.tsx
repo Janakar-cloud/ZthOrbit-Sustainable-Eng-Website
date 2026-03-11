@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { PodcastEpisode } from "@/types/content";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
+
 export default function PodcastPage() {
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -11,8 +13,13 @@ export default function PodcastPage() {
 
   useEffect(() => {
     async function load() {
+      if (!API_BASE) {
+        setError("API base URL missing. Set NEXT_PUBLIC_API_BASE in env.");
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await fetch("/api/podcasts");
+        const res = await fetch(`${API_BASE}/podcasts`);
         if (!res.ok) {
           throw new Error("Failed to load podcasts");
         }
@@ -50,10 +57,10 @@ export default function PodcastPage() {
             <div className="space-y-3 max-h-[480px] overflow-y-auto pr-2">
               {episodes.map((ep) => (
                 <button
-                  key={ep.id}
+                  key={ep._id || ep.id || ep.title}
                   onClick={() => setCurrent(ep)}
                   className={`w-full text-left rounded-md border px-3 py-2 text-sm transition-colors ${
-                    current?.id === ep.id
+                    current?._id === ep._id || current?.id === ep.id
                       ? "border-emerald-600 bg-emerald-50"
                       : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
@@ -61,7 +68,7 @@ export default function PodcastPage() {
                   <div className="font-semibold">{ep.title}</div>
                   <div className="text-xs text-slate-500 line-clamp-2">{ep.description}</div>
                   <div className="mt-1 text-[11px] text-slate-400 flex gap-2">
-                    <span>{new Date(ep.publishedAt).toLocaleDateString()}</span>
+                    <span>{ep.publishedAt ? new Date(ep.publishedAt).toLocaleDateString() : ""}</span>
                     <span>•</span>
                     <span>{ep.duration}</span>
                   </div>

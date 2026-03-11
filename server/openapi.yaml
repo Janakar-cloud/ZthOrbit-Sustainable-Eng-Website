@@ -1,0 +1,875 @@
+openapi: 3.0.3
+info:
+  title: ZthOrbit Backend API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Local dev
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /auth/login:
+    post:
+      summary: Login with email/password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+  /auth/refresh:
+    post:
+      summary: Exchange refresh token for new access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+  /auth/logout:
+    post:
+      summary: Revoke a refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token revoked
+  /auth/request-reset:
+    post:
+      summary: Request a password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Reset email queued
+  /auth/reset:
+    post:
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Password updated
+  /admin/summary:
+    get:
+      summary: Get counts
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Counts
+  /admin/test-email:
+    post:
+      summary: Send SMTP test email
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: string
+      responses:
+        '200':
+          description: Email sent
+  /users:
+    get:
+      summary: List users
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsers'
+    post:
+      summary: Create user
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: Created
+  /users/{id}:
+    put:
+      summary: Update user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /live/config:
+    get:
+      summary: Get live stream config
+      responses:
+        '200':
+          description: Live config
+    put:
+      summary: Update live stream config
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiveConfig'
+      responses:
+        '200':
+          description: Updated
+  /videos:
+    get:
+      summary: List videos
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated videos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVideos'
+    post:
+      summary: Create video
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Video'
+      responses:
+        '201':
+          description: Created
+  /videos/{id}:
+    put:
+      summary: Update video
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Video'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete video
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /podcasts:
+    get:
+      summary: List podcasts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated podcasts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPodcasts'
+    post:
+      summary: Create podcast
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Podcast'
+      responses:
+        '201':
+          description: Created
+  /podcasts/{id}:
+    put:
+      summary: Update podcast
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Podcast'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete podcast
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /podcasts/{id}/comments:
+    post:
+      summary: Add comment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodcastComment'
+      responses:
+        '201':
+          description: Created
+    get:
+      summary: List comments
+      responses:
+        '200':
+          description: Comments
+  /articles:
+    get:
+      summary: List articles
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: featured
+          schema:
+            type: boolean
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedArticles'
+    post:
+      summary: Create article
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '201':
+          description: Created
+  /articles/{id}:
+    get:
+      summary: Get article
+      responses:
+        '200':
+          description: Article
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+    put:
+      summary: Update article
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete article
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /case-stories:
+    get:
+      summary: List case stories
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+        - in: query
+          name: tag
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated case stories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaseStories'
+    post:
+      summary: Create case story
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseStory'
+      responses:
+        '201':
+          description: Created
+  /case-stories/{id}:
+    get:
+      summary: Get case story
+      responses:
+        '200':
+          description: Case story
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseStory'
+    put:
+      summary: Update case story
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseStory'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete case story
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /about:
+    get:
+      summary: List about blocks
+      responses:
+        '200':
+          description: Blocks
+    post:
+      summary: Create about block
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AboutBlock'
+      responses:
+        '201':
+          description: Created
+  /about/{id}:
+    put:
+      summary: Update about block
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AboutBlock'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete about block
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /tags:
+    get:
+      summary: List tags
+      responses:
+        '200':
+          description: Tags
+    post:
+      summary: Create tag
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '201':
+          description: Created
+  /tags/{id}:
+    delete:
+      summary: Delete tag
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+  /uploads/presign:
+    post:
+      summary: Create S3 presigned upload URL
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prefix:
+                  type: string
+                contentType:
+                  type: string
+      responses:
+        '200':
+          description: Presigned URL
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+    PaginatedUsers:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    CreateUser:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+    UpdateUser:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        password:
+          type: string
+    LiveConfig:
+      type: object
+      properties:
+        streamUrl:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+    Video:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        streamUrl:
+          type: string
+        thumbnailUrl:
+          type: string
+        duration:
+          type: string
+        publishDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        isLive:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+    PaginatedVideos:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Video'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    Podcast:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        audioUrl:
+          type: string
+        imageUrl:
+          type: string
+        duration:
+          type: string
+        publishDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    PaginatedPodcasts:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Podcast'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    PodcastComment:
+      type: object
+      properties:
+        author:
+          type: string
+        message:
+          type: string
+    Article:
+      type: object
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        bodyMd:
+          type: string
+        readTime:
+          type: string
+        coverImage:
+          type: string
+        publishDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        featured:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+    PaginatedArticles:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Article'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    CaseStory:
+      type: object
+      properties:
+        title:
+          type: string
+        impact:
+          type: string
+        duration:
+          type: string
+        heroImage:
+          type: string
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              value:
+                type: string
+        bodyMd:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    PaginatedCaseStories:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseStory'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    AboutBlock:
+      type: object
+      properties:
+        kind:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        mediaUrl:
+          type: string
+        order:
+          type: integer
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string

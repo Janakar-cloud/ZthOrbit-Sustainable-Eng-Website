@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { LiveConfig } from "@/types/content";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
+
 export default function LivePage() {
   const [config, setConfig] = useState<LiveConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -10,8 +12,13 @@ export default function LivePage() {
 
   useEffect(() => {
     async function load() {
+      if (!API_BASE) {
+        setError("API base URL missing. Set NEXT_PUBLIC_API_BASE in env.");
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await fetch("/api/live");
+        const res = await fetch(`${API_BASE}/live/config`);
         if (!res.ok) {
           throw new Error("Failed to load live stream");
         }

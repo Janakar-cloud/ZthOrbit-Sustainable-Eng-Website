@@ -1,94 +1,72 @@
-# ZthOrbit Backend API (v1)
+# GreenTvDashboard API (v0.1.0)
 
-Base URL: `/api/v1`
+Spec: OpenAPI 3.1.0 at `server/openapi.yaml`.
+Servers: production and staging URLs are placeholders in the spec; fill in real hosts when ready.
 
-## Auth
-- `POST /auth/register` — email, password, name; returns accessToken + refreshToken
-- `POST /auth/login` — email, password; returns accessToken + refreshToken
-- `POST /auth/refresh` — body { refreshToken }; returns accessToken
-- `POST /auth/logout` — body { refreshToken }; revokes stored token
-- `POST /auth/request-reset` — body { email }; sends reset email if SMTP configured
-- `POST /auth/reset` — body { token, password }; resets password
+## Auth & Headers
+- Bearer JWT on all protected routes: `Authorization: Bearer <accessToken>`
+- Auth endpoints
+  - `POST /api/auth/login` — body { email, password } ⇒ { accessToken, refreshToken, user }
+  - `POST /api/auth/refresh` — body { refreshToken } ⇒ { accessToken }
+  - `POST /api/auth/forgot-password` — body { email } ⇒ 204
+  - `POST /api/auth/reset-password` — body { token, newPassword } ⇒ 204
 
-### Headers
-- Authenticated routes require `Authorization: Bearer <accessToken>`
+## Common Shapes
+- Error: `{ status, code, message, details?, traceId? }`
+- Pagination meta: `{ page, limit, total }`
 
-## Admin
-- `GET /admin/summary` — counts (admin/editor)
-- `POST /admin/test-email` — optional body { to }; sends SMTP test (admin/editor)
+## Users
+- `GET /api/users` — list (query: page, limit, search, status, role, sort, order)
+- `POST /api/users` — create (multipart: name, email, role, status?, avatar?, instagram?, facebook?)
+- `GET /api/users/{id}` — fetch
+- `PUT /api/users/{id}` — update
+- `DELETE /api/users/{id}` — delete
+- `PATCH /api/users/{id}/status` — update status
 
-## Users (admin)
-- `GET /users?page=&pageSize=` — paginated list
-- `POST /users` — create { email, password, role, name, status }
-- `PUT /users/:id` — update { name?, role?, status?, password? }
-- `DELETE /users/:id`
-
-## Live
-- `GET /live/config` — public
-- `PUT /live/config` — (admin/editor) { streamUrl, title, description }
-
-## Videos
-- `GET /videos?page=&pageSize=&tag=&status=` — paginated list
-- `POST /videos` — (admin/editor) { title, streamUrl, ... }
-- `PUT /videos/:id` — (admin/editor)
-- `DELETE /videos/:id` — (admin)
-
-## Podcasts
-- `GET /podcasts?page=&pageSize=&tag=&status=` — paginated list
-- `POST /podcasts` — (admin/editor)
-- `PUT /podcasts/:id` — (admin/editor)
-- `DELETE /podcasts/:id` — (admin)
-- `POST /podcasts/:id/comments` — public { author, message }
-- `GET /podcasts/:id/comments` — public
+## Media
+- `GET /api/media` — list (page, limit, search, category, menu, mediaType, status)
+- `POST /api/media` — upload (multipart: file, thumbnail?, mediaType, title, description?, menu, category, tags?, duration?)
+- `GET /api/media/{id}` — fetch
+- `PUT /api/media/{id}` — update metadata
+- `DELETE /api/media/{id}` — delete
+- `PATCH /api/media/{id}/status` — encoder callback (status, fileUrl?, thumbnailUrl?, duration?)
 
 ## Articles
-- `GET /articles?page=&pageSize=&tag=&featured=&status=` — paginated list
-- `GET /articles/:id`
-- `POST /articles` — (admin/editor)
-- `PUT /articles/:id` — (admin/editor)
-- `DELETE /articles/:id` — (admin)
+- `GET /api/articles` — list (page, limit, search, status, category, sort)
+- `POST /api/articles` — create (multipart: title, subTitle?, category, status?, tags?, cover?, content?)
+- `GET /api/articles/{id}` — fetch
+- `PUT /api/articles/{id}` — update
+- `DELETE /api/articles/{id}` — delete
+- `PATCH /api/articles/{id}/status` — publish/draft
 
-## Case Stories
-- `GET /case-stories?page=&pageSize=&tag=` — paginated list
-- `GET /case-stories/:id`
-- `POST /case-stories` — (admin/editor)
-- `PUT /case-stories/:id` — (admin/editor)
-- `DELETE /case-stories/:id` — (admin)
+## Posts (blog)
+- `GET /api/posts` — list (page, limit, search, category, sort)
+- `POST /api/posts` — create (body matches Post schema)
+- `GET /api/posts/{id}` — fetch
+- `PUT /api/posts/{id}` — update
+- `DELETE /api/posts/{id}` — delete
 
-## About
-- `GET /about` — list blocks
-- `POST /about` — (admin/editor)
-- `PUT /about/:id` — (admin/editor)
-- `DELETE /about/:id` — (admin)
+## Notifications
+- `GET /api/notifications` — list (page, limit, isUnread?)
+- `DELETE /api/notifications` — delete all
+- `PATCH /api/notifications/{id}` — mark read/unread (isUnread)
+- `DELETE /api/notifications/{id}` — delete one
+- `PATCH /api/notifications/read-all` — mark all read
 
-## Tags
-- `GET /tags`
-- `POST /tags` — (admin/editor)
-- `DELETE /tags/:id` — (admin)
+## Dashboard
+- `GET /api/dashboard/summary` — aggregated metrics (query: from, to, interval)
 
-## Uploads (S3 presign)
-- `POST /uploads/presign` — (admin/editor) body { prefix, contentType }; returns presigned URL
+## Reference Data
+- `GET /api/categories` — list categories (type: media | article | post)
+- `GET /api/menus` — list menus
+- `GET /api/tags` — list tags (type: article | media)
 
-## Pagination shape
-Responses with pagination return `{ items, total, page, pageSize }`.
+## Key Schemas (abbrev)
+- User: { id, name, email, role (Admin|User|Moderator), status (active|inactive|banned), isVerified, avatarUrl?, socials? }
+- MediaItem: { id, title, mediaType (video|audio), menu (LiveTv|Podcast), category, tags[], status, fileUrl?, thumbnailUrl?, duration?, createdAt }
+- Article: { id, title, subTitle?, category, status, tags[], coverUrl?, content?, publishedAt?, author? }
+- Post: { id, title, description?, coverUrl, totals..., postedAt, author }
+- Notification: { id, title, description?, avatarUrl|null, type, postedAt, isUnread }
+- DashboardSummary: { metrics, trendingPodcastCategory, trendingArticleCategory, usersStatus[], recentActivity[] }
 
-## Env (server/.env)
-- Mongo/JWT: `MONGODB_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`
-- App URL: `APP_URL`
-- CORS: `CORS_ORIGINS`
-- AWS S3: `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`
-- SMTP (used for password reset emails and test-email endpoint):
-	- `SMTP_HOST` (set to `smtp.gmail.com`)
-	- `SMTP_PORT` (set to `465`)
-	- `SMTP_SECURE` (`true` for SSL)
-	- `SMTP_USER` (`greentvsupport@gmail.com`)
-	- `SMTP_PASS` (Gmail app password)
-	- `SMTP_FROM` (`"Green TV Support <greentvsupport@gmail.com>"`)
-
-## Local SMTP test flow
-1) Set SMTP_* env (for Gmail app password) and APP_URL.
-2) Start server: `npm run dev` in `server/`.
-3) Call `POST /api/v1/admin/test-email` with Authorization (admin/editor token) and optional `{ "to": "you@example.com" }` to verify delivery.
-
-## Seeds
-- Run `npm run seed` to create admin user and starter content.
+For full request/response details and examples, see the OpenAPI file.

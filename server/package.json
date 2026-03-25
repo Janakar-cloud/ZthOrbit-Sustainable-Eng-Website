@@ -7,7 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p .",
     "start": "node dist/index.js",
-    "seed": "ts-node-dev --transpile-only src/seed.ts",
+    "seed": "node --loader ts-node/esm src/seed.ts",
     "migrate:s3": "node --loader ts-node/esm src/migrations/migrate-to-s3.ts"
   },
   "dependencies": {

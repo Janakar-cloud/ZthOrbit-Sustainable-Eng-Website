@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as Omit<PodcastEpisode, "id">;
 
     const episodes = await readEpisodes();
-    const nextId = episodes.length ? Math.max(...episodes.map((e) => e.id)) + 1 : 1;
+    const nextId = episodes.length ? Math.max(...episodes.map((e) => e.id).filter((id): id is number => id !== undefined)) + 1 : 1;
 
     const newEpisode: PodcastEpisode = {
       id: nextId,

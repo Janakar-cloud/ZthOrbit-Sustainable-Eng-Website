@@ -13,6 +13,7 @@ async function main() {
 
   const app = express();
   app.disable("x-powered-by");
+  app.set("trust proxy", 1);
   app.use(helmet());
   app.use(
     cors({
@@ -25,6 +26,7 @@ async function main() {
   app.use("/api/v1", apiLimiter, routes);
 
   app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
+  app.get("/readyz", (_req, res) => res.json({ status: "ready", envPath: env.envPath || "unknown" }));
 
   app.use((req, res) => res.status(404).json({ error: `Not found: ${req.path}` }));
   app.use(errorHandler);

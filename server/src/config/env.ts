@@ -1,6 +1,18 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
-dotenv.config();
+const currentFile = fileURLToPath(import.meta.url);
+const currentDir = path.dirname(currentFile);
+const candidateEnvPaths = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(currentDir, "../../.env"),
+  path.resolve(currentDir, "../../../.env"),
+];
+const envPath = candidateEnvPaths.find((candidate) => existsSync(candidate));
+
+dotenv.config(envPath ? { path: envPath } : undefined);
 
 const required = [
   "MONGODB_URI",
@@ -48,4 +60,5 @@ export const env = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER || "",
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
   },
+  envPath: envPath || "",
 };

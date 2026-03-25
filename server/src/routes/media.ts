@@ -186,7 +186,7 @@ const mediaSchema = z.object({
 });
 
 // Create media (routes to video or podcast)
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = mediaSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -244,7 +244,7 @@ router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
 });
 
 // Update media
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = mediaSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -300,7 +300,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
 });
 
 // Delete media
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const video = await Video.findByIdAndDelete(req.params.id);
   if (video) return res.status(204).send();
 
@@ -311,7 +311,7 @@ router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
 });
 
 // Update media status (PATCH endpoint for encoder callbacks)
-router.patch("/:id/status", requireAuth(["admin", "editor"]), async (req, res) => {
+router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = z.object({
     status: z.enum(["processing", "ready", "failed"]),
     fileUrl: z.string().url().optional(),

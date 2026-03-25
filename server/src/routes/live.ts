@@ -17,7 +17,7 @@ const liveSchema = z.object({
   description: z.string().optional().default(""),
 });
 
-router.put("/config", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/config", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = liveSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 

@@ -28,14 +28,14 @@ const blockSchema = z.object({
   order: z.number().int().default(0),
 });
 
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = blockSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const created = await AboutBlock.create(parsed.data);
   res.status(201).json(created);
 });
 
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = blockSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const updated = await AboutBlock.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
@@ -43,7 +43,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
   res.json(updated);
 });
 
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const deleted = await AboutBlock.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();

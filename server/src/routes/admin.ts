@@ -11,7 +11,7 @@ import { env } from "../config/env.js";
 
 const router = Router();
 
-router.get("/summary", requireAuth(["admin", "editor"]), async (req, res) => {
+router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   // Get date range filters if provided
   const from = req.query.from ? new Date(req.query.from as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const to = req.query.to ? new Date(req.query.to as string) : new Date();
@@ -95,7 +95,7 @@ router.get("/summary", requireAuth(["admin", "editor"]), async (req, res) => {
   });
 });
 
-router.post("/test-email", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/test-email", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const to = (req.body?.to as string) || env.smtp.user;
   if (!to) return res.status(400).json({ error: "Provide 'to' or set SMTP_USER" });
   try {

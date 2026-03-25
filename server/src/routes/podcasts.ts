@@ -40,14 +40,14 @@ const podcastSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = podcastSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const created = await Podcast.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(created);
 });
 
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = podcastSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const updated = await Podcast.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
@@ -55,7 +55,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
   res.json(updated);
 });
 
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const deleted = await Podcast.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
@@ -78,13 +78,13 @@ router.get("/:id/comments", async (req, res) => {
 });
 
 // Admin: Get all comments (including hidden)
-router.get("/:id/comments/all", requireAuth(["admin", "editor"]), async (req, res) => {
+router.get("/:id/comments/all", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const comments = await PodcastComment.find({ podcastId: req.params.id }).sort({ createdAt: -1 });
   res.json(comments);
 });
 
 // Moderate comment (hide/show)
-router.patch("/:podcastId/comments/:commentId/status", requireAuth(["admin", "editor"]), async (req, res) => {
+router.patch("/:podcastId/comments/:commentId/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const statusSchema = z.object({ status: z.enum(["visible", "hidden"]) });
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -100,7 +100,7 @@ router.patch("/:podcastId/comments/:commentId/status", requireAuth(["admin", "ed
 });
 
 // Delete comment
-router.delete("/:podcastId/comments/:commentId", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const comment = await PodcastComment.findOneAndDelete({
     _id: req.params.commentId,
     podcastId: req.params.podcastId,

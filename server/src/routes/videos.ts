@@ -40,14 +40,14 @@ const videoSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = videoSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const video = await Video.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(video);
 });
 
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = videoSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const video = await Video.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
@@ -55,7 +55,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
   res.json(video);
 });
 
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin"]), async (req, res) => {
   const deleted = await Video.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();

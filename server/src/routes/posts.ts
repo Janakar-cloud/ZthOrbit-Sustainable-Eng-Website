@@ -51,7 +51,7 @@ const postSchema = z.object({
 });
 
 // Create post
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = postSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -64,7 +64,7 @@ router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
 });
 
 // Update post
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = postSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -78,7 +78,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
 });
 
 // Delete post
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const deleted = await Post.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Post not found" });
   res.status(204).send();

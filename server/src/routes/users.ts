@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 
 const router = Router();
 
-router.get("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.get("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
   const skip = (page - 1) * pageSize;
@@ -20,12 +20,12 @@ router.get("/", requireAuth(["admin", "editor"]), async (req, res) => {
 const createSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["admin", "editor", "viewer"]).default("viewer"),
+  role: z.enum(["superadmin", "admin", "editor", "viewer"]).default("viewer"),
   name: z.string().optional(),
   status: z.enum(["active", "inactive"]).default("active"),
 });
 
-router.post("/", requireAuth(["admin"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const existing = await User.findOne({ email: parsed.data.email });
@@ -37,12 +37,12 @@ router.post("/", requireAuth(["admin"]), async (req, res) => {
 
 const updateSchema = z.object({
   name: z.string().optional(),
-  role: z.enum(["admin", "editor", "viewer"]).optional(),
+  role: z.enum(["superadmin", "admin", "editor", "viewer"]).optional(),
   status: z.enum(["active", "inactive"]).optional(),
   password: z.string().min(8).optional(),
 });
 
-router.put("/:id", requireAuth(["admin"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data: any = { ...parsed.data };
@@ -55,14 +55,14 @@ router.put("/:id", requireAuth(["admin"]), async (req, res) => {
   res.json(user);
 });
 
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const deleted = await User.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
 });
 
 // PATCH endpoint for status updates
-router.patch("/:id/status", requireAuth(["admin"]), async (req, res) => {
+router.patch("/:id/status", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const parsed = z.object({
     status: z.enum(["active", "inactive"]),
   }).safeParse(req.body);

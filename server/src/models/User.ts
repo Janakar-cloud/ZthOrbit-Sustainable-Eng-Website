@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 export interface IUser {
   email: string;
   passwordHash: string;
-  role: "admin" | "editor" | "viewer";
+  role: "superadmin" | "admin" | "editor" | "viewer";
   name?: string;
   avatarUrl?: string;
   socials?: Record<string, string>;
@@ -16,7 +16,7 @@ const userSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, required: true },
-    role: { type: String, enum: ["admin", "editor", "viewer"], default: "viewer" },
+    role: { type: String, enum: ["superadmin", "admin", "editor", "viewer"], default: "viewer" },
     name: { type: String },
     avatarUrl: { type: String },
     socials: { type: Schema.Types.Mixed },

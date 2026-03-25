@@ -18,14 +18,25 @@ async function main() {
   );
   const tagMap = Object.fromEntries(tagDocs.map((t) => [t.name, t._id]));
 
-  const adminEmail = "admin@zthorbit.local";
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "ChangeMe123!";
-  const adminHash = await bcrypt.hash(adminPassword, 10);
-  await User.findOneAndUpdate(
-    { email: adminEmail },
-    { email: adminEmail, passwordHash: adminHash, role: "admin", status: "active", name: "Admin" },
-    { upsert: true, new: true }
-  );
+  const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || "ChangeMe123!";
+  const testUsers = [
+    { email: "superadmin@zthorbit.local", role: "superadmin" as const, name: "Super Admin" },
+    { email: "janakar.ganesan@gmail.com", role: "superadmin" as const, name: "Janakar" },
+    { email: "admin1@zthorbit.local", role: "admin" as const, name: "Admin One" },
+    { email: "admin2@zthorbit.local", role: "admin" as const, name: "Admin Two" },
+    { email: "user1@zthorbit.local", role: "viewer" as const, name: "User One" },
+    { email: "user2@zthorbit.local", role: "viewer" as const, name: "User Two" },
+  ];
+  const primaryAdminEmail = testUsers[0].email;
+
+  for (const user of testUsers) {
+    const hash = await bcrypt.hash(defaultPassword, 10);
+    await User.findOneAndUpdate(
+      { email: user.email },
+      { email: user.email, passwordHash: hash, role: user.role, status: "active", name: user.name },
+      { upsert: true, new: true }
+    );
+  }
 
   await LiveConfig.findOneAndUpdate(
     {},
@@ -33,7 +44,7 @@ async function main() {
       streamUrl: "https://example.com/live.m3u8",
       title: "Live Sustainable Engineering Channel",
       description: "24/7 conversations on sustainability, technology, and impact.",
-      updatedBy: adminEmail,
+      updatedBy: primaryAdminEmail,
       updatedAt: new Date(),
     },
     { upsert: true }
@@ -163,7 +174,8 @@ async function main() {
     { kind: "cta", title: "Join the community", body: "Empowering sustainability through conscious leadership.", order: 20 },
   ]);
 
-  console.log("Seed complete. Admin login:", adminEmail, adminPassword);
+  console.log("Seed complete. Test users (password =", defaultPassword, "):");
+  testUsers.forEach((u) => console.log(`- ${u.role}: ${u.email}`));
   process.exit(0);
 }
 

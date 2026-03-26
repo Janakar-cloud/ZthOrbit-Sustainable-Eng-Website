@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import '../../style/LiveTV.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -8,6 +8,7 @@ import { Video } from '../HomePage/type/type'
 import { videos } from '../LiveTv/data/data'
 import VideoCategoryFilters from './components/renderFilterButtons'
 import VideoGrid from './components/VideoGrid'
+import { getLiveConfig, type LiveConfig } from '../../utils/api'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -16,9 +17,11 @@ interface LiveTVProps {
 export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
-  const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const { darkMode } = useAppContext()
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [liveConfig, setLiveConfig] = useState<LiveConfig | null>(null)
+  const [liveError, setLiveError] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
   // useEffect(() => {
   //   const timer = setInterval(() => {
@@ -43,25 +46,84 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   // }, [videos.length])
 
   useEffect(() => {
-    // Set first video
-    setCurrentHeroVideoIndex(0);
-
-    // Clock timer (updates every second)
     const clockTimer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+    return () => clearInterval(clockTimer);
+  }, []);
 
-    // Video rotation timer (every 15 minutes)
-    const videoInterval = setInterval(() => {
-      setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
-    }, 900000);
+  useEffect(() => {
+    async function loadLive() {
+      try {
+        const cfg = await getLiveConfig()
+        setLiveConfig(cfg)
+        setLiveError(null)
+      } catch (err: any) {
+        setLiveError((err as Error)?.message || 'Could not load live stream')
+      }
+    }
+    loadLive()
+  }, [])
 
-    // Cleanup
+  useEffect(() => {
+    if (!liveConfig?.streamUrl || !videoRef.current) return
+
+    const videoEl = videoRef.current
+    let hls: any = null
+
+    const setup = async () => {
+      // Native HLS support
+      if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+        videoEl.src = liveConfig.streamUrl
+        try {
+          await videoEl.play()
+        } catch {
+          /* autoplay may be blocked */
+        }
+        return
+      }
+
+      // Fallback to hls.js via CDN without bundling
+      if (!(window as any).Hls) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+          script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js'
+          script.onload = resolve
+          script.onerror = reject
+          document.body.appendChild(script)
+        })
+      }
+
+      const Hls = (window as any).Hls
+      if (!Hls?.isSupported()) {
+        setLiveError('Browser does not support HLS playback')
+        return
+      }
+
+      hls = new Hls({ enableWorker: true, lowLatencyMode: true })
+      hls.loadSource(liveConfig.streamUrl)
+      hls.attachMedia(videoEl)
+      hls.on(Hls.Events.ERROR, (_evt: any, data: any) => {
+        if (data?.fatal) setLiveError('Live stream error, please retry')
+      })
+
+      try {
+        await videoEl.play()
+      } catch {
+        /* autoplay may be blocked */
+      }
+    }
+
+    setup()
+
     return () => {
-      clearInterval(clockTimer);
-      clearInterval(videoInterval);
-    };
-  }, [videos.length]);
+      if (hls) hls.destroy()
+      if (videoEl) {
+        videoEl.pause()
+        videoEl.removeAttribute('src')
+      }
+    }
+  }, [liveConfig?.streamUrl])
 
 
   const filteredVideos = selectedCategory === 'all'
@@ -80,18 +142,23 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
       <section className="livetv-hero">
         <div className="hero-video-carousel">
-          <iframe
-            key={currentHeroVideoIndex}
-            src={`https://drive.google.com/file/d/${videos[currentHeroVideoIndex].videoId}/preview`}
-            className="hero-video-player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={videos[currentHeroVideoIndex].title}
-          ></iframe>
+          <div className="hero-video-player">
+            {liveConfig?.streamUrl ? (
+              <video
+                ref={videoRef}
+                className="hero-video-player"
+                controls
+                muted
+                playsInline
+                autoPlay
+              />
+            ) : (
+              <div className="hero-video-fallback">
+                <p>No live stream configured.</p>
+              </div>
+            )}
+          </div>
 
-          {/* LIVE Tag Overlay */}
-          {/* <div className="live-tag">LIVE</div> */}
-              {/* LIVE Tag Overlay */}
           <div className="live-container">
             <div className="live-tag">LIVE</div>
             <div className="live-time">
@@ -101,9 +168,9 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
           <div className="hero-video-overlay">
             <div className="hero-video-info">
-              <span className="hero-video-category">{videos[currentHeroVideoIndex].category}</span>
-              <h2 className="hero-video-title">{videos[currentHeroVideoIndex].title}</h2>
-              <p className="hero-video-description">{videos[currentHeroVideoIndex].description}</p>
+              <span className="hero-video-category">Live</span>
+              <h2 className="hero-video-title">{liveConfig?.title || 'Live Sustainable Engineering Channel'}</h2>
+              <p className="hero-video-description">{liveConfig?.description || 'Streaming now'}</p>
             </div>
           </div>
         </div>

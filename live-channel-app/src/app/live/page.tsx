@@ -68,7 +68,7 @@ export default function LivePage() {
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(videoEl);
 
-      hlsInstance.on(Hls.Events.ERROR, (_event, data) => {
+      hlsInstance.on(Hls.Events.ERROR, (_event: any, data: any) => {
         if (data?.fatal) {
           setStreamError("The live stream encountered an error. Please retry.");
           hlsInstance?.destroy();

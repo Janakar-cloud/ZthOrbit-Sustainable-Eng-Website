@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useCallback } from 'react'
 import HomePage from './pages/HomePage/HomePage'
 import AboutUs from './pages/AboutUs/AboutUs'
 import Login from './pages/Login/Login'
@@ -8,33 +8,74 @@ import Articles from './pages/Articles/Articles'
 import Podcast from './pages/Podcast/Podcast'
 import LiveTV from './pages/LiveTv/LiveTV'
 import CaseStories from './pages/CaseStories/CaseStories'
+import { useAppContext } from './context/AppContext'
+
+const PATH_TO_PAGE: Record<string, string> = {
+  '/': 'home',
+  '/about': 'about',
+  '/login': 'login',
+  '/signup': 'signup',
+  '/admin': 'admin',
+  '/articles': 'articles',
+  '/podcast': 'podcast',
+  '/livetv': 'livetv',
+  '/casestories': 'casestories',
+}
+
+const PAGE_TO_PATH: Record<string, string> = Object.fromEntries(
+  Object.entries(PATH_TO_PAGE).map(([k, v]) => [v, k])
+)
+
+function pageFromPath(pathname: string): string {
+  return PATH_TO_PAGE[pathname] || 'home'
+}
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home')
+  const { activePage, setActivePage } = useAppContext()
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page)
-  }
+  // Set initial page from URL on mount
+  useEffect(() => {
+    const initial = pageFromPath(window.location.pathname)
+    setActivePage(initial)
+  }, [setActivePage])
+
+  // Listen for browser back/forward
+  useEffect(() => {
+    const onPopState = () => {
+      setActivePage(pageFromPath(window.location.pathname))
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [setActivePage])
+
+  const handleNavigate = useCallback((page: string) => {
+    const path = PAGE_TO_PATH[page] || '/'
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path)
+    }
+    setActivePage(page)
+    window.scrollTo(0, 0)
+  }, [setActivePage])
 
   const handleLogin = () => {
-    setCurrentPage('admin')
+    handleNavigate('admin')
   }
 
   const handleSignupComplete = () => {
-    setCurrentPage('home')
+    handleNavigate('home')
   }
 
   return (
     <>
-      {currentPage === 'home' && <HomePage onNavigate={handleNavigate} />}
-      {currentPage === 'about' && <AboutUs onNavigate={handleNavigate} />}
-      {currentPage === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
-      {currentPage === 'signup' && <Signup onNavigate={handleNavigate} onComplete={handleSignupComplete} />}
-      {currentPage === 'admin' && <AdminDashboard onNavigate={handleNavigate} />}
-      {currentPage === 'articles' && <Articles onNavigate={handleNavigate} />}
-      {currentPage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
-      {currentPage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
-      {currentPage === 'casestories' && <CaseStories onNavigate={handleNavigate} />}
+      {activePage === 'home' && <HomePage onNavigate={handleNavigate} />}
+      {activePage === 'about' && <AboutUs onNavigate={handleNavigate} />}
+      {activePage === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
+      {activePage === 'signup' && <Signup onNavigate={handleNavigate} onComplete={handleSignupComplete} />}
+      {activePage === 'admin' && <AdminDashboard onNavigate={handleNavigate} />}
+      {activePage === 'articles' && <Articles onNavigate={handleNavigate} />}
+      {activePage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
+      {activePage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
+      {activePage === 'casestories' && <CaseStories onNavigate={handleNavigate} />}
     </>
   )
 }

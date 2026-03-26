@@ -218,16 +218,18 @@ POST /api/uploads/presign
 **Response:**
 ```json
 {
-  "uploadUrl": "https://s3-presigned-upload-url",
-  "fileUrl": "https://cdn.example.com/videos/filename.mp4",
-  "key": "videos/filename.mp4"
+  "url": "https://s3-presigned-upload-url...",
+  "fileUrl": "https://your-bucket.s3.us-east-1.amazonaws.com/videos/uuid.mp4",
+  "key": "videos/uuid.mp4",
+  "bucket": "your-bucket",
+  "region": "us-east-1"
 }
 ```
 
 **Upload Flow:**
 1. Dashboard requests presigned URL from backend
-2. Backend returns presigned URL + final fileUrl
-3. Dashboard uploads file directly to S3 using presigned URL (PUT request)
+2. Backend returns presigned `url` + permanent `fileUrl`
+3. Dashboard uploads file directly to S3 using `url` (PUT request)
 4. Dashboard uses `fileUrl` when creating media/article/post
 
 **Supported Prefixes:**

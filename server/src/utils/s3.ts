@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env.js";
 import { randomUUID } from "crypto";
 
-const s3 = new S3Client({
+export const s3 = new S3Client({
   region: env.s3.region,
   credentials: {
     accessKeyId: env.s3.accessKeyId,
@@ -18,6 +18,14 @@ export async function createPresignedUpload(keyPrefix: string, contentType: stri
     Key: key,
     ContentType: contentType,
   });
-  const url = await getSignedUrl(s3, command, { expiresIn: 300 });
-  return { url, key, bucket: env.s3.bucket, region: env.s3.region };
+  const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+  const fileUrl = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/${key}`;
+  
+  return { 
+    url: uploadUrl,     // Presigned URL for uploading
+    fileUrl,            // Final public URL to use in database
+    key,                // S3 key/path
+    bucket: env.s3.bucket, 
+    region: env.s3.region 
+  };
 }

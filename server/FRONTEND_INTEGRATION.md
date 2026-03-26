@@ -172,6 +172,172 @@ const searchResults = await getMedia({ search: 'climate' });
 const processingMedia = await getMedia({ status: 'processing' });
 ```
 
+---
+
+## S3 File Upload Flow
+
+### Complete Upload Example
+
+```typescript
+async function uploadMediaFile(
+  file: File,
+  prefix: 'videos' | 'podcasts' | 'images' | 'thumbnails'
+): Promise<string> {
+  // Step 1: Request presigned URL
+  const presignResponse = await fetch(`${API_BASE_URL}/uploads/presign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+    },
+    body: JSON.stringify({
+      prefix,
+      contentType: file.type,
+    }),
+  });
+
+  if (!presignResponse.ok) {
+    throw new Error('Failed to get upload URL');
+  }
+
+  const { url, fileUrl } = await presignResponse.json();
+  // url: presigned S3 URL for uploading
+  // fileUrl: permanent public URL to store in database
+
+  // Step 2: Upload file directly to S3
+  const uploadResponse = await fetch(url, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+    },
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error('Failed to upload file to S3');
+  }
+
+  // Step 3: Return permanent URL
+  return fileUrl;
+}
+```
+
+### Upload with Progress Tracking
+
+```typescript
+async function uploadWithProgress(
+  file: File,
+  prefix: string,
+  onProgress?: (percent: number) => void
+): Promise<string> {
+  // Get presigned URL
+  const presignResponse = await fetch(`${API_BASE_URL}/uploads/presign`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+    },
+    body: JSON.stringify({ prefix, contentType: file.type }),
+  });
+
+  const { url, fileUrl } = await presignResponse.json();
+
+  // Upload with XMLHttpRequest for progress tracking
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && onProgress) {
+        const percent = (e.loaded / e.total) * 100;
+        onProgress(Math.round(percent));
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200) {
+        resolve(fileUrl);
+      } else {
+        reject(new Error(`Upload failed: ${xhr.statusText}`));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.send(file);
+  });
+}
+```
+
+### React Hook Example
+
+```typescript
+import { useState } from 'react';
+
+function useFileUpload() {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const upload = async (file: File, prefix: string): Promise<string | null> => {
+    setUploading(true);
+    setProgress(0);
+    setError(null);
+
+    try {
+      const fileUrl = await uploadWithProgress(file, prefix, setProgress);
+      setUploading(false);
+      return fileUrl;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+      setUploading(false);
+      return null;
+    }
+  };
+
+  return { upload, uploading, progress, error };
+}
+
+// Usage in component
+function UploadVideoForm() {
+  const { upload, uploading, progress } = useFileUpload();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = fileInput.files?.[0];
+
+    if (!file) return;
+
+    // Upload video file
+    const videoUrl = await upload(file, 'videos');
+
+    if (videoUrl) {
+      // Create media with uploaded URL
+      await createMedia({
+        title: 'My Video',
+        mediaType: 'video',
+        menu: 'LiveTv',
+        fileUrl: videoUrl,
+        status: 'ready',
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="file" accept="video/*" disabled={uploading} />
+      {uploading && <progress value={progress} max="100">{progress}%</progress>}
+      <button type="submit" disabled={uploading}>Upload</button>
+    </form>
+  );
+}
+```
+
+---
+
 ### Create Media Item
 ```typescript
 async function createMedia(data: {

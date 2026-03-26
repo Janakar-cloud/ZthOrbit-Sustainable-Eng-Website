@@ -1194,11 +1194,18 @@ Request a pre-signed S3 URL for file upload.
 **Response:** `200 OK`
 ```json
 {
-  "uploadUrl": "https://s3-presigned-upload-url",
-  "fileUrl": "https://cdn-url/videos/filename.mp4",
-  "key": "videos/filename.mp4"
+  "url": "https://s3-presigned-upload-url...",
+  "fileUrl": "https://your-bucket.s3.us-east-1.amazonaws.com/videos/uuid.mp4",
+  "key": "videos/uuid.mp4",
+  "bucket": "your-bucket",
+  "region": "us-east-1"
 }
 ```
+
+**Upload Flow:**
+1. Request presigned URL from this endpoint
+2. Upload file directly to S3 using `url` (PUT request with file as body)
+3. Use `fileUrl` when creating media/article/post (this is the permanent public URL)
 
 **Error Codes:**
 - `400` - Validation error (missing prefix/contentType)
@@ -1206,7 +1213,37 @@ Request a pre-signed S3 URL for file upload.
 - `403` - Forbidden
 - `500` - S3 configuration error
 
-**Usage:** Client uploads file directly to `uploadUrl` using PUT, then uses `fileUrl` in content creation.
+**Example:**
+```bash
+# 1. Get presigned URL
+curl -X POST http://api/uploads/presign \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"prefix":"videos","contentType":"video/mp4"}'
+
+# Response:
+# {
+#   "url": "https://bucket.s3.amazonaws.com/videos/uuid?...",
+#   "fileUrl": "https://bucket.s3.amazonaws.com/videos/uuid.mp4",
+#   "key": "videos/uuid.mp4"
+# }
+
+# 2. Upload file to presigned URL
+curl -X PUT "$PRESIGNED_URL" \
+  -H "Content-Type: video/mp4" \
+  --data-binary @video.mp4
+
+# 3. Create media with fileUrl
+curl -X POST http://api/media \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My Video",
+    "mediaType": "video",
+    "menu": "LiveTv",
+    "fileUrl": "https://bucket.s3.amazonaws.com/videos/uuid.mp4"
+  }'
+```
 
 ---
 

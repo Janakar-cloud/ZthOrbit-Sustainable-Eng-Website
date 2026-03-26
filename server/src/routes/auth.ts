@@ -158,7 +158,7 @@ router.post("/resend-verification", async (req, res) => {
   if (!user) return res.status(404).json({ error: "User not found" });
   if (user.emailVerified) return res.json({ message: "Email already verified" });
 
-  await issueVerificationCode(user.email, user._id);
+  await issueVerificationCode(user.email, user.id);
   res.json({ message: "Verification code resent" });
 });
 

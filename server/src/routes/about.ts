@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { AboutBlock } from "../models/AboutBlock.js";
 import { requireAuth } from "../middleware/auth.js";
+import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
@@ -10,9 +11,10 @@ router.get("/", async (req, res) => {
   const filter: any = {};
   
   if (search) {
+    const safe = escapeRegex(search as string);
     filter.$or = [
-      { title: new RegExp(search as string, "i") },
-      { body: new RegExp(search as string, "i") },
+      { title: new RegExp(safe, "i") },
+      { body: new RegExp(safe, "i") },
     ];
   }
   

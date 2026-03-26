@@ -33,7 +33,7 @@ async function main() {
     const hash = await bcrypt.hash(defaultPassword, 10);
     await User.findOneAndUpdate(
       { email: user.email },
-      { email: user.email, passwordHash: hash, role: user.role, status: "active", name: user.name },
+      { email: user.email, passwordHash: hash, role: user.role, status: "active", name: user.name, emailVerified: true },
       { upsert: true, new: true }
     );
   }

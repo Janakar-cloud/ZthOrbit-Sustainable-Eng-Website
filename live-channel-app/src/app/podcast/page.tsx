@@ -23,7 +23,9 @@ export default function PodcastPage() {
         if (!res.ok) {
           throw new Error("Failed to load podcasts");
         }
-        const data = (await res.json()) as PodcastEpisode[];
+        const json = await res.json();
+        // API returns { items: [...], total, page, pageSize }
+        const data = (Array.isArray(json) ? json : json.items || []) as PodcastEpisode[];
         setEpisodes(data);
         if (data.length) {
           setCurrent(data[0]);

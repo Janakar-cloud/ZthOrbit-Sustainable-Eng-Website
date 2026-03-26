@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { requireAuth } from "../middleware/auth.js";
+import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.get("/", async (req, res) => {
   // Filter by menu (LiveTv = videos, Podcast = podcasts)
   if (menu === "LiveTv" || mediaType === "video") {
     const videoFilter = { ...filter };
-    if (search) videoFilter.title = new RegExp(search as string, "i");
+    if (search) videoFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [videos, count] = await Promise.all([
       Video.find(videoFilter).sort({ createdAt: -1 }).skip(skip).limit(limit),
@@ -48,7 +49,7 @@ router.get("/", async (req, res) => {
     total = count;
   } else if (menu === "Podcast" || mediaType === "audio") {
     const podcastFilter = { ...filter };
-    if (search) podcastFilter.title = new RegExp(search as string, "i");
+    if (search) podcastFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [podcasts, count] = await Promise.all([
       Podcast.find(podcastFilter).sort({ createdAt: -1 }).skip(skip).limit(limit),
@@ -76,8 +77,8 @@ router.get("/", async (req, res) => {
     const videoFilter = { ...filter };
     const podcastFilter = { ...filter };
     if (search) {
-      videoFilter.title = new RegExp(search as string, "i");
-      podcastFilter.title = new RegExp(search as string, "i");
+      videoFilter.title = new RegExp(escapeRegex(search as string), "i");
+      podcastFilter.title = new RegExp(escapeRegex(search as string), "i");
     }
     
     const [videos, podcasts, vCount, pCount] = await Promise.all([

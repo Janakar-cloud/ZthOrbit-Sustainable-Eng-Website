@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './Login.css';
 import { login, register, resendVerification, verifyEmail } from '../../utils/api';
+import { useAppContext } from '../../context/AppContext';
 
 interface LoginProps {
   onNavigate: (page: string) => void;
@@ -22,12 +23,10 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<StatusState>(null);
+  const { loginWithTokens } = useAppContext();
 
   const storeTokens = (accessToken: string, refreshToken: string) => {
-    if (rememberMe) {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-    }
+    loginWithTokens(accessToken, refreshToken);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

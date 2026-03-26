@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import '../../style/Header.css'
 import {useAppContext} from '../../context/AppContext'
+import { logout as apiLogout } from '../../utils/api'
 
 export default function Header({ onNavigate }: { onNavigate: (page: string) => void }) {
   const {
@@ -11,6 +12,9 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
     showProfileMenu,
     toggleProfileMenu,
     isAdmin,
+    isLoggedIn,
+    user,
+    logout,
   } = useAppContext()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -18,7 +22,15 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
   const handleNavigate = (page: string) => {
     setActivePage(page);
     onNavigate(page);
-    // setMobileMenuOpen(!mobileMenuOpen);
+  }
+
+  const handleLogout = async () => {
+    const refreshTk = localStorage.getItem('refreshToken')
+    if (refreshTk) {
+      try { await apiLogout(refreshTk) } catch { /* best-effort */ }
+    }
+    logout()
+    handleNavigate('home')
   }
 
   const isActive = (page: string) =>
@@ -60,6 +72,13 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
 
               {showProfileMenu && (
                 <div className="profile-dropdown">
+                  {isLoggedIn && user && (
+                    <div className="dropdown-item" style={{ cursor: 'default', opacity: 0.7 }}>
+                      <span className="material-icons">person</span>
+                      <span>{user.email}</span>
+                    </div>
+                  )}
+
                   <button className="dropdown-item" onClick={toggleDarkMode}>
                     <span className="material-icons">
                       {darkMode ? 'light_mode' : 'dark_mode'}
@@ -67,20 +86,19 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                     <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
                   </button>
 
-                  <button className="dropdown-item">
-                    <span className="material-icons">settings</span>
-                    <span>Settings</span>
-                  </button>
+                  {isLoggedIn && (
+                    <button className="dropdown-item" onClick={() => handleNavigate('login')}>
+                      <span className="material-icons">lock_reset</span>
+                      <span>Change Password</span>
+                    </button>
+                  )}
 
-                  <button className="dropdown-item">
-                    <span className="material-icons">lock_reset</span>
-                    <span>Forgot Password</span>
-                  </button>
-
-                  <button className="dropdown-item logout">
-                    <span className="material-icons">logout</span>
-                    <span>Logout</span>
-                  </button>
+                  {isLoggedIn && (
+                    <button className="dropdown-item logout" onClick={handleLogout}>
+                      <span className="material-icons">logout</span>
+                      <span>Logout</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -92,9 +110,15 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
               </button>
             )}
 
-            <button className="login-btn" onClick={() => handleNavigate('login')}>
-              Login
-            </button>
+            {!isLoggedIn ? (
+              <button className="login-btn" onClick={() => handleNavigate('login')}>
+                Login
+              </button>
+            ) : (
+              <button className="login-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            )}
 
 
             {/* MOBILE MENU BUTTON */}

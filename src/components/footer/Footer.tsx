@@ -56,7 +56,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <p className="newsletter-description">
               Get the latest sustainability updates from our team.
             </p>
-            <form className="newsletter-form">
+            <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email"

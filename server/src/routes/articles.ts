@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { Article } from "../models/Article.js";
 import { requireAuth } from "../middleware/auth.js";
+import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
@@ -15,10 +16,11 @@ router.get("/", async (req, res) => {
   if (featured !== undefined) filter.featured = featured === "true";
   if (status) filter.status = status;
   if (search) {
+    const safe = escapeRegex(search as string);
     filter.$or = [
-      { title: new RegExp(search as string, "i") },
-      { subtitle: new RegExp(search as string, "i") },
-      { bodyMd: new RegExp(search as string, "i") },
+      { title: new RegExp(safe, "i") },
+      { subtitle: new RegExp(safe, "i") },
+      { bodyMd: new RegExp(safe, "i") },
     ];
   }
   const [items, total] = await Promise.all([

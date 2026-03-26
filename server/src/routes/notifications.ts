@@ -35,6 +35,12 @@ router.get("/", requireAuth(["superadmin", "admin", "editor", "viewer"]), async 
   });
 });
 
+// Mark all as read — must be registered BEFORE /:id to avoid Express matching "read-all" as an id
+router.patch("/read-all", requireAuth(["superadmin", "admin", "editor", "viewer"]), async (req, res) => {
+  await Notification.updateMany({ userId: req.user!.id, isUnread: true }, { isUnread: false });
+  res.status(204).send();
+});
+
 // Mark notification as read/unread
 router.patch("/:id", requireAuth(["superadmin", "admin", "editor", "viewer"]), async (req, res) => {
   const parsed = z.object({ isUnread: z.boolean() }).safeParse(req.body);
@@ -55,12 +61,6 @@ router.patch("/:id", requireAuth(["superadmin", "admin", "editor", "viewer"]), a
     postedAt: notification.postedAt,
     isUnread: notification.isUnread,
   });
-});
-
-// Mark all as read
-router.patch("/read-all", requireAuth(["superadmin", "admin", "editor", "viewer"]), async (req, res) => {
-  await Notification.updateMany({ userId: req.user!.id, isUnread: true }, { isUnread: false });
-  res.status(204).send();
 });
 
 // Delete single notification

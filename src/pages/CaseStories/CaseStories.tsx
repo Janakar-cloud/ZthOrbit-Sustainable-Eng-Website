@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './CaseStories.css'
 import Header from '../../components/header/Header'
 import Footer from '../../components/footer/Footer'
 import { useAppContext } from '../../context/AppContext'
+import { getCaseStories } from '../../utils/api'
 
 interface CaseStoriesProps {
   onNavigate: (page: string) => void
@@ -34,7 +35,7 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
     { id: 'technology', name: 'Technology', icon: 'computer' }
   ]
 
-  const stories: Story[] = [
+  const defaultStories: Story[] = [
     {
       id: 1,
       title: 'Transforming Urban Waste Management',
@@ -121,22 +122,34 @@ export default function CaseStories({ onNavigate }: CaseStoriesProps) {
     }
   ]
 
+  const [stories, setStories] = useState<Story[]>(defaultStories)
+
+  useEffect(() => {
+    getCaseStories()
+      .then((res) => {
+        if (res.items.length) {
+          const mapped: Story[] = res.items.map((s, i) => ({
+            id: i + 1,
+            title: s.title,
+            category: (s.tags?.[0] || 'sustainability').toLowerCase(),
+            description: s.bodyMd || '',
+            impact: s.impact,
+            duration: s.duration || '',
+            image: s.heroImage || '/assets/images/seetharaman/Seetharaman1.jpg',
+            metrics: s.metrics || [],
+          }))
+          setStories(mapped)
+        }
+      })
+      .catch(() => { /* fallback to local data */ })
+  }, [])
+
   const filteredStories = selectedCategory === 'all'
     ? stories
     : stories.filter(story => story.category === selectedCategory)
 
   return (
     <div className={`case-stories ${darkMode ? 'dark' : ''}`}>
-      {/* <Header
-        onNavigate={onNavigate}
-        darkMode={darkMode}
-        activePage={activePage}
-        showProfileMenu={showProfileMenu}
-        isAdmin={isAdmin}
-        onToggleDarkMode={() => setDarkMode(!darkMode)}
-        onToggleshowProfileMenu={() => setShowProfileMenu(!showProfileMenu)}
-        onToggleActivePage={(activePage) => setActivePage(activePage)}
-      /> */}
 
       <Header onNavigate={onNavigate}/>
       

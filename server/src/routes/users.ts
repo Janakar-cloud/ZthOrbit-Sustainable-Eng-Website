@@ -11,7 +11,7 @@ router.get("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res)
   const pageSize = Number(req.query.pageSize || 20);
   const skip = (page - 1) * pageSize;
   const [items, total] = await Promise.all([
-    User.find().sort({ createdAt: -1 }).skip(skip).limit(pageSize),
+    User.find().select("-passwordHash").sort({ createdAt: -1 }).skip(skip).limit(pageSize),
     User.countDocuments(),
   ]);
   res.json({ items, total, page, pageSize });
@@ -32,7 +32,8 @@ router.post("/", requireAuth(["superadmin", "admin"]), async (req, res) => {
   if (existing) return res.status(400).json({ error: "Email already exists" });
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
   const user = await User.create({ ...parsed.data, passwordHash });
-  res.status(201).json(user);
+  const { passwordHash: _ph, ...safeUser } = user.toObject();
+  res.status(201).json(safeUser);
 });
 
 const updateSchema = z.object({
@@ -50,7 +51,7 @@ router.put("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
     data.passwordHash = await bcrypt.hash(data.password, 10);
     delete data.password;
   }
-  const user = await User.findByIdAndUpdate(req.params.id, data, { new: true });
+  const user = await User.findByIdAndUpdate(req.params.id, data, { new: true }).select("-passwordHash");
   if (!user) return res.status(404).json({ error: "Not found" });
   res.json(user);
 });
@@ -73,7 +74,7 @@ router.patch("/:id/status", requireAuth(["superadmin", "admin"]), async (req, re
     req.params.id,
     { status: parsed.data.status },
     { new: true }
-  );
+  ).select("-passwordHash");
   
   if (!user) return res.status(404).json({ error: "Not found" });
   res.json(user);

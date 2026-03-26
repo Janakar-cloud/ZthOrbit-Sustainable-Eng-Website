@@ -4,6 +4,7 @@ import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
 import { CaseStory } from "../models/CaseStory.js";
 import { Post } from "../models/Post.js";
+import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get("/", async (req, res) => {
   }
 
   const searchLimit = Math.min(Number(limit), 50); // Max 50 results per type
-  const searchRegex = new RegExp(q, "i");
+  const searchRegex = new RegExp(escapeRegex(q), "i");
 
   try {
     const results: any = {

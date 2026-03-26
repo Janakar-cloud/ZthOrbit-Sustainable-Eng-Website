@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../style/Podcast.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -9,6 +9,7 @@ import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
 import PodcastComments from './components/PodcastComments/PodcastComments'
+import { getPodcasts } from '../../utils/api'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -17,6 +18,28 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const [newComment, setNewComment] = useState('')
   const { darkMode, isAdmin } = useAppContext()
   const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(PODCASTS_DATA)
+
+  useEffect(() => {
+    getPodcasts()
+      .then((res) => {
+        if (res.items.length) {
+          const mapped: PodcastEpisode[] = res.items.map((p, i) => ({
+            id: i + 1,
+            title: p.title,
+            description: p.description,
+            audioFile: p.audioUrl,
+            image: p.imageUrl || '',
+            duration: p.duration || '',
+            category: (p.tags?.[0] || 'general').toLowerCase(),
+            publishDate: p.publishDate || '',
+            commentsEnabled: true,
+            comments: [],
+          }))
+          setPodcasts(mapped)
+        }
+      })
+      .catch(() => { /* fallback to local data */ })
+  }, [])
 
 
   const filteredPodcasts = selectedCategory === 'all'

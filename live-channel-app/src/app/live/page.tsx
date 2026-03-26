@@ -42,12 +42,13 @@ export default function LivePage() {
 
     let hlsInstance: typeof import("hls.js").default | null = null;
     const videoEl = videoRef.current;
+    const streamUrl = config.streamUrl; // Capture for TypeScript
     setStreamError(null);
 
     async function setupPlayer() {
       // Native HLS (Safari / iOS)
       if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
-        videoEl.src = config.streamUrl;
+        videoEl.src = streamUrl;
         try {
           await videoEl.play();
         } catch (err) {
@@ -64,7 +65,7 @@ export default function LivePage() {
       }
 
       hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
-      hlsInstance.loadSource(config.streamUrl);
+      hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(videoEl);
 
       hlsInstance.on(Hls.Events.ERROR, (_event, data) => {

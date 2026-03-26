@@ -5,10 +5,12 @@ import { z } from "zod";
 import { User } from "../models/User.js";
 import { RefreshToken } from "../models/RefreshToken.js";
 import { PasswordReset } from "../models/PasswordReset.js";
+import { EmailVerification } from "../models/EmailVerification.js";
 import { signAccess } from "../utils/jwt.js";
 import { sendMail } from "../utils/mailer.js";
 import { env } from "../config/env.js";
 import { AuthUser } from "../middleware/auth.js";
+import { randomInt } from "crypto";
 
 const router = Router();
 
@@ -28,9 +30,10 @@ router.post("/register", async (req, res) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await User.create({ email, passwordHash, name, role: "viewer" });
-  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
-  const refreshToken = await issueRefresh(user.id, payload);
-  res.json({ accessToken: signAccess(payload), refreshToken });
+
+  await issueVerificationCode(user.email, user.id);
+
+  res.status(202).json({ message: "Verification code sent to email. Please verify before logging in." });
 });
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string() });
@@ -44,6 +47,10 @@ router.post("/login", async (req, res) => {
 
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+  if (!user.emailVerified) {
+    return res.status(403).json({ error: "Email not verified. Please complete verification." });
+  }
 
   const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
   const refreshToken = await issueRefresh(user.id, payload);
@@ -119,12 +126,67 @@ router.post("/reset", async (req, res) => {
   res.json({ success: true });
 });
 
+const verificationSchema = z.object({ email: z.string().email(), code: z.string().length(6) });
+
+router.post("/verify-email", async (req, res) => {
+  const parsed = verificationSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const { email, code } = parsed.data;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (user.emailVerified) return res.json({ message: "Email already verified" });
+
+  const record = await EmailVerification.findOne({ userId: user._id, code, used: false }).sort({ createdAt: -1 });
+  if (!record || record.expiresAt < new Date()) {
+    return res.status(400).json({ error: "Invalid or expired code" });
+  }
+
+  user.emailVerified = true;
+  await user.save();
+  record.used = true;
+  await record.save();
+
+  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
+  const refreshToken = await issueRefresh(user.id, payload);
+  res.json({ accessToken: signAccess(payload), refreshToken });
+});
+
+router.post("/resend-verification", async (req, res) => {
+  const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await User.findOne({ email: parsed.data.email });
+  if (!user) return res.status(404).json({ error: "User not found" });
+  if (user.emailVerified) return res.json({ message: "Email already verified" });
+
+  await issueVerificationCode(user.email, user._id);
+  res.json({ message: "Verification code resent" });
+});
+
 async function issueRefresh(userId: string, payload: AuthUser) {
   const token = randomBytes(48).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
   await RefreshToken.create({ userId, token, expiresAt, revoked: false });
   // Return JWT-based refresh for verification plus stored token for revocation
   return token;
+}
+
+async function issueVerificationCode(email: string, userId: string) {
+  const code = randomInt(100000, 999999).toString();
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 15);
+  await EmailVerification.deleteMany({ userId, used: false });
+  await EmailVerification.create({ userId, code, expiresAt, used: false });
+
+  const html = `
+    <p>Hi,</p>
+    <p>Your verification code is <strong>${code}</strong>.</p>
+    <p>This code expires in 15 minutes.</p>
+  `;
+
+  try {
+    await sendMail(email, "Verify your email", html);
+  } catch (err) {
+    console.warn("[mailer] failed to send verification email", err);
+  }
 }
 
 export default router;

@@ -171,7 +171,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      required={mode !== 'verify'}
+                      required
                     />
                   </div>
                 </div>

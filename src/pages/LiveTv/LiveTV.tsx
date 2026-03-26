@@ -157,6 +157,12 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
                 <p>No live stream configured.</p>
               </div>
             )}
+            {liveError && (
+              <div className="hero-video-fallback live-error">
+                <span className="material-icons">error_outline</span>
+                <span>{liveError}</span>
+              </div>
+            )}
           </div>
 
           <div className="live-container">

@@ -5,8 +5,18 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-router.get("/", async (_req, res) => {
-  const blocks = await AboutBlock.find().sort({ order: 1, createdAt: 1 });
+router.get("/", async (req, res) => {
+  const { search } = req.query;
+  const filter: any = {};
+  
+  if (search) {
+    filter.$or = [
+      { title: new RegExp(search as string, "i") },
+      { body: new RegExp(search as string, "i") },
+    ];
+  }
+  
+  const blocks = await AboutBlock.find(filter).sort({ order: 1, createdAt: 1 });
   res.json(blocks);
 });
 

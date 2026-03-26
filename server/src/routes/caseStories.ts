@@ -6,12 +6,19 @@ import { requireAuth } from "../middleware/auth.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const { tag } = req.query;
+  const { tag, search } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
   const skip = (page - 1) * pageSize;
   const filter: any = {};
   if (tag) filter.tags = tag;
+  if (search) {
+    filter.$or = [
+      { title: new RegExp(search as string, "i") },
+      { impact: new RegExp(search as string, "i") },
+      { bodyMd: new RegExp(search as string, "i") },
+    ];
+  }
   const [items, total] = await Promise.all([
     CaseStory.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize),
     CaseStory.countDocuments(filter),

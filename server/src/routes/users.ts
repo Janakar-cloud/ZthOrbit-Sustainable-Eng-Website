@@ -61,4 +61,22 @@ router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
   res.status(204).send();
 });
 
+// PATCH endpoint for status updates
+router.patch("/:id/status", requireAuth(["admin"]), async (req, res) => {
+  const parsed = z.object({
+    status: z.enum(["active", "inactive"]),
+  }).safeParse(req.body);
+  
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { status: parsed.data.status },
+    { new: true }
+  );
+  
+  if (!user) return res.status(404).json({ error: "Not found" });
+  res.json(user);
+});
+
 export default router;

@@ -11,6 +11,8 @@ export interface IVideo {
   isLive: boolean;
   tags: Types.ObjectId[];
   metadata?: Record<string, any>;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const videoSchema = new Schema<IVideo>(

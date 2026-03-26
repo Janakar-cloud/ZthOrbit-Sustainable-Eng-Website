@@ -6,7 +6,7 @@ import { requireAuth } from "../middleware/auth.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const { tag, featured, status } = req.query;
+  const { tag, featured, status, search } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
   const skip = (page - 1) * pageSize;
@@ -14,6 +14,13 @@ router.get("/", async (req, res) => {
   if (tag) filter.tags = tag;
   if (featured !== undefined) filter.featured = featured === "true";
   if (status) filter.status = status;
+  if (search) {
+    filter.$or = [
+      { title: new RegExp(search as string, "i") },
+      { subtitle: new RegExp(search as string, "i") },
+      { bodyMd: new RegExp(search as string, "i") },
+    ];
+  }
   const [items, total] = await Promise.all([
     Article.find(filter).sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
     Article.countDocuments(filter),
@@ -58,6 +65,24 @@ router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
   const deleted = await Article.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
+});
+
+// PATCH endpoint for status updates (publish/draft)
+router.patch("/:id/status", requireAuth(["admin", "editor"]), async (req, res) => {
+  const parsed = z.object({
+    status: z.enum(["published", "draft"]),
+  }).safeParse(req.body);
+  
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  
+  const updated = await Article.findByIdAndUpdate(
+    req.params.id,
+    { status: parsed.data.status },
+    { new: true }
+  );
+  
+  if (!updated) return res.status(404).json({ error: "Not found" });
+  res.json(updated);
 });
 
 export default router;

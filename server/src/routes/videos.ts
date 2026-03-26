@@ -5,6 +5,14 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
+// Deprecation warning middleware
+router.use((req, res, next) => {
+  console.warn(
+    `[DEPRECATED] /videos endpoint accessed. Migrate to /media?menu=LiveTv&mediaType=video. Legacy endpoint will be removed in v2.0.`
+  );
+  next();
+});
+
 router.get("/", async (req, res) => {
   const { tag, status } = req.query;
   const page = Number(req.query.page || 1);

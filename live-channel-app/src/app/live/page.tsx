@@ -40,7 +40,7 @@ export default function LivePage() {
     // Attach HLS once we have a stream URL and a video element
     if (!config?.streamUrl || !videoRef.current) return;
 
-    let hlsInstance: typeof import("hls.js").default | null = null;
+    let hlsInstance: any = null;
     const videoEl = videoRef.current;
     const streamUrl = config.streamUrl; // Capture for TypeScript
     setStreamError(null);

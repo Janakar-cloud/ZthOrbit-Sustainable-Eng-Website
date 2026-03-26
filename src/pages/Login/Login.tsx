@@ -110,6 +110,40 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
   };
 
   return (
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-left">
+          <div className="login-brand">
+            <div className="brand-icon">
+              <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="brand-logo-image" />
+            </div>
+            <h1>Green Generation TV</h1>
+            <p className="brand-tagline">Empowering Sustainability Through Conscious Leadership</p>
+          </div>
+
+          <div className="login-features">
+            <div className="feature-item">
+              <span className="material-icons">check_circle</span>
+              <span>Access exclusive sustainability content</span>
+            </div>
+            <div className="feature-item">
+              <span className="material-icons">check_circle</span>
+              <span>Connect with thought leaders</span>
+            </div>
+            <div className="feature-item">
+              <span className="material-icons">check_circle</span>
+              <span>Join a community of change-makers</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="login-right">
+          <div className="login-card">
+            <div className="login-header">
+              <h2>{mode === 'register' ? 'Create Account' : mode === 'verify' ? 'Verify Email' : 'Welcome Back'}</h2>
+              <p>{mode === 'verify' ? 'Enter the 6-digit code sent to your email' : 'Sign in or create an account'}</p>
+            </div>
+
             <form onSubmit={handleSubmit} className="login-form">
               <div className="form-group">
                 <label htmlFor="email">Email Address</label>
@@ -226,62 +260,6 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                 )}
               </div>
             </form>
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <label className="remember-me">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <span>Remember me</span>
-                </label>
-
-                <button type="button" className="link-button" onClick={handleForgotPassword}>
-                  Forgot password?
-                </button>
-              </div>
-
-              {status && (
-                <div className={`status-banner ${status.variant}`}>
-                  <span className="material-icons">
-                    {status.variant === 'error' ? 'error_outline' : 'check_circle'}
-                  </span>
-                  <span>{status.message}</span>
-                </div>
-              )}
-
-              <button 
-                type="submit" 
-                className="login-button"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <span>Continue with Email</span>
-                    <span className="material-icons">arrow_forward</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="login-footer">
-              <p>
-                Don't have an account?{' '}
-                <button onClick={() => onNavigate('signup')} className="link-button">
-                  Sign up
-                </button>
-              </p>
-            </div>
           </div>
 
           <div className="back-home">

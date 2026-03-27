@@ -15,6 +15,18 @@ async function main() {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
   app.use(helmet());
+  
+  // CORS debug logging (only in development)
+  if (env.nodeEnv === "development") {
+    app.use((req, res, next) => {
+      if (req.headers.origin) {
+        const isAllowed = env.corsOrigins.includes("*") || env.corsOrigins.includes(req.headers.origin);
+        console.log(`[CORS] ${req.method} ${req.path} from ${req.headers.origin} - ${isAllowed ? "✓ ALLOWED" : "✗ BLOCKED"}`);
+      }
+      next();
+    });
+  }
+  
   app.use(
     cors({
       origin: env.corsOrigins.includes("*") ? true : env.corsOrigins,
@@ -33,6 +45,8 @@ async function main() {
 
   app.listen(env.port, () => {
     console.log(`[server] listening on :${env.port}`);
+    console.log(`[server] environment: ${env.nodeEnv}`);
+    console.log(`[server] CORS origins: ${env.corsOrigins.join(", ")}`);
   });
 }
 

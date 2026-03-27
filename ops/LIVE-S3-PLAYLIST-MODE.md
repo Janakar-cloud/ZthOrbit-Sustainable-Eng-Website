@@ -70,8 +70,15 @@ To allow browser access to videos, configure CORS on your S3 bucket:
 ```json
 [
   {
-    "AllowedHeaders": ["*"],
-    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": [
+      "Range",
+      "Content-Type",
+      "Authorization"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "HEAD"
+    ],
     "AllowedOrigins": [
       "https://www.thegreentv.com",
       "http://13.205.72.30",
@@ -83,7 +90,8 @@ To allow browser access to videos, configure CORS on your S3 bucket:
       "Content-Length",
       "Content-Type",
       "Content-Range",
-      "Accept-Ranges"
+      "Accept-Ranges",
+      "ETag"
     ],
     "MaxAgeSeconds": 3600
   }
@@ -97,6 +105,8 @@ To allow browser access to videos, configure CORS on your S3 bucket:
 4. Scroll to "Cross-origin resource sharing (CORS)"
 5. Click "Edit" and paste the above JSON
 6. Save changes
+
+**Important:** The `Range` header allows browsers to request specific byte ranges for video seeking. The `Accept-Ranges` and `Content-Range` response headers enable HTML5 video scrubbing.
 
 ### 3. Make Videos Publicly Readable (or use presigned URLs)
 

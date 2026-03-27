@@ -88,14 +88,27 @@ AWS Console → S3 → greentv-s3 → Permissions → CORS:
 ```json
 [
   {
-    "AllowedHeaders": ["*"],
-    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": [
+      "Range",
+      "Content-Type",
+      "Authorization"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "HEAD"
+    ],
     "AllowedOrigins": [
       "https://www.thegreentv.com",
       "http://13.205.72.30",
       "https://13.205.72.30"
     ],
-    "ExposeHeaders": ["Content-Length", "Content-Type"],
+    "ExposeHeaders": [
+      "Content-Length",
+      "Content-Type",
+      "Content-Range",
+      "Accept-Ranges",
+      "ETag"
+    ],
     "MaxAgeSeconds": 3600
   }
 ]

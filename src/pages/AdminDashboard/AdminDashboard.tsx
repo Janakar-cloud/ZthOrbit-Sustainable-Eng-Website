@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import './AdminDashboard.css'
 import {
-  getDashboardSummary,
   getUsers,
   createUser,
   updateUser,
@@ -9,9 +8,6 @@ import {
   getVideos,
   getPodcasts,
   getPresignedUpload,
-  type UserItem,
-  type VideoItem,
-  type PodcastItem,
 } from '../../utils/api'
 
 interface AdminDashboardProps {

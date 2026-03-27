@@ -60,6 +60,15 @@ export const env = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER || "",
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
   },
+  live: {
+    accessMode: (() => {
+      const mode = (process.env.LIVE_ACCESS_MODE || "direct").toLowerCase();
+      if (mode === "cloudfront") return "cloudfront";
+      if (mode === "s3_playlist") return "s3_playlist";
+      return "direct";
+    })(),
+    s3Folder: process.env.LIVE_S3_FOLDER || "LiveTV",
+  },
   cloudFront: {
     streamDomain: process.env.CF_STREAM_DOMAIN || "",
     keyPairId: process.env.CF_KEY_PAIR_ID || "",

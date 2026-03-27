@@ -49,11 +49,13 @@ describe('Live Routes', () => {
       expect(response.body).toHaveProperty('description', 'Test description');
     });
 
-    it('should return 404 when no live config exists', async () => {
+    it('should return empty config when none exists', async () => {
       const response = await request(app).get('/live/config');
 
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty('error');
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('streamUrl', '');
+      expect(response.body).toHaveProperty('title', '');
+      expect(response.body).toHaveProperty('description', '');
     });
 
     it('should allow public access (no auth required)', async () => {
@@ -163,6 +165,55 @@ describe('Live Routes', () => {
       const configs = await LiveConfig.find({});
       expect(configs).toHaveLength(1);
       expect(configs[0].streamUrl).toBe('https://first.example.com/live.m3u8');
+    });
+  });
+
+  describe('POST /live/access (direct mode)', () => {
+    it('should return stream info for authenticated user without cookies', async () => {
+      const { accessToken } = await createTestUser('viewer');
+      await LiveConfig.create({
+        streamUrl: 'http://localhost:8080/live/main/index.m3u8',
+        title: 'Live Sustainable Engineering Channel',
+        description: 'Streaming now',
+        updatedBy: 'tester@example.com',
+      });
+
+      const response = await request(app)
+        .post('/live/access')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        streamUrl: 'http://localhost:8080/live/main/index.m3u8',
+        title: 'Live Sustainable Engineering Channel',
+        description: 'Streaming now',
+        accessMode: 'direct',
+        expiresIn: 0,
+      });
+      expect(response.headers['set-cookie']).toBeUndefined();
+    });
+
+    it('should return 404 when live stream is not configured', async () => {
+      const { accessToken } = await createTestUser('viewer');
+
+      const response = await request(app)
+        .post('/live/access')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should require authentication', async () => {
+      await LiveConfig.create({
+        streamUrl: 'http://localhost:8080/live/main/index.m3u8',
+        title: 'Live Sustainable Engineering Channel',
+        description: 'Streaming now',
+        updatedBy: 'tester@example.com',
+      });
+
+      const response = await request(app).post('/live/access');
+
+      expect(response.status).toBe(401);
     });
   });
 });

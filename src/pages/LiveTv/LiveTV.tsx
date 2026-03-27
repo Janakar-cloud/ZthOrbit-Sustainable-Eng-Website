@@ -14,6 +14,14 @@ interface LiveTVProps {
   onNavigate: (page: string) => void
 }
 
+interface S3Video {
+  key: string
+  url: string
+  fileName: string
+  size: number
+  lastModified: string
+}
+
 export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
@@ -23,6 +31,9 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [liveTitle, setLiveTitle] = useState('Live Sustainable Engineering Channel')
   const [liveDescription, setLiveDescription] = useState('Streaming now')
   const [liveError, setLiveError] = useState<string | null>(null)
+  const [accessMode, setAccessMode] = useState<'direct' | 'cloudfront' | 's3_playlist' | null>(null)
+  const [playlist, setPlaylist] = useState<S3Video[]>([])
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
   // Clock
@@ -42,15 +53,32 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
     requestLiveAccess()
       .then((res) => {
-        setLiveUrl(res.streamUrl)
-        setLiveTitle(res.title || 'Live Sustainable Engineering Channel')
-        setLiveDescription(res.description || 'Streaming now')
+        // Handle S3 playlist mode
+        if (res.accessMode === 's3_playlist') {
+          setPlaylist(res.playlist)
+          setCurrentVideoIndex(0)
+          if (res.playlist.length > 0) {
+            setLiveUrl(res.playlist[0].url)
+          }
+          setAccessMode('s3_playlist')
+          setLiveTitle(res.title || 'Live Sustainable Engineering Channel')
+          setLiveDescription(res.description || 'Streaming now')
+        } else {
+          // Handle direct/cloudfront modes
+          setLiveUrl(res.streamUrl)
+          const mode = res.accessMode === 'cloudfront' ? 'cloudfront' : 'direct'
+          setAccessMode(mode)
+          setLiveTitle(res.title || 'Live Sustainable Engineering Channel')
+          setLiveDescription(res.description || 'Streaming now')
+        }
+        
         setLiveError(null)
       })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : 'Could not load live stream'
         setLiveError(message)
         setLiveUrl('')
+        setAccessMode(null)
       })
   }, [isLoggedIn])
 
@@ -61,6 +89,18 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     let hls: any = null
 
     const setup = async () => {
+      // For S3 playlist mode, play MP4 directly
+      if (accessMode === 's3_playlist') {
+        videoEl.src = liveUrl
+        try {
+          await videoEl.play()
+        } catch {
+          /* autoplay may be blocked */
+        }
+        return
+      }
+
+      // For HLS streams (direct/cloudfront modes)
       if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
         videoEl.src = liveUrl
         try {
@@ -87,13 +127,18 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         return
       }
 
-      hls = new Hls({
+      const hlsConfig: Record<string, unknown> = {
         lowLatencyMode: true,
         enableWorker: true,
-        xhrSetup: (xhr: XMLHttpRequest) => {
+      }
+
+      if (accessMode === 'cloudfront') {
+        hlsConfig.xhrSetup = (xhr: XMLHttpRequest) => {
           xhr.withCredentials = true
-        },
-      })
+        }
+      }
+
+      hls = new Hls(hlsConfig)
 
       hls.loadSource(liveUrl)
       hls.attachMedia(videoEl)
@@ -120,7 +165,30 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         videoEl.removeAttribute('src')
       }
     }
-  }, [liveUrl])
+  }, [liveUrl, accessMode])
+
+  // Handle playlist looping
+  useEffect(() => {
+    if (accessMode !== 's3_playlist' || !videoRef.current || playlist.length === 0) return
+
+    const videoEl = videoRef.current
+
+    const handleVideoEnd = () => {
+      // Move to next video in playlist, loop back to start
+      setCurrentVideoIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % playlist.length
+        setLiveUrl(playlist[nextIndex].url)
+        setLiveDescription(`Playing ${playlist[nextIndex].fileName} (${nextIndex + 1}/${playlist.length})`)
+        return nextIndex
+      })
+    }
+
+    videoEl.addEventListener('ended', handleVideoEnd)
+
+    return () => {
+      videoEl.removeEventListener('ended', handleVideoEnd)
+    }
+  }, [accessMode, playlist, currentVideoIndex])
 
   const filteredVideos = selectedCategory === 'all'
     ? videos

@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env.js";
 import { randomUUID } from "crypto";
@@ -28,4 +28,68 @@ export async function createPresignedUpload(keyPrefix: string, contentType: stri
     bucket: env.s3.bucket, 
     region: env.s3.region 
   };
+}
+
+export interface S3Video {
+  key: string;
+  url: string;
+  fileName: string;
+  size: number;
+  lastModified: Date;
+}
+
+/**
+ * List all video files from a specific S3 folder
+ */
+export async function listVideosFromFolder(folderPrefix: string): Promise<S3Video[]> {
+  const command = new ListObjectsV2Command({
+    Bucket: env.s3.bucket,
+    Prefix: folderPrefix.endsWith('/') ? folderPrefix : `${folderPrefix}/`,
+  });
+
+  try {
+    const response = await s3.send(command);
+    
+    if (!response.Contents || response.Contents.length === 0) {
+      return [];
+    }
+
+    // Filter for video files only
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v'];
+    const videos = response.Contents
+      .filter(item => {
+        if (!item.Key || item.Key.endsWith('/')) return false; // Skip folders
+        return videoExtensions.some(ext => item.Key!.toLowerCase().endsWith(ext));
+      })
+      .map(item => {
+        const key = item.Key!;
+        const fileName = key.split('/').pop() || key;
+        const encodedKey = key.split('/').map(encodeURIComponent).join('/');
+        
+        return {
+          key,
+          url: `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/${encodedKey}`,
+          fileName,
+          size: item.Size || 0,
+          lastModified: item.LastModified || new Date(),
+        };
+      })
+      .sort((a, b) => a.fileName.localeCompare(b.fileName)); // Sort alphabetically
+
+    return videos;
+  } catch (error) {
+    console.error('Error listing S3 videos:', error);
+    throw new Error('Failed to list videos from S3');
+  }
+}
+
+/**
+ * Generate a presigned URL for viewing a private S3 object
+ */
+export async function createPresignedView(key: string, expiresIn = 3600): Promise<string> {
+  const command = new GetObjectCommand({
+    Bucket: env.s3.bucket,
+    Key: key,
+  });
+  return await getSignedUrl(s3, command, { expiresIn });
 }

@@ -93,7 +93,30 @@ export function resetPassword(data: { token: string; password: string }) {
 // ─── Live Config ─────────────────────────────────────────────────
 
 export type LiveConfig = { streamUrl: string; title: string; description: string };
-export type LiveAccess = LiveConfig & { expiresIn: number };
+
+export interface S3Video {
+  key: string;
+  url: string;
+  fileName: string;
+  size: number;
+  lastModified: string;
+}
+
+export type LiveAccess = 
+  | { 
+      streamUrl: string; 
+      title: string; 
+      description: string; 
+      expiresIn: number; 
+      accessMode: "direct" | "cloudfront";
+    }
+  | {
+      playlist: S3Video[];
+      title: string;
+      description: string;
+      expiresIn: number;
+      accessMode: "s3_playlist";
+    };
 
 export function getLiveConfig() {
   return request<LiveConfig>("/live/config");

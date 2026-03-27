@@ -1,5 +1,7 @@
 # Live Streaming Runbook (Single Channel, Authenticated, CMAF/fMP4, Signed Cookies)
 
+> Note: The application now defaults to `LIVE_ACCESS_MODE=direct` for Nginx RTMP/HLS without signed cookies. See `ops/LIVE-RTMP-HLS-NGINX.md` if you are not using CloudFront.
+
 This runbook covers the infrastructure and deployment steps that must be performed after code is pushed.
 
 ## 1) What was implemented in code

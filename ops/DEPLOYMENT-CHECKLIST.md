@@ -1,6 +1,6 @@
 # ZthOrbit Deployment Checklist
 
-Complete validation checklist to ensure browser URLs and API endpoints work perfectly on the production server (13.205.72.30).
+Complete validation checklist to ensure browser URLs and API endpoints work perfectly on both production domain (www.thegreentv.com) and server IP (13.205.72.30).
 
 ## 🔧 Pre-Deployment Configuration
 
@@ -16,8 +16,9 @@ Required variables:
 - [ ] `MONGODB_URI=mongodb://localhost:27017/zthorbit` - Or Atlas connection string
 - [ ] `JWT_SECRET=<32-byte-random-secret>` - Access token secret
 - [ ] `JWT_REFRESH_SECRET=<32-byte-different-secret>` - Refresh token secret
-- [ ] `APP_URL=http://13.205.72.30` - Public URL (no trailing slash)
-- [ ] `CORS_ORIGINS=http://13.205.72.30,http://13.205.72.30:3000` - Allowed origins
+- [ ] `APP_URL=https://www.thegreentv.com` - Public URL (no trailing slash)
+- [ ] `# APP_URL=http://13.205.72.30` - IP fallback
+- [ ] `CORS_ORIGINS=https://www.thegreentv.com,http://13.205.72.30,https://13.205.72.30,http://13.205.72.30:3000` - Allowed origins
 - [ ] `SEED_DEFAULT_PASSWORD=ChangeMe123!` - Default password for seeded users
 - [ ] `NODE_ENV=production` - Production mode
 
@@ -51,8 +52,10 @@ cp .env.example .env
 ```
 
 Required variables:
-- [ ] `VITE_API_BASE=http://13.205.72.30/api/v1` - Backend API base URL (no trailing slash)
-- [ ] `VITE_LIVE_STREAM_URL=http://13.205.72.30:8080/hls/channel.m3u8` - Optional live stream URL
+- [ ] `VITE_API_BASE=https://www.thegreentv.com/api/v1` - Backend API base URL (no trailing slash)
+- [ ] `# VITE_API_BASE=http://13.205.72.30/api/v1` - IP fallback
+- [ ] `VITE_LIVE_STREAM_URL=https://stream.thegreentv.com/live/main/master.m3u8` - Live stream URL
+- [ ] `# VITE_LIVE_STREAM_URL=http://13.205.72.30/hls/live/main/master.m3u8` - IP fallback
 
 **Verify .env exists:**
 ```bash
@@ -337,18 +340,19 @@ curl -i http://127.0.0.1/api/v1/live/config
 ### 11. Browser Testing (From Your Machine)
 
 #### Frontend
-- [ ] Visit `http://13.205.72.30/` → Should load the homepage
+- [ ] Visit `https://www.thegreentv.com/` → Should load the homepage
+- [ ] Visit `http://13.205.72.30/` → Should load the homepage (IP fallback)
 - [ ] Check browser console for errors (should be clean)
 - [ ] Check Network tab: requests to `/api/v1/*` should return expected status (NOT 404)
 
 #### API Endpoints
 Open these in browser or Postman:
 
-- [ ] `http://13.205.72.30/api/v1/live/config` → Returns JSON with live config
-- [ ] `http://13.205.72.30/api/v1/videos?limit=10` → Returns videos array
-- [ ] `http://13.205.72.30/api/v1/podcasts?limit=10` → Returns podcasts array
-- [ ] `http://13.205.72.30/api/v1/articles?limit=10` → Returns articles array
-- [ ] `http://13.205.72.30/api/v1/tags?kind=category` → Returns tags array
+- [ ] `https://www.thegreentv.com/api/v1/live/config` (and `http://13.205.72.30/api/v1/live/config`) → Returns JSON with live config
+- [ ] `https://www.thegreentv.com/api/v1/videos?limit=10` (and `http://13.205.72.30/api/v1/videos?limit=10`) → Returns videos array
+- [ ] `https://www.thegreentv.com/api/v1/podcasts?limit=10` (and `http://13.205.72.30/api/v1/podcasts?limit=10`) → Returns podcasts array
+- [ ] `https://www.thegreentv.com/api/v1/articles?limit=10` (and `http://13.205.72.30/api/v1/articles?limit=10`) → Returns articles array
+- [ ] `https://www.thegreentv.com/api/v1/tags?kind=category` (and `http://13.205.72.30/api/v1/tags?kind=category`) → Returns tags array
 
 **All should return HTTP 200, NOT 404 "Not found: /v1"**
 
@@ -356,7 +360,8 @@ Open these in browser or Postman:
 
 ### 12. Login Flow Test (Browser)
 
-1. [ ] Navigate to `http://13.205.72.30/` (or `/login` if you have a login page)
+1. [ ] Navigate to `https://www.thegreentv.com/` (or `/login` if you have a login page)
+  - [ ] Also verify `http://13.205.72.30/`
 2. [ ] Open browser DevTools → Network tab
 3. [ ] Submit login form with:
    - Email: `janakar.ganesan@gmail.com`
@@ -374,7 +379,9 @@ Open these in browser or Postman:
 
 Use the Postman collection at `server/postman/backend-api.postman_collection.json`.
 
-Base URL should be: `http://13.205.72.30/api/v1`
+Base URL should be: `https://www.thegreentv.com/api/v1`
+
+IP fallback base URL: `http://13.205.72.30/api/v1`
 
 Test sequence:
 1. [ ] **POST** `/auth/login` → 200, returns tokens

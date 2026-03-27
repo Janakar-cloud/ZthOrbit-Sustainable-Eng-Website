@@ -8,7 +8,7 @@ import { Video } from '../HomePage/type/type'
 import { videos } from '../LiveTv/data/data'
 import VideoCategoryFilters from './components/renderFilterButtons'
 import VideoGrid from './components/VideoGrid'
-import { getLiveConfig, type LiveConfig } from '../../utils/api'
+import { requestLiveAccess } from '../../utils/api'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -17,64 +17,52 @@ interface LiveTVProps {
 export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
-  const { darkMode } = useAppContext()
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [liveConfig, setLiveConfig] = useState<LiveConfig | null>(null)
+  const { darkMode, isLoggedIn } = useAppContext()
+  const [currentTime, setCurrentTime] = useState(new Date())
+  const [liveUrl, setLiveUrl] = useState('')
+  const [liveTitle, setLiveTitle] = useState('Live Sustainable Engineering Channel')
+  const [liveDescription, setLiveDescription] = useState('Streaming now')
   const [liveError, setLiveError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(new Date());
-  //   }, 1000);
-
-  //   return () => clearInterval(timer);
-  // }, []);
-
-
-  // useEffect(() => {
-  //   setCurrentHeroVideoIndex(0); // first video
-  // }, []);
-
-  // // Auto-rotate videos every 15 minutes to allow full-length playback
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
-  //   }, 900000) // Change video every 15 minutes (900000ms)
-
-  //   return () => clearInterval(interval)
-  // }, [videos.length])
-
+  // Clock
   useEffect(() => {
     const clockTimer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(clockTimer);
-  }, []);
-
-  useEffect(() => {
-    async function loadLive() {
-      try {
-        const cfg = await getLiveConfig()
-        setLiveConfig(cfg)
-        setLiveError(null)
-      } catch (err: any) {
-        setLiveError((err as Error)?.message || 'Could not load live stream')
-      }
-    }
-    loadLive()
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(clockTimer)
   }, [])
 
   useEffect(() => {
-    if (!liveConfig?.streamUrl || !videoRef.current) return
+    if (!isLoggedIn) {
+      setLiveUrl('')
+      setLiveError('Please login to watch the live stream.')
+      return
+    }
+
+    requestLiveAccess()
+      .then((res) => {
+        setLiveUrl(res.streamUrl)
+        setLiveTitle(res.title || 'Live Sustainable Engineering Channel')
+        setLiveDescription(res.description || 'Streaming now')
+        setLiveError(null)
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : 'Could not load live stream'
+        setLiveError(message)
+        setLiveUrl('')
+      })
+  }, [isLoggedIn])
+
+  useEffect(() => {
+    if (!liveUrl || !videoRef.current) return
 
     const videoEl = videoRef.current
     let hls: any = null
 
     const setup = async () => {
-      // Native HLS support
       if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-        videoEl.src = liveConfig.streamUrl
+        videoEl.src = liveUrl
         try {
           await videoEl.play()
         } catch {
@@ -83,13 +71,12 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         return
       }
 
-      // Fallback to hls.js via CDN without bundling
       if (!(window as any).Hls) {
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
           const script = document.createElement('script')
           script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js'
-          script.onload = resolve
-          script.onerror = reject
+          script.onload = () => resolve()
+          script.onerror = () => reject(new Error('Failed to load HLS library'))
           document.body.appendChild(script)
         })
       }
@@ -100,11 +87,18 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         return
       }
 
-      hls = new Hls({ enableWorker: true, lowLatencyMode: true })
-      hls.loadSource(liveConfig.streamUrl)
+      hls = new Hls({
+        lowLatencyMode: true,
+        enableWorker: true,
+        xhrSetup: (xhr: XMLHttpRequest) => {
+          xhr.withCredentials = true
+        },
+      })
+
+      hls.loadSource(liveUrl)
       hls.attachMedia(videoEl)
-      hls.on(Hls.Events.ERROR, (_evt: any, data: any) => {
-        if (data?.fatal) setLiveError('Live stream error, please retry')
+      hls.on(Hls.Events.ERROR, (_evt: unknown, data: { fatal?: boolean }) => {
+        if (data?.fatal) setLiveError('Live stream playback error. Please refresh.')
       })
 
       try {
@@ -114,7 +108,10 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       }
     }
 
-    setup()
+    setup().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to start stream'
+      setLiveError(message)
+    })
 
     return () => {
       if (hls) hls.destroy()
@@ -123,8 +120,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         videoEl.removeAttribute('src')
       }
     }
-  }, [liveConfig?.streamUrl])
-
+  }, [liveUrl])
 
   const filteredVideos = selectedCategory === 'all'
     ? videos
@@ -143,7 +139,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       <section className="livetv-hero">
         <div className="hero-video-carousel">
           <div className="hero-video-player">
-            {liveConfig?.streamUrl ? (
+            {liveUrl ? (
               <video
                 ref={videoRef}
                 className="hero-video-player"
@@ -154,13 +150,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
               />
             ) : (
               <div className="hero-video-fallback">
-                <p>No live stream configured.</p>
-              </div>
-            )}
-            {liveError && (
-              <div className="hero-video-fallback live-error">
-                <span className="material-icons">error_outline</span>
-                <span>{liveError}</span>
+                <p>{liveError || 'No live stream configured.'}</p>
               </div>
             )}
           </div>
@@ -175,8 +165,8 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           <div className="hero-video-overlay">
             <div className="hero-video-info">
               <span className="hero-video-category">Live</span>
-              <h2 className="hero-video-title">{liveConfig?.title || 'Live Sustainable Engineering Channel'}</h2>
-              <p className="hero-video-description">{liveConfig?.description || 'Streaming now'}</p>
+              <h2 className="hero-video-title">{liveTitle}</h2>
+              <p className="hero-video-description">{liveDescription}</p>
             </div>
           </div>
         </div>

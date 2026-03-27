@@ -60,5 +60,12 @@ export const env = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER || "",
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
   },
+  cloudFront: {
+    streamDomain: process.env.CF_STREAM_DOMAIN || "",
+    keyPairId: process.env.CF_KEY_PAIR_ID || "",
+    privateKey: (process.env.CF_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+    cookieTtlSeconds: Number(process.env.CF_COOKIE_TTL_SECONDS || 600),
+    cookieDomain: process.env.CF_COOKIE_DOMAIN || "",
+  },
   envPath: envPath || "",
 };

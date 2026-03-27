@@ -13,6 +13,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       ...authHeaders(),
       ...(options.headers || {}),
     },
+    credentials: "include",
     ...options,
   });
   if (!res.ok) {
@@ -92,6 +93,7 @@ export function resetPassword(data: { token: string; password: string }) {
 // ─── Live Config ─────────────────────────────────────────────────
 
 export type LiveConfig = { streamUrl: string; title: string; description: string };
+export type LiveAccess = LiveConfig & { expiresIn: number };
 
 export function getLiveConfig() {
   return request<LiveConfig>("/live/config");
@@ -101,6 +103,12 @@ export function updateLiveConfig(data: LiveConfig) {
   return request<LiveConfig>("/live/config", {
     method: "PUT",
     body: JSON.stringify(data),
+  });
+}
+
+export function requestLiveAccess() {
+  return request<LiveAccess>("/live/access", {
+    method: "POST",
   });
 }
 

@@ -158,7 +158,7 @@
     padding: 0 1rem;
     gap: 1rem;
     flex-direction: row;
-    max-width: 100%;   /* ✅ Full width on mobile */
+    max-width: 100%;   /* Full width on mobile */
   }
 
   .desktop-nav {
@@ -194,7 +194,7 @@
   .header-content {
     padding: 0 1.5rem;
     flex-direction: row;
-    max-width: 1024px;   /* ✅ Constrain tablet width */
+    max-width: 1024px;   /* Constrain tablet width */
   }
 
   .desktop-nav {
@@ -209,7 +209,7 @@
 /* -------- DESKTOP -------- */
 @media (min-width: 1025px) {
   .header-content {
-    max-width: 1280px;   /* ✅ Standard desktop width */
+    max-width: 1280px;   /* Standard desktop width */
     flex-direction: row;
   }
 }
@@ -218,7 +218,7 @@
 @media (min-width: 1440px) {
   .header-content {
     padding: 0 3rem;
-    max-width: 1440px;   /* ✅ Large screens */
+    max-width: 1440px;   /* Large screens */
     flex-direction: row;
   }
 }

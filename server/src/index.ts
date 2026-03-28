@@ -21,7 +21,7 @@ async function main() {
     app.use((req, res, next) => {
       if (req.headers.origin) {
         const isAllowed = env.corsOrigins.includes("*") || env.corsOrigins.includes(req.headers.origin);
-        console.log(`[CORS] ${req.method} ${req.path} from ${req.headers.origin} - ${isAllowed ? "✓ ALLOWED" : "✗ BLOCKED"}`);
+        console.log(`[CORS] ${req.method} ${req.path} from ${req.headers.origin} - ${isAllowed ? "ALLOWED" : "BLOCKED"}`);
       }
       next();
     });
@@ -53,4 +53,4 @@ async function main() {
 main().catch((err) => {
   console.error("Failed to start server", err);
   process.exit(1);
-});
+});:::

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import '../../style/LiveTV.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -18,60 +18,84 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const { darkMode } = useAppContext()
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date())
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(new Date());
-  //   }, 1000);
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
-  //   return () => clearInterval(timer);
-  // }, []);
+  // Live Videos List
+  const liveVideos = [
+    {
+      title: "Sustainability in sanatana Dharma PART 1",
+      category: "Karma",
+      description: "Culture GreenEarth",
+      videoUrl:
+        "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+DharmaPART+1+(1).mp4",
+    },
+    {
+      title: "Sustainability in sanatana Dharma PART 2",
+      category: "Karma",
+      description: "Culture GreenEarth",
+      videoUrl:
+        "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+Dharma+PART+2.mp4",
+    },
+  ]
 
-
-  // useEffect(() => {
-  //   setCurrentHeroVideoIndex(0); // first video
-  // }, []);
-
-  // // Auto-rotate videos every 15 minutes to allow full-length playback
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length)
-  //   }, 900000) // Change video every 15 minutes (900000ms)
-
-  //   return () => clearInterval(interval)
-  // }, [videos.length])
-
+  //  Load saved session (index + time)
   useEffect(() => {
-    // Set first video
-    setCurrentHeroVideoIndex(0);
+    const savedIndex = localStorage.getItem("currentVideoIndex")
+    const savedTime = localStorage.getItem("videoTime")
 
-    // Clock timer (updates every second)
+    if (savedIndex !== null) {
+      setCurrentHeroVideoIndex(Number(savedIndex))
+    }
+
+    // restore time after video loads
+    setTimeout(() => {
+      if (savedTime && videoRef.current) {
+        videoRef.current.currentTime = Number(savedTime)
+      }
+    }, 500)
+
+    // Clock
     const clockTimer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+      setCurrentTime(new Date())
+    }, 1000)
 
-    // Video rotation timer (every 15 minutes)
-    const videoInterval = setInterval(() => {
-      setCurrentHeroVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
-    }, 900000);
+    return () => clearInterval(clockTimer)
+  }, [])
 
-    // Cleanup
-    return () => {
-      clearInterval(clockTimer);
-      clearInterval(videoInterval);
-    };
-  }, [videos.length]);
+  // Save playback time
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      localStorage.setItem(
+        "videoTime",
+        videoRef.current.currentTime.toString()
+      )
+    }
+  }
 
+  // Auto next video + save index
+  const handleVideoEnd = () => {
+    setCurrentHeroVideoIndex((prev) => {
+      const nextIndex = (prev + 1) % liveVideos.length
+      localStorage.setItem("currentVideoIndex", nextIndex.toString())
+      localStorage.setItem("videoTime", "0")
+      return nextIndex
+    })
+  }
 
-  const filteredVideos = selectedCategory === 'all'
-    ? videos
-    : videos.filter(video => video.category === selectedCategory)
+  // Filter videos (grid section)
+  const filteredVideos =
+    selectedCategory === 'all'
+      ? videos
+      : videos.filter((video) => video.category === selectedCategory)
 
   const handlePlayVideo = (video: Video) => {
     setSelectedVideo(video)
   }
 
+  // Prevent crash
+  if (!liveVideos.length) return <div>Loading...</div>
 
   return (
     <div className={`livetv ${darkMode ? 'dark' : ''}`}>
@@ -80,18 +104,26 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
       <section className="livetv-hero">
         <div className="hero-video-carousel">
-          <iframe
-            key={currentHeroVideoIndex}
-            src={`https://drive.google.com/file/d/${videos[currentHeroVideoIndex].videoId}/preview`}
-            className="hero-video-player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={videos[currentHeroVideoIndex].title}
-          ></iframe>
 
-          {/* LIVE Tag Overlay */}
-          {/* <div className="live-tag">LIVE</div> */}
-              {/* LIVE Tag Overlay */}
+          {/*VIDEO PLAYER */}
+          <video
+            ref={videoRef}
+            key={currentHeroVideoIndex}
+            className="hero-video-player"
+            controls
+            autoPlay
+            playsInline
+            preload="auto"
+            onEnded={handleVideoEnd}
+            onTimeUpdate={handleTimeUpdate}
+          >
+            <source
+              src={encodeURI(liveVideos[currentHeroVideoIndex]?.videoUrl)}
+              type="video/mp4"
+            />
+          </video>
+
+          {/*  LIVE TAG */}
           <div className="live-container">
             <div className="live-tag">LIVE</div>
             <div className="live-time">
@@ -99,16 +131,24 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
             </div>
           </div>
 
+          {/* OVERLAY */}
           <div className="hero-video-overlay">
             <div className="hero-video-info">
-              <span className="hero-video-category">{videos[currentHeroVideoIndex].category}</span>
-              <h2 className="hero-video-title">{videos[currentHeroVideoIndex].title}</h2>
-              <p className="hero-video-description">{videos[currentHeroVideoIndex].description}</p>
+              <span className="hero-video-category">
+                {liveVideos[currentHeroVideoIndex].category}
+              </span>
+              <h2 className="hero-video-title">
+                {liveVideos[currentHeroVideoIndex].title}
+              </h2>
+              <p className="hero-video-description">
+                {liveVideos[currentHeroVideoIndex].description}
+              </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* VIDEO GRID */}
       <div className="livetv-container">
 
         <VideoCategoryFilters
@@ -125,6 +165,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
       </div>
 
+      {/* MODAL */}
       {selectedVideo && (
         <VideoModal
           video={selectedVideo}

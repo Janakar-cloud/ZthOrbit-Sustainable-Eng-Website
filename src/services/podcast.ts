@@ -3,8 +3,8 @@ import { API_ENDPOINTS } from "../api/endpoints";
 import { PodcastEpisode } from "../types/podcast";
 
 export const getPodcasts = async (): Promise<PodcastEpisode[]> => {
-  const res = await axiosClient.get<PodcastEpisode[]>(API_ENDPOINTS.PODCAST);
-  return res.data;
+  const res = await axiosClient.get<{ items: PodcastEpisode[] }>(API_ENDPOINTS.PODCAST);
+  return res.data?.items || [];
 };
 
 // export const createUser = async (data: Partial<User>): Promise<User> => {

@@ -14,7 +14,10 @@ async function main() {
   const app = express();
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
-  app.use(helmet());
+  app.use(helmet({
+    // Allow the API to be consumed from Vite dev (different origin) while keeping other helmet defaults
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }));
   
   // CORS debug logging (only in development)
   if (env.nodeEnv === "development") {
@@ -26,13 +29,45 @@ async function main() {
       next();
     });
   }
-  
-  app.use(
-    cors({
-      origin: env.corsOrigins.includes("*") ? true : env.corsOrigins,
-      credentials: true,
-    })
-  );
+
+  const devOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:5175",
+  ];
+  const allowedOrigins = new Set([...env.corsOrigins, ...devOrigins]);
+
+  const corsOptions: cors.CorsOptions = {
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow tools like curl / Postman
+
+      // Allow any localhost/127.* dev port between 3000-5200
+      try {
+        const url = new URL(origin);
+        const isLocalHost = ["localhost", "127.0.0.1"].includes(url.hostname);
+        const port = Number(url.port || 80);
+        if (isLocalHost && port >= 3000 && port <= 5200) {
+          return callback(null, origin);
+        }
+      } catch (_) {
+        // fall through to explicit allowlist
+      }
+
+      if (allowedOrigins.has("*") || allowedOrigins.has(origin)) {
+        return callback(null, origin);
+      }
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+
+  app.use(cors(corsOptions));
+  app.options("*", cors(corsOptions));
   app.use(express.json({ limit: "2mb" }));
   app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
   app.use("/api/v1", apiLimiter, routes);
@@ -53,4 +88,4 @@ async function main() {
 main().catch((err) => {
   console.error("Failed to start server", err);
   process.exit(1);
-});:::
+});

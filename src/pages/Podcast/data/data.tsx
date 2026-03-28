@@ -68,4 +68,5 @@
       publishDate: 'Jan 5, 2026',
       commentsEnabled: true,
       comments: []
+    }
   ];

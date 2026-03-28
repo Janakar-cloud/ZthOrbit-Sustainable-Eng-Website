@@ -16,7 +16,7 @@ export const apiClient = {
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false,
+  withCredentials: true, // Required for CORS with credentials
 };
 
 // Add auth token to requests
@@ -31,6 +31,91 @@ export function setAuthToken(token: string) {
 
 ---
 
+## 🔒 CORS & Credentials Configuration
+
+**IMPORTANT:** All API requests must include `credentials: 'include'` for CORS to work properly.
+
+### Why?
+The backend is configured with:
+```typescript
+cors({
+  origin: env.corsOrigins, // Specific origins from .env
+  credentials: true,        // Requires credentials in requests
+})
+```
+
+### Required Settings
+
+**1. Backend `.env` Configuration:**
+```bash
+# Development
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+
+# Production  
+CORS_ORIGINS=https://www.thegreentv.com,http://13.205.72.30
+```
+
+**2. Frontend Fetch Requests:**
+```typescript
+// ✅ CORRECT - Always include credentials
+fetch(url, {
+  method: 'GET',
+  credentials: 'include',  // Required!
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+})
+
+// ❌ WRONG - Missing credentials
+fetch(url, {
+  method: 'GET',
+  headers: { Authorization: `Bearer ${token}` },
+})
+```
+
+**3. Backend Must Be Restarted After `.env` Changes:**
+```bash
+cd server
+npm run build
+npm start
+# Or: pm2 restart zthorbit-backend
+```
+
+### Common CORS Errors
+
+**Error:** `Access to fetch has been blocked by CORS policy`
+
+**Causes & Fixes:**
+
+1. **Missing `credentials: 'include'`**
+   ```typescript
+   // ❌ Wrong
+   fetch(url, { headers: {...} })
+   
+   // ✅ Correct
+   fetch(url, { credentials: 'include', headers: {...} })
+   ```
+
+2. **Frontend origin not in `CORS_ORIGINS`**
+   ```bash
+   # Check server/.env
+   CORS_ORIGINS=http://localhost:5173  # Add your frontend URL
+   ```
+
+3. **Backend not restarted after `.env` change**
+   ```bash
+   pm2 restart zthorbit-backend
+   ```
+
+4. **Protocol/port mismatch**
+   - Frontend: `http://localhost:5173` 
+   - CORS_ORIGINS must match **exactly** including protocol and port
+
+**Debug:** See [CORS-TROUBLESHOOTING.md](CORS-TROUBLESHOOTING.md) for detailed debugging steps.
+
+---
+
 ## Authentication Flow
 
 ### 1. Register New User
@@ -38,6 +123,7 @@ export function setAuthToken(token: string) {
 async function register(email: string, password: string, name?: string) {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, name }),
   });
@@ -56,6 +142,7 @@ async function register(email: string, password: string, name?: string) {
 async function verifyEmail(email: string, code: string) {
   const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code }),
   });
@@ -76,6 +163,7 @@ async function verifyEmail(email: string, code: string) {
 async function login(email: string, password: string) {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
@@ -101,6 +189,7 @@ async function refreshAccessToken() {
   
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
   });
@@ -152,6 +241,7 @@ async function getMedia(params: {
   );
   
   const response = await fetch(`${API_BASE_URL}/media?${query}`, {
+    credentials: 'include',
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
   });
   
@@ -186,6 +276,7 @@ async function uploadMediaFile(
   // Step 1: Request presigned URL
   const presignResponse = await fetch(`${API_BASE_URL}/uploads/presign`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -354,6 +445,7 @@ async function createMedia(data: {
 }) {
   const response = await fetch(`${API_BASE_URL}/media`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('accessToken')}`,

@@ -240,6 +240,56 @@
   box-shadow: 0 0 0 4px rgba(92, 176, 57, 0.1);
 }
 
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.remember-me {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4f5b66;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.remember-me input {
+  width: 16px;
+  height: 16px;
+  accent-color: #5CB039;
+  cursor: pointer;
+}
+
+.status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+}
+
+.status-banner.info {
+  background: #f3fbef;
+  border-color: #d6edce;
+  color: #2c3e50;
+}
+
+.status-banner.error {
+  background: #fff5f5;
+  border-color: #ffcdd2;
+  color: #b00020;
+}
+
+.status-banner .material-icons {
+  font-size: 1.2rem;
+}
+
 .login-button {
   padding: 1rem 2rem;
   background: linear-gradient(135deg, #5CB039 0%, #7dcc5c 100%);

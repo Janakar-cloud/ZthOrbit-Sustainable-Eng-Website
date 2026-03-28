@@ -6,23 +6,58 @@ interface LoginProps {
   onLogin: () => void;
 }
 
+type StatusState = {
+  message: string;
+  variant: 'info' | 'error';
+} | null;
+
 export default function Login({ onNavigate, onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<StatusState>(null);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email.trim() || !password.trim()) {
+      setStatus({ message: 'Please enter both email and password.', variant: 'error' });
+      return;
+    }
+
+    setStatus(null);
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
+      setStatus({ message: 'Welcome back! Redirecting to your dashboard...', variant: 'info' });
       onLogin();
     }, 1500);
   };
 
+  const handleForgotPassword = () => {
+    if (!email.trim()) {
+      setStatus({ message: 'Enter your email so we can send you a reset link.', variant: 'error' });
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus({ message: 'Sending you a reset link...', variant: 'info' });
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setStatus({
+        message: 'If an account exists for that email, a reset link is on the way.',
+        variant: 'info',
+      });
+    }, 1200);
+  };
+
   const handleGoogleLogin = () => {
     setIsLoading(true);
+    setStatus({ message: 'Signing you in with Google...', variant: 'info' });
     // Simulate Google OAuth
     setTimeout(() => {
       setIsLoading(false);
@@ -32,6 +67,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
 
   const handleAppleLogin = () => {
     setIsLoading(true);
+    setStatus({ message: 'Signing you in with Apple...', variant: 'info' });
     // Simulate Apple OAuth
     setTimeout(() => {
       setIsLoading(false);
@@ -95,7 +131,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                 disabled={isLoading}
               >
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l-.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                 </svg>
                 Continue with Apple
               </button>
@@ -109,6 +145,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
               <div className="form-group">
                 <label htmlFor="email">Email Address</label>
                 <div className="input-wrapper">
+                  <span className="material-icons">mail</span>
                   <input
                     type="email"
                     id="email"
@@ -119,6 +156,45 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                   />
                 </div>
               </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <div className="input-wrapper">
+                  <span className="material-icons">lock</span>
+                  <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <label className="remember-me">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Remember me</span>
+                </label>
+
+                <button type="button" className="link-button" onClick={handleForgotPassword}>
+                  Forgot password?
+                </button>
+              </div>
+
+              {status && (
+                <div className={`status-banner ${status.variant}`}>
+                  <span className="material-icons">
+                    {status.variant === 'error' ? 'error_outline' : 'check_circle'}
+                  </span>
+                  <span>{status.message}</span>
+                </div>
+              )}
 
               <button 
                 type="submit" 

@@ -3,14 +3,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import type { LiveConfig, PodcastEpisode } from "@/types/content";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
+const TOKEN_KEY = "admin-access-token";
+
 function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem("admin-token");
+  return window.localStorage.getItem(TOKEN_KEY);
 }
 
 function setStoredToken(token: string) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem("admin-token", token);
+  window.localStorage.setItem(TOKEN_KEY, token);
 }
 
 function toMessage(error: unknown, fallback: string) {
@@ -20,7 +23,10 @@ function toMessage(error: unknown, fallback: string) {
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
-  const [tokenInput, setTokenInput] = useState("");
+  const [email, setEmail] = useState(process.env.ADMIN_EMAIL || "");
+  const [password, setPassword] = useState(process.env.ADMIN_PASSWORD || "");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const [liveConfig, setLiveConfig] = useState<LiveConfig | null>(null);
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
@@ -36,10 +42,11 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function load() {
+      if (!API_BASE) return;
       try {
         const [liveRes, podcastRes] = await Promise.all([
-          fetch("/api/live"),
-          fetch("/api/podcasts"),
+          fetch(`${API_BASE}/live/config`),
+          fetch(`${API_BASE}/podcasts`),
         ]);
 
         if (liveRes.ok) {
@@ -55,25 +62,44 @@ export default function AdminPage() {
     load();
   }, []);
 
-  function handleLogin(e: FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
-    if (!tokenInput.trim()) return;
-    setStoredToken(tokenInput.trim());
-    setToken(tokenInput.trim());
-    setTokenInput("");
+    if (!API_BASE) {
+      setLoginError("API base URL is missing. Set NEXT_PUBLIC_API_BASE.");
+      return;
+    }
+    setLoginError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.accessToken) {
+        throw new Error(data.error || "Login failed");
+      }
+      setStoredToken(data.accessToken);
+      setToken(data.accessToken);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      setLoginError(toMessage(err, "Login failed"));
+    }
   }
 
   async function saveLiveConfig(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!token || !liveConfig) return;
+    if (!token || !liveConfig || !API_BASE) return;
     setLiveStatus(null);
 
     try {
-      const res = await fetch("/api/live", {
+      const res = await fetch(`${API_BASE}/live/config`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-token": token,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(liveConfig),
       });
@@ -90,7 +116,7 @@ export default function AdminPage() {
 
   async function addPodcast(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!token) return;
+    if (!token || !API_BASE) return;
     setPodcastStatus(null);
 
     const formData = new FormData(e.currentTarget);
@@ -99,16 +125,16 @@ export default function AdminPage() {
       description: String(formData.get("description") || ""),
       audioUrl: String(formData.get("audioUrl") || ""),
       imageUrl: String(formData.get("imageUrl") || ""),
-      publishedAt: new Date().toISOString(),
+      publishDate: new Date().toISOString(),
       duration: String(formData.get("duration") || ""),
     } as Omit<PodcastEpisode, "id">;
 
     try {
-      const res = await fetch("/api/podcasts", {
+      const res = await fetch(`${API_BASE}/podcasts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-token": token,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });
@@ -136,22 +162,39 @@ export default function AdminPage() {
         >
           <h1 className="text-lg font-semibold">Admin Login</h1>
           <p className="text-sm text-slate-600">
-            Enter the admin token configured in your environment. This is a
-            simple protection layer until full authentication is added.
+            Sign in with the admin credentials configured in your environment
+            to obtain a JWT for protected actions.
           </p>
+          {!API_BASE && (
+            <div className="rounded bg-amber-100 border border-amber-300 text-amber-900 text-xs p-3">
+              Set NEXT_PUBLIC_API_BASE to point to the backend (e.g.
+              http://localhost:4000/api/v1).
+            </div>
+          )}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Admin email"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            required
+          />
           <input
             type="password"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="Admin token"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            required
           />
           <button
             type="submit"
-            className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
+            disabled={loading}
+            className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            Continue
+            {loading ? "Signing in..." : "Sign in"}
           </button>
+          {loginError && <p className="text-xs text-red-600">{loginError}</p>}
         </form>
       </main>
     );
@@ -163,8 +206,7 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold">Admin Area</h1>
         <p className="text-slate-600 text-sm max-w-2xl">
           Update the live channel settings and manage podcast episodes. All
-          changes are saved to simple JSON files for now and can be migrated to
-          a database later.
+          changes are saved to the backend service (MongoDB + S3 for media).
         </p>
       </header>
 
@@ -296,7 +338,7 @@ export default function AdminPage() {
             <h3 className="text-sm font-semibold">Existing episodes</h3>
             <ul className="space-y-1 text-sm max-h-48 overflow-y-auto pr-1">
               {episodes.map((ep) => (
-                <li key={ep.id} className="flex justify-between gap-2">
+                <li key={ep._id || ep.id || ep.title} className="flex justify-between gap-2">
                   <span className="truncate">{ep.title}</span>
                   <span className="text-xs text-slate-400">{ep.duration}</span>
                 </li>

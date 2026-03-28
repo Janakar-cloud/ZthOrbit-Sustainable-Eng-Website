@@ -9,7 +9,7 @@ import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
 import PodcastComments from './components/PodcastComments/PodcastComments'
-import { getPodcasts } from '../../utils/api'
+import { podcastEpisode } from '../../hooks/podcast'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -18,28 +18,26 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const [newComment, setNewComment] = useState('')
   const { darkMode, isAdmin } = useAppContext()
   const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(PODCASTS_DATA)
+  const { podcast: fetchedPodcasts, loading, error } = podcastEpisode();
 
   useEffect(() => {
-    getPodcasts()
-      .then((res) => {
-        if (res.items.length) {
-          const mapped: PodcastEpisode[] = res.items.map((p, i) => ({
-            id: i + 1,
-            title: p.title,
-            description: p.description,
-            audioFile: p.audioUrl,
-            image: p.imageUrl || '',
-            duration: p.duration || '',
-            category: (p.tags?.[0] || 'general').toLowerCase(),
-            publishDate: p.publishDate || '',
-            commentsEnabled: true,
-            comments: [],
-          }))
-          setPodcasts(mapped)
-        }
-      })
-      .catch(() => { /* fallback to local data */ })
-  }, [])
+    // Use fetched podcasts from the hook if available, and map to component's expected format
+    if (fetchedPodcasts && fetchedPodcasts.length > 0) {
+      const mapped: PodcastEpisode[] = fetchedPodcasts.map((p, i) => ({
+        id: i + 1,
+        title: p.title,
+        description: p.description,
+        audioFile: p.audioUrl,
+        image: p.imageUrl || '',
+        duration: p.duration || '',
+        category: (p.tags?.[0] || 'general').toLowerCase(),
+        publishDate: p.publishDate || '',
+        commentsEnabled: true,
+        comments: [],
+      }))
+      setPodcasts(mapped)
+    }
+  }, [fetchedPodcasts])
 
 
   const filteredPodcasts = selectedCategory === 'all'
@@ -78,7 +76,8 @@ export default function Podcast({ onNavigate }: PodcastProps) {
     setNewComment('')
     setSelectedPodcast({ ...selectedPodcast, comments: [...selectedPodcast.comments, comment] })
   }
-
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className={`podcast-page ${darkMode ? 'dark' : ''}`}>
 

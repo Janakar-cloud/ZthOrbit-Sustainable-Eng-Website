@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "proxy": "http://13.205.72.30",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -17,6 +18,7 @@
     "@sendgrid/mail": "^8.1.6",
     "@supabase/auth-helpers-react": "^0.15.0",
     "@supabase/supabase-js": "^2.91.0",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
@@ -27,6 +29,7 @@
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.12",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.71.1",

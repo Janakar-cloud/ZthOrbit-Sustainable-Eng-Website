@@ -9,6 +9,7 @@ import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
 import PodcastComments from './components/PodcastComments/PodcastComments'
+import { podcastEpisode } from '../../hooks/podcast'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -17,6 +18,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const [newComment, setNewComment] = useState('')
   const { darkMode, isAdmin } = useAppContext()
   const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(PODCASTS_DATA)
+  const { podcast, loading, error } = podcastEpisode();
 
 
   const filteredPodcasts = selectedCategory === 'all'
@@ -55,7 +57,8 @@ export default function Podcast({ onNavigate }: PodcastProps) {
     setNewComment('')
     setSelectedPodcast({ ...selectedPodcast, comments: [...selectedPodcast.comments, comment] })
   }
-
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className={`podcast-page ${darkMode ? 'dark' : ''}`}>
 

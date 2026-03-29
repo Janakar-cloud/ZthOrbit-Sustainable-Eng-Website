@@ -1,8 +1,30 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { AppProvider } from '../context/AppContext'
+
+vi.mock('../hooks/podcast', () => ({
+  podcastEpisode: () => ({
+    podcast: [
+      {
+        id: 1,
+        title: 'Mock Podcast',
+        description: 'Mock description',
+        audioFile: 'mock.mp3',
+        image: '',
+        duration: '10:00',
+        category: 'general',
+        publishDate: '2024-01-01',
+        commentsEnabled: true,
+        comments: [],
+      },
+    ],
+    loading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}))
 
 describe('App Component', () => {
   const renderApp = () =>

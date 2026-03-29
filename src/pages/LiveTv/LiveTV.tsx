@@ -8,18 +8,9 @@ import { Video } from '../HomePage/type/type'
 import { videos } from '../LiveTv/data/data'
 import VideoCategoryFilters from './components/renderFilterButtons'
 import VideoGrid from './components/VideoGrid'
-import { requestLiveAccess } from '../../utils/api'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
-}
-
-interface S3Video {
-  key: string
-  url: string
-  fileName: string
-  size: number
-  lastModified: string
 }
 
 export default function LiveTV({ onNavigate }: LiveTVProps) {

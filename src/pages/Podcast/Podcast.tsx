@@ -10,6 +10,9 @@ import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
 import PodcastComments from './components/PodcastComments/PodcastComments'
 import { podcastEpisode } from '../../hooks/podcast'
+import Loader from '../../components/Loader'
+import ErrorMessage from '../../components/ErroMessage'
+import NoData from '../../components/Nodatafound'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -20,12 +23,11 @@ export default function Podcast({ onNavigate }: PodcastProps) {
 
   const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([])
 
-  const { podcast: podcastList, loading, error } = podcastEpisode()
+  const { podcast: podcastList, loading, error, refetch } = podcastEpisode()
 
   // Sync API data safely
   useEffect(() => {
     if (!Array.isArray(podcastList?.items)) return
-
     const formatted = podcastList.items.map((p: any) => ({
       id: p._id,
       title: p.title,
@@ -131,36 +133,34 @@ export default function Podcast({ onNavigate }: PodcastProps) {
 
           {/* Loading */}
           {loading && (
-            <div className="status-message">
-              <p>Loading podcasts...</p>
-            </div>
+            <Loader />
           )}
 
           {/* Error */}
           {error && (
-            <div className="status-message error">
-              <p>{error}</p>
-            </div>
+            <ErrorMessage message={error} onRetry={() => { refetch() }}/>
           )}
 
           {/* Data */}
           {!loading && !error && (
-            <div className="episodes-grid">
+            <>
               {filteredPodcasts.length > 0 ? (
-                filteredPodcasts.map((podcastData) => (
-                  <EpisodeCard
-                    key={podcastData.id}
-                    podcast={podcastData}
-                    isPlaying={currentlyPlaying === podcastData.id}
-                    isAdmin={isAdmin}
-                    onPlay={handlePlayPodcast}
-                    onToggleComments={handleToggleComments}
-                  />
-                ))
+                <div className="episodes-grid">
+                  {filteredPodcasts.map((podcastData) => (
+                    <EpisodeCard
+                      key={podcastData.id}
+                      podcast={podcastData}
+                      isPlaying={currentlyPlaying === podcastData.id}
+                      isAdmin={isAdmin}
+                      onPlay={handlePlayPodcast}
+                      onToggleComments={handleToggleComments}
+                    />
+                  ))}
+                </div>
               ) : (
-                <p>No podcasts found.</p>
+                <NoData message="No podcasts found." onRetry={() => { refetch() }} />
               )}
-            </div>
+            </>
           )}
 
         </div>

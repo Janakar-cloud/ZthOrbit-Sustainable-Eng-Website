@@ -1,9 +1,9 @@
 import axiosClient from "../api/axiosClient";
 import { API_ENDPOINTS } from "../api/endpoints";
-import { PodcastEpisode } from "../types/podcast";
+import { PodcastApiResponse } from "../types/podcast";
 
-export const getPodcasts = async (): Promise<PodcastEpisode[]> => {
-  const res = await axiosClient.get<PodcastEpisode[]>(API_ENDPOINTS.PODCAST);
+export const getPodcasts = async (): Promise<PodcastApiResponse> => {
+  const res = await axiosClient.get<PodcastApiResponse>(API_ENDPOINTS.PODCAST);
   return res.data;
 };
 

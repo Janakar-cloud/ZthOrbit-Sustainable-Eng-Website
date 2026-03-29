@@ -7,7 +7,6 @@ import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Articles from './pages/Articles/Articles'
 import Podcast from './pages/Podcast/Podcast'
 import LiveTV from './pages/LiveTv/LiveTV'
-import CaseStories from './pages/CaseStories/CaseStories'
 import { useAppContext } from './context/AppContext'
 
 const PATH_TO_PAGE: Record<string, string> = {
@@ -19,7 +18,7 @@ const PATH_TO_PAGE: Record<string, string> = {
   '/articles': 'articles',
   '/podcast': 'podcast',
   '/livetv': 'livetv',
-  '/casestories': 'casestories',
+  // '/casestories': 'casestories',
 }
 
 const PAGE_TO_PATH: Record<string, string> = Object.fromEntries(
@@ -75,7 +74,6 @@ function App() {
       {activePage === 'articles' && <Articles onNavigate={handleNavigate} />}
       {activePage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
       {activePage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
-      {activePage === 'casestories' && <CaseStories onNavigate={handleNavigate} />}
     </>
   )
 }

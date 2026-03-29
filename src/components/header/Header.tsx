@@ -57,7 +57,6 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
             <a href="#" onClick={(e) =>  {e.preventDefault();handleNavigate('livetv')}} className={isActive('livetv')}>LiveTV</a>
             <a href="#" onClick={(e) =>  {e.preventDefault();handleNavigate('podcast')}} className={isActive('podcast')}>Podcast</a>
             <a href="#" onClick={(e) =>  {e.preventDefault();handleNavigate('articles')}} className={isActive('articles')}>Articles</a>
-            <a href="#" onClick={(e) =>  {e.preventDefault();handleNavigate('casestories')}} className={isActive('casestories')}>Case Stories</a>
             <a href="#"  onClick={(e) => {e.preventDefault(); handleNavigate('about')}} className={isActive('about')}>About Us</a>
           </nav>
 
@@ -146,7 +145,6 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
           <a onClick={() => handleNavigate('livetv')} className="nav-link">LiveTV</a>
           <a onClick={() => handleNavigate('podcast')}className="nav-link">Podcast</a>
           <a onClick={() => handleNavigate('articles')} className="nav-link">Articles</a>
-          <a onClick={() => handleNavigate('casestories')} className="nav-link">Case Stories</a>
           <a onClick={() => handleNavigate('about')} className="nav-link">About Us</a>
         </div>
       )}

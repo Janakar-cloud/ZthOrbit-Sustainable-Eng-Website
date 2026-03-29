@@ -4,7 +4,7 @@ import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
 import Footer from '../../components/footer/Footer'
 import { PodcastProps, PodcastEpisode, Comment } from './type/type'
-import { PODCASTS_DATA, categories } from './data/data'
+import { categories } from './data/data'
 import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
@@ -17,7 +17,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null)
   const [newComment, setNewComment] = useState('')
   const { darkMode, isAdmin } = useAppContext()
-  const [podcasts, setPodcasts] = useState<PodcastEpisode[]>(PODCASTS_DATA)
+  const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([])
   const { podcast: fetchedPodcasts, loading, error } = podcastEpisode();
 
   useEffect(() => {

@@ -236,27 +236,6 @@ export function deleteVideo(id: string) {
   return request<void>(`/videos/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
 
-// ─── Case Stories ────────────────────────────────────────────────
-
-export interface CaseStoryItem {
-  _id: string;
-  title: string;
-  impact: string;
-  duration?: string;
-  heroImage?: string;
-  metrics?: { label: string; value: string }[];
-  bodyMd?: string;
-  tags: string[];
-}
-
-export function getCaseStories(params?: { tag?: string; search?: string; page?: number }) {
-  const qs = new URLSearchParams();
-  if (params?.tag) qs.set("tag", params.tag);
-  if (params?.search) qs.set("search", params.search);
-  if (params?.page) qs.set("page", String(params.page));
-  return request<PaginatedResponse<CaseStoryItem>>(`/case-stories?${qs}`);
-}
-
 // ─── Admin: Dashboard Summary ────────────────────────────────────
 
 export interface DashboardSummary {

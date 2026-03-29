@@ -7,7 +7,8 @@ export interface Video {
   id: number
   title: string
   description: string
-  videoId: string
+  videoId?: string
+  streamUrl?: string
   category: string
   publishDate: string
   thumbnail: string

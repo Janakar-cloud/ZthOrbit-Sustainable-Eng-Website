@@ -11,11 +11,11 @@ ZthOrbit Sustainable Eng Website is an **AI‑infused, content‑driven digital 
 - **About Us Section**: Company profile and mission statement.
 
 ## Tech Stack
-- **Frontend**: Next.js + Tailwind CSS (responsive, fast, SEO‑friendly)
-- **Backend**: Node.js + Express (modular APIs, scalable architecture)
-- **Database**: MongoDB (flexible schema, optimized for content storage)
-- **AI Integration**: Infused modules for intelligent content recommendations and personalization
-- **Hosting & Infrastructure**: AWS (EC2, S3, CloudFront) for secure, scalable deployment
+- **Primary Frontend**: React + Vite at the repo root, built to `dist/`
+- **Secondary App**: Next.js app in `live-channel-app` for live/admin flows
+- **Backend**: Node.js + Express API in `server/`
+- **Database**: MongoDB
+- **Storage / Delivery**: AWS S3 for media, Nginx + PM2 on EC2, optional CloudFront for CDN/HLS
 
 
 ## Purpose
@@ -25,17 +25,17 @@ ZthOrbit Sustainable Eng Website is an **AI‑infused, content‑driven digital 
 
 ---
 
-## Current Status (Build & Tests)
-- `npm run test:run` currently fails because several component imports cannot be resolved (e.g., `AboutUs`, `HomePage`, and `header.css` case mismatch). The Live TV data mapping tests pass.
-- `npm run build` currently fails on TypeScript unused-variable errors in `src/CaseStories.tsx`, `src/pages/Articles/Articles.tsx`, and `src/pages/HomePage/HomePage.tsx`.
-- UI flows (Home, About, Articles, Live TV, Podcast, Login/Signup, Admin shell) render from static data with simulated auth; no backend/APIs are wired up yet.
+## Current Status (Build & Deployment)
+- The root Vite app builds successfully and is intended to be served as static files from `dist/` via Nginx.
+- The Express API builds and runs under PM2 from `server/dist/index.js`.
+- The `live-channel-app` Next.js project is a separate deployment unit and should be built and run independently if you need the admin/live experience from that app.
+- The repo now includes EC2-ready Nginx and PM2 examples under `ops/`.
 
 ## Pending Work
-- Fix the TypeScript build blockers by removing unused state/handlers in the files noted above.
-- Correct component exports/import paths so `AboutUs`, `HomePage`, and header styles resolve in tests.
-- Replace simulated authentication with a real provider (e.g., Clerk/Supabase) and connect forms to live APIs and persistence (MongoDB/Cloudinary/S3 as designed).
-- Wire video/podcast/article content to backend/CMS sources instead of static lists; ensure asset URLs and env vars are configured.
-- Add routing (React Router or Next.js pages), deployment pipeline (Vercel/Netlify), and CI to run build/tests on each push.
+- Decide whether production should expose only the root Vite app, or also reverse-proxy the `live-channel-app` Next.js service.
+- Finalize AWS media delivery for live TV: either Nginx RTMP + FFmpeg + HLS on EC2 or AWS Elemental / MediaLive + CloudFront.
+- Add CI to run root build, server build, and optional Next build on every push.
+- Move production secrets fully into server-side environment management or AWS Systems Manager / Secrets Manager.
 
 ---
 

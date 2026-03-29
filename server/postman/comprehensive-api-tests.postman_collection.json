@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "ZthOrbit Comprehensive API Tests",
+    "description": "Complete test suite for all ZthOrbit backend APIs with automated tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "zthorbit-api-v1-comprehensive",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://13.205.72.30/api/v1", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "superadminEmail", "value": "janakar.ganesan@gmail.com", "type": "string" },
+    { "key": "superadminPassword", "value": "ChangeMe123!", "type": "string" },
+    { "key": "lastVideoId", "value": "", "type": "string" },
+    { "key": "lastPodcastId", "value": "", "type": "string" },
+    { "key": "lastArticleId", "value": "", "type": "string" },
+    { "key": "lastCaseStoryId", "value": "", "type": "string" },
+    { "key": "lastAboutId", "value": "", "type": "string" },
+    { "key": "lastTagId", "value": "", "type": "string" },
+    { "key": "lastUserId", "value": "", "type": "string" },
+    { "key": "lastMediaId", "value": "", "type": "string" },
+    { "key": "lastPostId", "value": "", "type": "string" },
+    { "key": "lastNotificationId", "value": "", "type": "string" },
+    { "key": "lastCommentId", "value": "", "type": "string" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-login if no access token exists",
+          "if (!pm.environment.get('accessToken') && !pm.collectionVariables.get('accessToken')) {",
+          "  console.log('No access token found, will need to login first');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test: Response time should be reasonable",
+          "pm.test('Response time under 5s', function() {",
+          "  pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "// Log errors for debugging",
+          "if (pm.response.code >= 400) {",
+          "  console.log('Error response:', pm.response.json());",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [

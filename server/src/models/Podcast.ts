@@ -9,6 +9,8 @@ export interface IPodcast {
   publishDate?: Date;
   status: "draft" | "published";
   tags: Types.ObjectId[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const podcastSchema = new Schema<IPodcast>(

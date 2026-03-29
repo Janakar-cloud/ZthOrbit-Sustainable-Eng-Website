@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import './Login.css';
+import { login, register, resendVerification, verifyEmail } from '../../utils/api';
+import { useAppContext } from '../../context/AppContext';
 
 interface LoginProps {
   onNavigate: (page: string) => void;
@@ -8,71 +10,102 @@ interface LoginProps {
 
 type StatusState = {
   message: string;
-  variant: 'info' | 'error';
+  variant: 'info' | 'error' | 'success';
 } | null;
+
+type Mode = 'login' | 'register' | 'verify';
 
 export default function Login({ onNavigate, onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [mode, setMode] = useState<Mode>('login');
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<StatusState>(null);
+  const { loginWithTokens } = useAppContext();
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const storeTokens = (accessToken: string, refreshToken: string) => {
+    loginWithTokens(accessToken, refreshToken);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus(null);
 
-    if (!email.trim() || !password.trim()) {
-      setStatus({ message: 'Please enter both email and password.', variant: 'error' });
+    if (!email.trim()) {
+      setStatus({ message: 'Email is required.', variant: 'error' });
       return;
     }
 
-    setStatus(null);
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setStatus({ message: 'Welcome back! Redirecting to your dashboard...', variant: 'info' });
+      if (mode === 'register') {
+        if (!password.trim()) {
+          setStatus({ message: 'Password is required to register.', variant: 'error' });
+          setIsLoading(false);
+          return;
+        }
+        await register({ email: email.trim(), password: password.trim() });
+        setMode('verify');
+        setStatus({ message: 'Code sent. Check your email.', variant: 'success' });
+        return;
+      }
+
+      if (mode === 'verify') {
+        if (code.trim().length !== 6) {
+          setStatus({ message: 'Enter the 6-digit code.', variant: 'error' });
+          setIsLoading(false);
+          return;
+        }
+        const tokens = await verifyEmail({ email: email.trim(), code: code.trim() });
+        storeTokens(tokens.accessToken, tokens.refreshToken);
+        setStatus({ message: 'Verified! Logging you in...', variant: 'success' });
+        onLogin();
+        return;
+      }
+
+      // login
+      if (!password.trim()) {
+        setStatus({ message: 'Password is required.', variant: 'error' });
+        setIsLoading(false);
+        return;
+      }
+      const tokens = await login({ email: email.trim(), password: password.trim() });
+      storeTokens(tokens.accessToken, tokens.refreshToken);
+      setStatus({ message: 'Welcome back! Redirecting...', variant: 'success' });
       onLogin();
-    }, 1500);
+    } catch (err: any) {
+      const msg = (err as Error)?.message || 'Request failed';
+      if (msg.toLowerCase().includes('verify')) {
+        setMode('verify');
+      }
+      setStatus({ message: msg, variant: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
+    setStatus({ message: 'Password reset flow not yet wired.', variant: 'info' });
+  };
+
+  const handleResend = async () => {
     if (!email.trim()) {
-      setStatus({ message: 'Enter your email so we can send you a reset link.', variant: 'error' });
+      setStatus({ message: 'Enter email to resend code.', variant: 'error' });
       return;
     }
-
-    setIsLoading(true);
-    setStatus({ message: 'Sending you a reset link...', variant: 'info' });
-
-    setTimeout(() => {
+    try {
+      setIsLoading(true);
+      await resendVerification(email.trim());
+      setStatus({ message: 'Code resent. Check your email.', variant: 'success' });
+      setMode('verify');
+    } catch (err: any) {
+      setStatus({ message: (err as Error)?.message || 'Could not resend code', variant: 'error' });
+    } finally {
       setIsLoading(false);
-      setStatus({
-        message: 'If an account exists for that email, a reset link is on the way.',
-        variant: 'info',
-      });
-    }, 1200);
-  };
-
-  const handleGoogleLogin = () => {
-    setIsLoading(true);
-    setStatus({ message: 'Signing you in with Google...', variant: 'info' });
-    // Simulate Google OAuth
-    setTimeout(() => {
-      setIsLoading(false);
-      onLogin();
-    }, 1500);
-  };
-
-  const handleAppleLogin = () => {
-    setIsLoading(true);
-    setStatus({ message: 'Signing you in with Apple...', variant: 'info' });
-    // Simulate Apple OAuth
-    setTimeout(() => {
-      setIsLoading(false);
-      onLogin();
-    }, 1500);
+    }
   };
 
   return (
@@ -86,7 +119,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
             <h1>Green Generation TV</h1>
             <p className="brand-tagline">Empowering Sustainability Through Conscious Leadership</p>
           </div>
-          
+
           <div className="login-features">
             <div className="feature-item">
               <span className="material-icons">check_circle</span>
@@ -106,42 +139,11 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
         <div className="login-right">
           <div className="login-card">
             <div className="login-header">
-              <h2>Welcome Back</h2>
-              <p>Sign in to continue your journey</p>
+              <h2>{mode === 'register' ? 'Create Account' : mode === 'verify' ? 'Verify Email' : 'Welcome Back'}</h2>
+              <p>{mode === 'verify' ? 'Enter the 6-digit code sent to your email' : 'Sign in or create an account'}</p>
             </div>
 
-            <div className="social-login">
-              <button 
-                className="social-button google" 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-              </button>
-
-              <button 
-                className="social-button apple" 
-                onClick={handleAppleLogin}
-                disabled={isLoading}
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l-.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                </svg>
-                Continue with Apple
-              </button>
-            </div>
-
-            <div className="divider">
-              <span>or</span>
-            </div>
-
-            <form onSubmit={handleEmailLogin} className="login-form">
+            <form onSubmit={handleSubmit} className="login-form">
               <div className="form-group">
                 <label htmlFor="email">Email Address</label>
                 <div className="input-wrapper">
@@ -157,35 +159,59 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <div className="input-wrapper">
-                  <span className="material-icons">lock</span>
-                  <input
-                    type="password"
-                    id="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+              {mode !== 'verify' && (
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <div className="input-wrapper">
+                    <span className="material-icons">lock</span>
+                    <input
+                      type="password"
+                      id="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="form-actions">
-                <label className="remember-me">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <span>Remember me</span>
-                </label>
+              {mode === 'verify' && (
+                <div className="form-group">
+                  <label htmlFor="code">Verification Code</label>
+                  <div className="input-wrapper">
+                    <span className="material-icons">verified</span>
+                    <input
+                      type="text"
+                      id="code"
+                      placeholder="6-digit code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      maxLength={6}
+                    />
+                    <button type="button" className="link-button" onClick={handleResend} disabled={isLoading}>
+                      Resend
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                <button type="button" className="link-button" onClick={handleForgotPassword}>
-                  Forgot password?
-                </button>
-              </div>
+              {mode === 'login' && (
+                <div className="form-actions">
+                  <label className="remember-me">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <span>Remember me</span>
+                  </label>
+
+                  <button type="button" className="link-button" onClick={handleForgotPassword}>
+                    Forgot password?
+                  </button>
+                </div>
+              )}
 
               {status && (
                 <div className={`status-banner ${status.variant}`}>
@@ -196,33 +222,43 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                 </div>
               )}
 
-              <button 
-                type="submit" 
-                className="login-button"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <span>Continue with Email</span>
-                    <span className="material-icons">arrow_forward</span>
-                  </>
-                )}
+              <button type="submit" className="btn-primary" disabled={isLoading}>
+                {isLoading
+                  ? 'Please wait...'
+                  : mode === 'register'
+                  ? 'Send Code'
+                  : mode === 'verify'
+                  ? 'Verify & Sign In'
+                  : 'Sign In'}
               </button>
-            </form>
 
-            <div className="login-footer">
-              <p>
-                Don't have an account?{' '}
-                <button onClick={() => onNavigate('signup')} className="link-button">
-                  Sign up
-                </button>
-              </p>
-            </div>
+              <div className="login-footer">
+                {mode === 'login' && (
+                  <p>
+                    Don't have an account?{' '}
+                    <button type="button" onClick={() => setMode('register')} className="link-button">
+                      Create one
+                    </button>
+                  </p>
+                )}
+                {mode === 'register' && (
+                  <p>
+                    Already have an account?{' '}
+                    <button type="button" onClick={() => setMode('login')} className="link-button">
+                      Sign in
+                    </button>
+                  </p>
+                )}
+                {mode === 'verify' && (
+                  <p>
+                    Need to change email or password?{' '}
+                    <button type="button" onClick={() => setMode('register')} className="link-button">
+                      Start over
+                    </button>
+                  </p>
+                )}
+              </div>
+            </form>
           </div>
 
           <div className="back-home">

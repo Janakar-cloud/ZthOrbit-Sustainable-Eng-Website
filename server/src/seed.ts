@@ -18,14 +18,25 @@ async function main() {
   );
   const tagMap = Object.fromEntries(tagDocs.map((t) => [t.name, t._id]));
 
-  const adminEmail = "admin@zthorbit.local";
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "ChangeMe123!";
-  const adminHash = await bcrypt.hash(adminPassword, 10);
-  await User.findOneAndUpdate(
-    { email: adminEmail },
-    { email: adminEmail, passwordHash: adminHash, role: "admin", status: "active", name: "Admin" },
-    { upsert: true, new: true }
-  );
+  const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || "ChangeMe123!";
+  const testUsers = [
+    { email: "superadmin@zthorbit.local", role: "superadmin" as const, name: "Super Admin" },
+    { email: "janakar.ganesan@gmail.com", role: "superadmin" as const, name: "Janakar" },
+    { email: "admin1@zthorbit.local", role: "admin" as const, name: "Admin One" },
+    { email: "admin2@zthorbit.local", role: "admin" as const, name: "Admin Two" },
+    { email: "user1@zthorbit.local", role: "viewer" as const, name: "User One" },
+    { email: "user2@zthorbit.local", role: "viewer" as const, name: "User Two" },
+  ];
+  const primaryAdminEmail = testUsers[0].email;
+
+  for (const user of testUsers) {
+    const hash = await bcrypt.hash(defaultPassword, 10);
+    await User.findOneAndUpdate(
+      { email: user.email },
+      { email: user.email, passwordHash: hash, role: user.role, status: "active", name: user.name, emailVerified: true },
+      { upsert: true, new: true }
+    );
+  }
 
   await LiveConfig.findOneAndUpdate(
     {},
@@ -33,7 +44,7 @@ async function main() {
       streamUrl: "https://example.com/live.m3u8",
       title: "Live Sustainable Engineering Channel",
       description: "24/7 conversations on sustainability, technology, and impact.",
-      updatedBy: adminEmail,
+      updatedBy: primaryAdminEmail,
       updatedAt: new Date(),
     },
     { upsert: true }
@@ -42,58 +53,78 @@ async function main() {
   await Video.deleteMany({});
   await Video.insertMany([
     {
-      title: "Sustainable Development Goals: A Strategic Framework",
-      description: "Exploring sustainable development goals as a strategic framework for global stability.",
-      streamUrl: "https://example.com/videos/sdg.m3u8",
-      thumbnailUrl: "/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (5).jpg",
-      publishDate: new Date("2026-01-20"),
+      title: "Sustainability in Sanatana Dharma Part 1",
+      description: "Part 1 of the Sanatana Dharma sustainability series.",
+      streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+DharmaPART+1+(1).mp4",
+      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      publishDate: new Date("2026-03-01"),
       status: "published",
       isLive: false,
       tags: [tagMap.sustainability],
     },
     {
-      title: "AI for Sustainable Infrastructure",
-      description: "How AI is transforming environmental monitoring and infrastructure.",
-      streamUrl: "https://example.com/videos/ai-infra.m3u8",
-      thumbnailUrl: "/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg",
-      publishDate: new Date("2026-01-12"),
+      title: "Sustainability in Sanatana Dharma Part 2",
+      description: "Part 2 of the Sanatana Dharma sustainability series.",
+      streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+Dharma+PART+2.mp4",
+      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      publishDate: new Date("2026-03-02"),
       status: "published",
       isLive: false,
-      tags: [tagMap.technology],
-    },
-    {
-      title: "Responsible Finance 101",
-      description: "Principles for sustainable economic growth.",
-      streamUrl: "https://example.com/videos/finance.m3u8",
-      thumbnailUrl: "/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg",
-      publishDate: new Date("2026-01-05"),
-      status: "published",
-      isLive: false,
-      tags: [tagMap.economy],
+      tags: [tagMap.sustainability],
     },
   ]);
 
   await Podcast.deleteMany({});
   await Podcast.insertMany([
     {
-      title: "Welcome to the Sustainable Engineering Podcast",
-      description: "Introduction to the channel and what listeners can expect.",
-      audioUrl: "https://example.com/audio/episode1.mp3",
-      imageUrl: "https://example.com/images/episode1.jpg",
-      publishDate: new Date("2026-01-01"),
-      duration: "12:34",
+      title: "A Call from the Earth: Opportunities",
+      description: "Opportunities presented by Earth’s environmental challenges.",
+      audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/A+CALL+FROM+THE+EARTH+OPPORTUNITIES.m4a",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/A+CALL+FROM+THE+EARTH+OPPORTUNITIES.jpg",
+      publishDate: new Date("2026-03-01"),
+      duration: "45:30",
       status: "published",
       tags: [tagMap.sustainability],
     },
     {
-      title: "Artificial Intelligence as a Sustainability Enabler",
-      description: "AI use-cases driving sustainable development.",
-      audioUrl: "https://example.com/audio/episode2.mp3",
-      imageUrl: "https://example.com/images/episode2.jpg",
-      publishDate: new Date("2026-01-12"),
+      title: "Artificial Intelligence: A Great Enabler Towards Sustainable Development",
+      description: "How AI enables sustainable development.",
+      audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/ARTIFICIAL+INTELLIGENCE+IS+A+GREAT+ENABLER+TOWARDS+SUSTAINABLE+DEVELOPMENT.m4a",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/ARTIFICIAL+INTELLIGENCE+IS+A+GREAT+ENABLER+TOWARDS+SUSTAINABLE+DEVELOPMENT.jpg",
+      publishDate: new Date("2026-03-02"),
       duration: "52:15",
       status: "published",
       tags: [tagMap.technology],
+    },
+    {
+      title: "Digital Disruption: Case Studies & Cyber Hygiene",
+      description: "Case studies on digital disruption and cyber hygiene.",
+      audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/DIGITAL+DISRUPTION+CASE+STUDIES+%26+CYBER+HYGIENE.m4a",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/DIGITAL+DISRUPTION+CASE+STUDIES+%26+CYBER+HYGIENE.jpg",
+      publishDate: new Date("2026-03-03"),
+      duration: "48:20",
+      status: "published",
+      tags: [tagMap.technology],
+    },
+    {
+      title: "Examples to Understand Market Dynamics",
+      description: "Examples that explain market dynamics for sustainable growth.",
+      audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/EXAMPLES+TO+UNDERSTAND+MARKET+DYNAMICS.m4a",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/EXAMPLES+TO+UNDERSTAND+MARKET+DYNAMICS.jpg",
+      publishDate: new Date("2026-03-04"),
+      duration: "41:45",
+      status: "published",
+      tags: [tagMap.economy],
+    },
+    {
+      title: "Finance is Not Just Profit: It is Responsibility",
+      description: "Finance reimagined as responsibility as well as profit.",
+      audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/FINANCE+IS+NOT+JUST+PROFIT.+IT+IS+RESPONSIBILITY.m4a",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/FINANCE+IS+NOT+JUST+PROFIT.+IT+IS+RESPONSIBILITY.jpg",
+      publishDate: new Date("2026-03-05"),
+      duration: "39:30",
+      status: "published",
+      tags: [tagMap.economy],
     },
   ]);
 
@@ -163,7 +194,8 @@ async function main() {
     { kind: "cta", title: "Join the community", body: "Empowering sustainability through conscious leadership.", order: 20 },
   ]);
 
-  console.log("Seed complete. Admin login:", adminEmail, adminPassword);
+  console.log("Seed complete. Test users (password =", defaultPassword, "):");
+  testUsers.forEach((u) => console.log(`- ${u.role}: ${u.email}`));
   process.exit(0);
 }
 

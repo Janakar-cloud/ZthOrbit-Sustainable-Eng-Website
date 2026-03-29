@@ -36,7 +36,6 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="footer-list">
               <li><a onClick={() =>{ setActivePage('home'); onNavigate('home')}}>Home</a></li>
               <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv')}}>Videos</a></li>
-              <li><a onClick={() => { setActivePage('casestories'); onNavigate('casestories')}}>Case Stories</a></li>
             </ul>
           </div>
 
@@ -56,7 +55,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <p className="newsletter-description">
               Get the latest sustainability updates from our team.
             </p>
-            <form className="newsletter-form">
+            <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email"

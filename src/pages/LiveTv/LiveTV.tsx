@@ -84,6 +84,19 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     })
   }
 
+  
+
+  // select popvideo make live video pause
+  useEffect(() => {
+    if (videoRef.current) {
+      if (selectedVideo) {
+        videoRef.current.muted = true;   // mute when modal opens
+      } else {
+        videoRef.current.muted = false;  // unmute when modal closes
+      }
+    }
+  }, [selectedVideo]);
+
   // Filter videos (grid section)
   const filteredVideos =
     selectedCategory === 'all'

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './Signup.css';
+import { register } from '../../utils/api';
 
 interface SignupProps {
   onNavigate: (page: string) => void;
@@ -8,9 +9,12 @@ interface SignupProps {
 
 export default function Signup({ onNavigate, onComplete }: SignupProps) {
   const [step, setStep] = useState(1);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    password: '',
     organization: '',
     role: '',
     interests: [] as string[],
@@ -39,14 +43,27 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
     setFormData({ ...formData, interests: newInterests });
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      // Complete signup
-      setTimeout(() => {
+      // Final step: register user via API
+      setSignupError(null);
+      setIsSubmitting(true);
+      try {
+        await register({
+          email: formData.email.trim(),
+          password: formData.password.trim(),
+          name: formData.fullName.trim(),
+        });
+        // Registration successful, navigate to login for email verification
+        onNavigate('login');
         onComplete();
-      }, 1000);
+      } catch (err: unknown) {
+        setSignupError((err as Error)?.message || 'Registration failed. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -59,7 +76,7 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return formData.fullName && formData.email;
+        return formData.fullName && formData.email && formData.password && formData.password.length >= 8;
       case 2:
         return formData.interests.length > 0;
       case 3:
@@ -144,6 +161,19 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="password">
+                      Password <span className="required">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      placeholder="Minimum 8 characters"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
                     />
                   </div>
 
@@ -259,11 +289,11 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
               <button
                 className="btn-primary"
                 onClick={handleNext}
-                disabled={!isStepValid()}
+                disabled={!isStepValid() || isSubmitting}
               >
                 {step === 3 ? (
                   <>
-                    Complete Setup
+                    {isSubmitting ? 'Creating Account...' : 'Complete Setup'}
                     <span className="material-icons">check</span>
                   </>
                 ) : (
@@ -273,6 +303,9 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
                   </>
                 )}
               </button>
+              {signupError && (
+                <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '8px' }}>{signupError}</p>
+              )}
             </div>
           </div>
         </div>

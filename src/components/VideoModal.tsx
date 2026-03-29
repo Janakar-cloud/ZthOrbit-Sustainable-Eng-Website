@@ -7,6 +7,7 @@ export default function VideoModal({
   video: Video
   onClose: () => void
 }) {
+  const videoSrc = video.streamUrl || (video.videoId ? `https://drive.google.com/file/d/${video.videoId}/preview` : '')
   return (
      <div className="video-modal" onClick={onClose}>
           <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -14,12 +15,16 @@ export default function VideoModal({
               <span className="material-icons">close</span>
             </button>
             <div className="modal-video-wrapper">
-              <iframe
-                src={`https://drive.google.com/file/d/${video.videoId}/preview`}
-                allow="autoplay"
-                allowFullScreen
-                className="modal-video"
-              />
+              {video.streamUrl ? (
+                <video controls className="modal-video" src={videoSrc} />
+              ) : (
+                <iframe
+                  src={videoSrc}
+                  allow="autoplay"
+                  allowFullScreen
+                  className="modal-video"
+                />
+              )}
             </div>
             <div className="modal-info">
               <h3>{video.title}</h3>

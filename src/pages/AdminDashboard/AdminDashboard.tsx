@@ -1,5 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './AdminDashboard.css'
+import {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser as apiDeleteUser,
+  getVideos,
+  getPodcasts,
+  getPresignedUpload,
+} from '../../utils/api'
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void
@@ -23,6 +32,7 @@ interface PodcastUpload {
 
 interface User {
   id: number
+  _apiId?: string
   name: string
   email: string
   role: string
@@ -37,6 +47,7 @@ interface User {
 
 interface Video {
   id: number
+  _apiId?: string
   title: string
   category: string
   views: number
@@ -48,6 +59,7 @@ interface Video {
 
 interface Podcast {
   id: number
+  _apiId?: string
   title: string
   episode: string
   listens: number
@@ -136,6 +148,64 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     twitter: ''
   })
 
+  // Password field for new users
+  const [userPassword, setUserPassword] = useState('')
+
+  // Load data from API on mount
+  useEffect(() => {
+    getUsers()
+      .then((res) => {
+        if (res.items.length) {
+          setUsers(res.items.map((u, i) => ({
+            id: i + 1,
+            _apiId: u._id,
+            name: u.name || '',
+            email: u.email,
+            role: u.role.charAt(0).toUpperCase() + u.role.slice(1),
+            status: u.status.charAt(0).toUpperCase() + u.status.slice(1),
+            joinDate: u.createdAt?.split('T')[0] || '',
+          })))
+        }
+      })
+      .catch(() => { /* keep default */ })
+
+    getVideos()
+      .then((res) => {
+        if (res.items.length) {
+          setVideos(res.items.map((v, i) => ({
+            id: i + 1,
+            _apiId: v._id,
+            title: v.title,
+            category: (v.tags?.[0] || 'General'),
+            views: 0,
+            duration: v.duration || '',
+            uploadDate: v.publishDate?.split('T')[0] || '',
+            status: v.status === 'published' ? 'Published' : 'Draft',
+            description: v.description,
+          })))
+        }
+      })
+      .catch(() => { /* keep default */ })
+
+    getPodcasts()
+      .then((res) => {
+        if (res.items.length) {
+          setPodcasts(res.items.map((p, i) => ({
+            id: i + 1,
+            _apiId: p._id,
+            title: p.title,
+            episode: `Episode ${i + 1}`,
+            listens: 0,
+            duration: p.duration || '',
+            uploadDate: p.publishDate?.split('T')[0] || '',
+            status: p.status === 'published' ? 'Published' : 'Draft',
+            description: p.description,
+          })))
+        }
+      })
+      .catch(() => { /* keep default */ })
+  }, [])
+
   // CRUD Operations for Users
   const handleAddUser = () => {
     setEditingUser(null)
@@ -171,8 +241,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   const handleDeleteUser = (userId: number) => {
     if (confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(u => u.id !== userId))
-      alert('User deleted successfully!')
+      const user = users.find(u => u.id === userId)
+      if (user?._apiId) {
+        apiDeleteUser(user._apiId)
+          .then(() => {
+            setUsers(users.filter(u => u.id !== userId))
+            alert('User deleted successfully!')
+          })
+          .catch((err) => alert(`Failed to delete user: ${err.message}`))
+      } else {
+        setUsers(users.filter(u => u.id !== userId))
+        alert('User deleted successfully!')
+      }
     }
   }
 
@@ -183,24 +263,58 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
 
     if (editingUser) {
-      // Update existing user
-      setUsers(users.map(u => 
-        u.id === editingUser.id 
-          ? { ...u, ...userForm } 
-          : u
-      ))
-      alert('User updated successfully!')
-    } else {
-      // Add new user
-      const newUser: User = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...userForm,
-        joinDate: new Date().toISOString().split('T')[0]
+      const apiId = editingUser._apiId
+      if (apiId) {
+        updateUser(apiId, {
+          name: userForm.name,
+          role: userForm.role.toLowerCase(),
+          status: userForm.status.toLowerCase(),
+        })
+          .then(() => {
+            setUsers(users.map(u =>
+              u.id === editingUser.id
+                ? { ...u, ...userForm }
+                : u
+            ))
+            alert('User updated successfully!')
+            setShowUserModal(false)
+          })
+          .catch((err) => alert(`Failed to update user: ${err.message}`))
+      } else {
+        setUsers(users.map(u =>
+          u.id === editingUser.id
+            ? { ...u, ...userForm }
+            : u
+        ))
+        alert('User updated successfully!')
+        setShowUserModal(false)
       }
-      setUsers([...users, newUser])
-      alert('User added successfully!')
+    } else {
+      if (!userPassword || userPassword.length < 8) {
+        alert('Password must be at least 8 characters')
+        return
+      }
+      createUser({
+        email: userForm.email,
+        password: userPassword,
+        name: userForm.name,
+        role: userForm.role.toLowerCase(),
+        status: userForm.status.toLowerCase(),
+      })
+        .then((created) => {
+          const newUser: User = {
+            id: Math.max(0, ...users.map(u => u.id)) + 1,
+            _apiId: created._id,
+            ...userForm,
+            joinDate: new Date().toISOString().split('T')[0]
+          }
+          setUsers([...users, newUser])
+          setUserPassword('')
+          alert('User added successfully!')
+          setShowUserModal(false)
+        })
+        .catch((err) => alert(`Failed to create user: ${err.message}`))
     }
-    setShowUserModal(false)
   }
 
   // CRUD Operations for Videos
@@ -342,56 +456,94 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   const handleVideoSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!videoData.file || !videoData.thumbnail) {
+      alert('Please select both a video file and thumbnail')
+      return
+    }
     setIsUploading(true)
-    
-    // Simulate upload progress
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 10
-      setUploadProgress(progress)
-      if (progress >= 100) {
-        clearInterval(interval)
-        setTimeout(() => {
-          setIsUploading(false)
-          setUploadProgress(0)
-          setVideoData({
-            title: '',
-            description: '',
-            category: 'sustainability',
-            file: null,
-            thumbnail: null
-          })
-          alert('Video uploaded successfully!')
-        }, 500)
-      }
-    }, 200)
+    setUploadProgress(10)
+
+    try {
+      // Get presigned URLs for both files
+      const [videoPresign, thumbPresign] = await Promise.all([
+        getPresignedUpload('videos', videoData.file.type),
+        getPresignedUpload('thumbnails', videoData.thumbnail.type),
+      ])
+      setUploadProgress(30)
+
+      // Upload files to S3
+      await Promise.all([
+        fetch(videoPresign.url, { method: 'PUT', body: videoData.file, headers: { 'Content-Type': videoData.file.type } }),
+        fetch(thumbPresign.url, { method: 'PUT', body: videoData.thumbnail, headers: { 'Content-Type': videoData.thumbnail.type } }),
+      ])
+      setUploadProgress(70)
+
+      // Create video record in backend
+      const { createVideo } = await import('../../utils/api')
+      await createVideo({
+        title: videoData.title,
+        description: videoData.description,
+        streamUrl: videoPresign.fileUrl,
+        thumbnailUrl: thumbPresign.fileUrl,
+        tags: [videoData.category],
+      })
+      setUploadProgress(100)
+
+      setTimeout(() => {
+        setIsUploading(false)
+        setUploadProgress(0)
+        setVideoData({ title: '', description: '', category: 'sustainability', file: null, thumbnail: null })
+        alert('Video uploaded successfully!')
+      }, 500)
+    } catch (err: unknown) {
+      setIsUploading(false)
+      setUploadProgress(0)
+      alert(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    }
   }
 
   const handlePodcastSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!podcastData.file || !podcastData.cover) {
+      alert('Please select both an audio file and cover image')
+      return
+    }
     setIsUploading(true)
-    
-    // Simulate upload progress
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 10
-      setUploadProgress(progress)
-      if (progress >= 100) {
-        clearInterval(interval)
-        setTimeout(() => {
-          setIsUploading(false)
-          setUploadProgress(0)
-          setPodcastData({
-            title: '',
-            description: '',
-            episode: '',
-            file: null,
-            cover: null
-          })
-          alert('Podcast uploaded successfully!')
-        }, 500)
-      }
-    }, 200)
+    setUploadProgress(10)
+
+    try {
+      const [audioPresign, coverPresign] = await Promise.all([
+        getPresignedUpload('podcasts', podcastData.file.type),
+        getPresignedUpload('podcast-covers', podcastData.cover.type),
+      ])
+      setUploadProgress(30)
+
+      await Promise.all([
+        fetch(audioPresign.url, { method: 'PUT', body: podcastData.file, headers: { 'Content-Type': podcastData.file.type } }),
+        fetch(coverPresign.url, { method: 'PUT', body: podcastData.cover, headers: { 'Content-Type': podcastData.cover.type } }),
+      ])
+      setUploadProgress(70)
+
+      const { createPodcast } = await import('../../utils/api')
+      await createPodcast({
+        title: podcastData.title,
+        description: podcastData.description,
+        audioUrl: audioPresign.fileUrl,
+        imageUrl: coverPresign.fileUrl,
+      })
+      setUploadProgress(100)
+
+      setTimeout(() => {
+        setIsUploading(false)
+        setUploadProgress(0)
+        setPodcastData({ title: '', description: '', episode: '', file: null, cover: null })
+        alert('Podcast uploaded successfully!')
+      }, 500)
+    } catch (err: unknown) {
+      setIsUploading(false)
+      setUploadProgress(0)
+      alert(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    }
   }
 
   return (
@@ -1100,6 +1252,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     />
                   </div>
                 </div>
+                {!editingUser && (
+                  <div className="form-group">
+                    <label>Password *</label>
+                    <input
+                      type="password"
+                      value={userPassword}
+                      onChange={(e) => setUserPassword(e.target.value)}
+                      placeholder="Min 8 characters"
+                      minLength={8}
+                    />
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Role *</label>

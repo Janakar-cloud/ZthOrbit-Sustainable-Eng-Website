@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../style/Articles.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -7,14 +7,37 @@ import CategoryFilter from '../Podcast/components/CategoryFilter'
 import PodcastHero from '../Podcast/components/PodcastHero'
 import { ArticlesProps, Article } from './type/type'
 import ArticlesList from './components/ArticlesList'
-import { articles, categories } from './data/data'
+import { articles as localArticles, categories } from './data/data'
 import ArticleDetails from './components/ArticleDetails'
+import { getArticles } from '../../utils/api'
 
 
 export default function Articles({ onNavigate }: ArticlesProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const { darkMode, setActivePage } = useAppContext()
+  const [articles, setArticles] = useState<Article[]>(localArticles)
+
+  useEffect(() => {
+    getArticles()
+      .then((res) => {
+        if (res.items.length) {
+          const mapped: Article[] = res.items.map((a, i) => ({
+            id: i + 1,
+            title: a.title,
+            subtitle: a.subtitle || '',
+            category: (a.tags?.[0] || 'general').toLowerCase(),
+            readTime: a.readTime || '',
+            date: a.publishDate || '',
+            content: a.bodyMd ? a.bodyMd.split('\n\n') : [],
+            featured: a.featured,
+            image: a.coverImage || '',
+          }))
+          setArticles(mapped)
+        }
+      })
+      .catch(() => { /* fallback to local data */ })
+  }, [])
 
   const filteredArticles = selectedCategory === 'all'
     ? articles

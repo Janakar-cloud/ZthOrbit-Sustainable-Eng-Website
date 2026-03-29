@@ -1,6 +1,18 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 
-dotenv.config();
+const currentFile = fileURLToPath(import.meta.url);
+const currentDir = path.dirname(currentFile);
+const candidateEnvPaths = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(currentDir, "../../.env"),
+  path.resolve(currentDir, "../../../.env"),
+];
+const envPath = candidateEnvPaths.find((candidate) => existsSync(candidate));
+
+dotenv.config(envPath ? { path: envPath } : undefined);
 
 const required = [
   "MONGODB_URI",
@@ -48,4 +60,21 @@ export const env = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER || "",
     secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
   },
+  live: {
+    accessMode: (() => {
+      const mode = (process.env.LIVE_ACCESS_MODE || "direct").toLowerCase();
+      if (mode === "cloudfront") return "cloudfront";
+      if (mode === "s3_playlist") return "s3_playlist";
+      return "direct";
+    })(),
+    s3Folder: process.env.LIVE_S3_FOLDER || "LiveTV",
+  },
+  cloudFront: {
+    streamDomain: process.env.CF_STREAM_DOMAIN || "",
+    keyPairId: process.env.CF_KEY_PAIR_ID || "",
+    privateKey: (process.env.CF_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+    cookieTtlSeconds: Number(process.env.CF_COOKIE_TTL_SECONDS || 600),
+    cookieDomain: process.env.CF_COOKIE_DOMAIN || "",
+  },
+  envPath: envPath || "",
 };

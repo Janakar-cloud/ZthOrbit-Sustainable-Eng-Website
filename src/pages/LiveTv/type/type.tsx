@@ -9,6 +9,7 @@ export interface VideoCategory {
 
 export interface VideoCategoryFiltersProps {
   selectedCategory: string
+  categories: VideoCategory[]
   onCategoryChange: (category: string) => void
 }
 

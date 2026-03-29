@@ -10,7 +10,7 @@ const schema = z.object({
   contentType: z.string().min(1),
 });
 
-router.post("/presign", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/presign", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const { prefix, contentType } = parsed.data;

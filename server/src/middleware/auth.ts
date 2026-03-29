@@ -4,7 +4,7 @@ import { env } from "../config/env.js";
 
 export interface AuthUser {
   id: string;
-  role: "admin" | "editor" | "viewer";
+  role: "superadmin" | "admin" | "editor" | "viewer";
   email: string;
 }
 

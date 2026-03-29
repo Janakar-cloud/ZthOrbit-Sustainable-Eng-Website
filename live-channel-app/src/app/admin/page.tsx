@@ -23,8 +23,8 @@ function toMessage(error: unknown, fallback: string) {
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(null);
-  const [email, setEmail] = useState(process.env.ADMIN_EMAIL || "");
-  const [password, setPassword] = useState(process.env.ADMIN_PASSWORD || "");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -162,8 +162,8 @@ export default function AdminPage() {
         >
           <h1 className="text-lg font-semibold">Admin Login</h1>
           <p className="text-sm text-slate-600">
-            Sign in with the admin credentials configured in your environment
-            to obtain a JWT for protected actions.
+            Sign in with a valid administrator account to obtain a JWT for
+            protected actions.
           </p>
           {!API_BASE && (
             <div className="rounded bg-amber-100 border border-amber-300 text-amber-900 text-xs p-3">

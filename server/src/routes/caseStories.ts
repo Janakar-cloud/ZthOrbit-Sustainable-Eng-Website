@@ -2,16 +2,25 @@ import { Router } from "express";
 import { z } from "zod";
 import { CaseStory } from "../models/CaseStory.js";
 import { requireAuth } from "../middleware/auth.js";
+import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const { tag } = req.query;
+  const { tag, search } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
   const skip = (page - 1) * pageSize;
   const filter: any = {};
   if (tag) filter.tags = tag;
+  if (search) {
+    const safe = escapeRegex(search as string);
+    filter.$or = [
+      { title: new RegExp(safe, "i") },
+      { impact: new RegExp(safe, "i") },
+      { bodyMd: new RegExp(safe, "i") },
+    ];
+  }
   const [items, total] = await Promise.all([
     CaseStory.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize),
     CaseStory.countDocuments(filter),
@@ -36,14 +45,14 @@ const storySchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-router.post("/", requireAuth(["admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = storySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const created = await CaseStory.create(parsed.data);
   res.status(201).json(created);
 });
 
-router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = storySchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const updated = await CaseStory.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
@@ -51,7 +60,7 @@ router.put("/:id", requireAuth(["admin", "editor"]), async (req, res) => {
   res.json(updated);
 });
 
-router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const deleted = await CaseStory.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();

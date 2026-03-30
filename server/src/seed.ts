@@ -61,6 +61,9 @@ async function main() {
       status: "published",
       isLive: false,
       tags: [tagMap.Aether],
+      seriesId: "sanatana-dharma",
+      partNumber: 1,
+      partTitle: "Part 1",
     },
     {
       title: "Sustainability in Sanatana Dharma Part 2",
@@ -71,6 +74,9 @@ async function main() {
       status: "published",
       isLive: false,
       tags: [tagMap.Aether],
+      seriesId: "sanatana-dharma",
+      partNumber: 2,
+      partTitle: "Part 2",
     },
   ]);
 

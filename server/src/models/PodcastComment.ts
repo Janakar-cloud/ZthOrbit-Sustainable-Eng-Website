@@ -5,6 +5,7 @@ export interface IPodcastComment {
   author: string;
   message: string;
   status: "visible" | "hidden";
+  parentCommentId?: Types.ObjectId;
   createdAt: Date;
 }
 
@@ -14,6 +15,7 @@ const podcastCommentSchema = new Schema<IPodcastComment>(
     author: { type: String, required: true },
     message: { type: String, required: true },
     status: { type: String, enum: ["visible", "hidden"], default: "visible" },
+    parentCommentId: { type: Schema.Types.ObjectId, ref: "PodcastComment" },
     createdAt: { type: Date, default: () => new Date() },
   },
   { timestamps: false }

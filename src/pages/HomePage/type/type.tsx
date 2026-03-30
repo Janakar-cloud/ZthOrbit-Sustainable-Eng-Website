@@ -13,6 +13,9 @@ export interface Video {
   publishDate: string
   thumbnail: string
   tags?: string[]
+  seriesId?: string
+  partNumber?: number
+  partTitle?: string
 }
 
 export interface Podcast {

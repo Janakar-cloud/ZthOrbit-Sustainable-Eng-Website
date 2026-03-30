@@ -22,7 +22,11 @@ router.get("/", async (req, res) => {
   if (tag) filter.tags = tag;
   if (status) filter.status = status;
   const [items, total] = await Promise.all([
-    Video.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).populate("tags", "name kind"),
+    Video.find(filter)
+      .sort({ seriesId: 1, partNumber: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .populate("tags", "name kind"),
     Video.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });
@@ -38,6 +42,9 @@ const videoSchema = z.object({
   status: z.enum(["draft", "published"]).default("published"),
   isLive: z.boolean().default(false),
   tags: z.array(z.string()).optional().default([]),
+  seriesId: z.string().min(1).optional(),
+  partNumber: z.number().int().positive().optional(),
+  partTitle: z.string().min(1).optional(),
 });
 
 router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {

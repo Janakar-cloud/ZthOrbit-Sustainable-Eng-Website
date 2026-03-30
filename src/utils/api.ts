@@ -215,6 +215,19 @@ export interface VideoItem {
   status: string;
   isLive: boolean;
   tags: string[];
+  seriesId?: string;
+  partNumber?: number;
+  partTitle?: string;
+}
+
+export interface PodcastComment {
+  _id: string
+  podcastId: string
+  author: string
+  message: string
+  status: "visible" | "hidden"
+  parentCommentId?: string
+  createdAt: string
 }
 
 export function getVideos(params?: { tag?: string; page?: number }) {
@@ -234,6 +247,31 @@ export function updateVideo(id: string, data: Partial<{ title: string; descripti
 
 export function deleteVideo(id: string) {
   return request<void>(`/videos/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+// Podcast comments
+export function getPodcastComments(podcastId: string) {
+  return request<PodcastComment[]>(`/podcasts/${encodeURIComponent(podcastId)}/comments`);
+}
+
+export function addPodcastComment(podcastId: string, data: { author: string; message: string; parentCommentId?: string }) {
+  return request<PodcastComment>(`/podcasts/${encodeURIComponent(podcastId)}/comments`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updatePodcastCommentStatus(podcastId: string, commentId: string, status: "visible" | "hidden") {
+  return request<PodcastComment>(`/podcasts/${encodeURIComponent(podcastId)}/comments/${encodeURIComponent(commentId)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function deletePodcastComment(podcastId: string, commentId: string) {
+  return request<void>(`/podcasts/${encodeURIComponent(podcastId)}/comments/${encodeURIComponent(commentId)}`, {
+    method: "DELETE",
+  });
 }
 
 // ─── Admin: Dashboard Summary ────────────────────────────────────

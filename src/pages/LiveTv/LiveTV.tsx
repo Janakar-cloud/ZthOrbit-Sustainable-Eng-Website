@@ -56,9 +56,25 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
             publishDate: item.publishDate || '',
             thumbnail: item.thumbnailUrl || '/assets/livetv/placeholder.jpg',
             tags,
+            seriesId: item.seriesId,
+            partNumber: item.partNumber,
+            partTitle: item.partTitle,
           }
         })
-        setVideos(mapped)
+        // Sort by series/part first, then fallback to title as tiebreaker
+        const ordered = [...mapped].sort((a, b) => {
+          if (a.seriesId && b.seriesId) {
+            if (a.seriesId === b.seriesId) {
+              return (a.partNumber ?? 0) - (b.partNumber ?? 0)
+            }
+            return a.seriesId.localeCompare(b.seriesId)
+          }
+          if (a.seriesId) return -1
+          if (b.seriesId) return 1
+          return a.title.localeCompare(b.title)
+        })
+
+        setVideos(ordered)
 
         const derivedCategories: VideoCategory[] = Array.from(
           new Set(mapped.map((v) => v.category))

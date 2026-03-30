@@ -1,23 +1,19 @@
 import axios from "axios";
+import process from "process";
+const API_URL = process.env.VITE_APP_API_URL;
 
-// Read from Vite environment variable
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:4000/api/v1";
-
-console.log("[axiosClient] API Base URL:", API_BASE);
+console.log("api url ========= "+ API_URL);
 
 const axiosClient = axios.create({
-  baseURL: API_BASE,
+  baseURL: "/api/v1",
   timeout: 10000,
-  withCredentials: true,  // Required for CORS with credentials
-  headers: {
-    "Content-Type": "application/json",
-    // Don't set Access-Control-Allow-Origin - that's a response header from server!
-  },
+  withCredentials: true,
+
 });
 
 // Request Interceptor
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");  // Use accessToken (not "token")
+  const token = localStorage.getItem("token");
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }

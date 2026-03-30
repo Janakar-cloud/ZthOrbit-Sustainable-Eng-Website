@@ -12,3 +12,10 @@ export interface PodcastEpisode {
   createdAt: string; // ISO date
   updatedAt: string; // ISO date
 }
+
+export interface PodcastApiResponse {
+  items: PodcastEpisode[]
+  total: number
+  page: number
+  pageSize: number
+}

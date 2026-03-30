@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "proxy": "http://13.205.72.30",
+  "proxy": "http://13.205.72.3:4000",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -33,6 +33,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.71.1",
+    "react-spinners": "^0.17.0",
     "resend": "^6.8.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.10"

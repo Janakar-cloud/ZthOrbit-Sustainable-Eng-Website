@@ -13,6 +13,7 @@ export interface Article {
   content: string[]
   featured: boolean
   image: string
+  docUrl?: string
 }
 
 

@@ -5,6 +5,9 @@ export default function ArticleDetails({
   categories,
 }: ArticleDetailsProps) {
   const category = categories.find(c => c.id === article.category)
+  const docEmbed = article.docUrl && article.docUrl.endsWith('.docx')
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(article.docUrl)}`
+    : null
 
   return (
     <article className="article-full">
@@ -49,6 +52,18 @@ export default function ArticleDetails({
 
         {/* Body */}
         <div className="article-body">
+          {docEmbed && (
+            <div className="article-doc-embed">
+              <iframe
+                title="article-document"
+                src={docEmbed}
+                width="100%"
+                height="800"
+                style={{ border: 'none' }}
+              />
+            </div>
+          )}
+
           {article.content.map((paragraph, index) => (
             <p
               key={index}

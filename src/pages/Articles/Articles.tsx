@@ -29,9 +29,15 @@ export default function Articles({ onNavigate }: ArticlesProps) {
             category: (a.tags?.[0] || 'general').toLowerCase(),
             readTime: a.readTime || '',
             date: a.publishDate || '',
-            content: a.bodyMd ? a.bodyMd.split('\n\n') : [],
+            content: (() => {
+              const docUrl = typeof a.bodyMd === 'string' ? (a.bodyMd.match(/https?:\/\/\S+/)?.[0] || '') : ''
+              const paragraphs = a.bodyMd ? a.bodyMd.split('\n\n') : []
+              // Drop the raw URL paragraph if present; will show embed instead.
+              return paragraphs.filter(p => !docUrl || !p.includes(docUrl))
+            })(),
             featured: a.featured,
             image: a.coverImage || '',
+            docUrl: typeof a.bodyMd === 'string' ? (a.bodyMd.match(/https?:\/\/\S+/)?.[0] || undefined) : undefined,
           }))
           setArticles(mapped)
         }

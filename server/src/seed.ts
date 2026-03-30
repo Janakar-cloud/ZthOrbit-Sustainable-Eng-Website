@@ -12,7 +12,7 @@ import { AboutBlock } from "./models/AboutBlock.js";
 async function main() {
   await connectDb();
 
-  const categoryNames = ["sustainability", "technology", "economy", "leadership", "ethics", "innovation"];
+  const categoryNames = ["sustainability", "technology", "economy", "leadership", "ethics", "innovation", "karma", "nature"];
   const tagDocs = await Promise.all(
     categoryNames.map((name) => Tag.findOneAndUpdate({ name }, { name, kind: "category" }, { upsert: true, new: true }))
   );
@@ -56,21 +56,21 @@ async function main() {
       title: "Sustainability in Sanatana Dharma Part 1",
       description: "Part 1 of the Sanatana Dharma sustainability series.",
       streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+DharmaPART+1+(1).mp4",
-      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      thumbnailUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/Sustainability+in+sanatana+Dharma+PART+1.jpg",
       publishDate: new Date("2026-03-01"),
       status: "published",
       isLive: false,
-      tags: [tagMap.sustainability],
+      tags: [tagMap.karma, tagMap.nature],
     },
     {
       title: "Sustainability in Sanatana Dharma Part 2",
       description: "Part 2 of the Sanatana Dharma sustainability series.",
       streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+Dharma+PART+2.mp4",
-      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      thumbnailUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/Sustainability+in+sanatana+Dharma+PART+2.jpg",
       publishDate: new Date("2026-03-02"),
       status: "published",
       isLive: false,
-      tags: [tagMap.sustainability],
+      tags: [tagMap.karma, tagMap.nature],
     },
   ]);
 

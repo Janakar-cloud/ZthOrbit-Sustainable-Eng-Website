@@ -131,12 +131,12 @@ async function main() {
   await Article.deleteMany({});
   await Article.insertMany([
     {
-      title: "Digital Ecosystems as Drivers of Sustainable Growth",
+      title: "The Digital Ecosystem as the New Driver of Sustainable Economic Growth",
       subtitle: "From economic fixes to structural transformation",
       bodyMd:
-        "In an era marked by economic uncertainty and environmental stress, digital ecosystems are redefining sustainability, resilience, and long-term momentum...",
+        "Full article hosted in S3: https://greentv-s3.s3.ap-south-1.amazonaws.com/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.docx",
       readTime: "8 min",
-      coverImage: "/assets/images/digital ecosystem as a new driver of sustainable economic growth .png",
+      coverImage: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.png",
       publishDate: new Date("2026-01-15"),
       status: "published",
       featured: true,

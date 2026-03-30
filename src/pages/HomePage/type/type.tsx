@@ -12,6 +12,7 @@ export interface Video {
   category: string
   publishDate: string
   thumbnail: string
+  tags?: string[]
 }
 
 export interface Podcast {

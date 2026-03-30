@@ -22,7 +22,7 @@ router.get("/", async (req, res) => {
   if (tag) filter.tags = tag;
   if (status) filter.status = status;
   const [items, total] = await Promise.all([
-    Video.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize),
+    Video.find(filter).sort({ createdAt: -1 }).skip(skip).limit(pageSize).populate("tags", "name kind"),
     Video.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });

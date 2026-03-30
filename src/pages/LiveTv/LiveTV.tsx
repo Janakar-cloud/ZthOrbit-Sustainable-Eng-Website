@@ -38,16 +38,26 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         setLoading(true)
         const res = await getVideos()
         const items = (res as any)?.items ?? (res as any)?.data ?? []
-        const mapped: Video[] = items.map((item: any, idx: number) => ({
-          id: idx + 1,
-          title: item.title,
-          description: item.description || '',
-          videoId: item.videoId,
-          streamUrl: item.streamUrl || item.hlsUrl || item.url,
-          category: (item.tags?.[0] || 'general') as string,
-          publishDate: item.publishDate || '',
-          thumbnail: item.thumbnailUrl || '/assets/livetv/placeholder.jpg',
-        }))
+        const mapped: Video[] = items.map((item: any, idx: number) => {
+          const tags = Array.isArray(item.tags)
+            ? item.tags
+                .map((t: any) => (typeof t === 'string' ? t : t?.name))
+                .filter(Boolean)
+            : []
+          const primaryCategory = (tags[0] as string) || 'general'
+
+          return {
+            id: idx + 1,
+            title: item.title,
+            description: item.description || '',
+            videoId: item.videoId,
+            streamUrl: item.streamUrl || item.hlsUrl || item.url,
+            category: primaryCategory,
+            publishDate: item.publishDate || '',
+            thumbnail: item.thumbnailUrl || '/assets/livetv/placeholder.jpg',
+            tags,
+          }
+        })
         setVideos(mapped)
 
         const derivedCategories: VideoCategory[] = Array.from(

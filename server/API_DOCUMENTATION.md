@@ -63,6 +63,49 @@ const allMedia = await fetch('/api/media?search=climate');
 
 ---
 
+## 🛠 Dashboard API Quick Reference (Frontend)
+
+Use these for admin upload/edit flows. All write routes need `Authorization: Bearer <accessToken>` with role `superadmin`/`admin`/`editor` as noted.
+
+### Uploads (presigned S3)
+- POST `/uploads/presign` (superadmin/admin/editor)
+  - Body: `{ "prefix": "Thumbnail/videos/filename.jpg", "contentType": "image/jpeg" }`
+  - Returns: presigned URL/fields; `PUT`/form upload file, then store the resulting S3 URL in create/update payloads.
+
+### Categories (tags)
+- GET `/tags?kind=category` → use for category dropdowns. Each returned tag `_id` goes into `tags: ["<id>"]` in create/update payloads.
+
+### Media (preferred for videos + podcasts)
+- GET `/media?menu=LiveTv&mediaType=video&category=<tagId>&page=1&limit=50` (videos)
+- GET `/media?menu=Podcast&mediaType=audio&category=<tagId>&page=1&limit=50` (podcasts)
+- POST `/media` (superadmin/admin/editor)
+  - Body (video example): `{ "title","description","menu":"LiveTv","mediaType":"video","streamUrl","thumbnailUrl","tags":["<tagId>"],"status":"published","publishDate":"2026-03-01","seriesId":"series-key","partNumber":1,"partTitle":"Part 1" }`
+  - Body (podcast example): same but `menu:"Podcast"`, `mediaType:"audio"`, `fileUrl` (or `audioUrl` if using legacy), `thumbnailUrl`.
+- PUT `/media/:id` (superadmin/admin/editor) → partial update, same fields as POST.
+- DELETE `/media/:id` (superadmin) → remove item.
+
+### Legacy Videos (if still used)
+- POST `/videos` / PUT `/videos/:id` accept `seriesId`, `partNumber`, `partTitle`, `thumbnailUrl`, `streamUrl`, `tags`, `status`, `publishDate`.
+
+### Articles
+- GET `/articles` (supports `status`, paging)
+- POST `/articles` (superadmin/admin/editor)
+  - Body: `{ "title","subtitle","bodyMd","coverImage","tags":["<tagId>"],"status":"published","publishDate":"2026-01-15","readTime":"8 min","featured":true }`
+  - For docx content, set `bodyMd` to include the doc URL (frontend embeds via Office viewer).
+- PUT `/articles/:id` (superadmin/admin/editor) → partial update.
+- PATCH `/articles/:id/status` → `{ "status": "published" | "draft" }`
+- DELETE `/articles/:id` (superadmin/admin)
+
+### Podcast Comments (with replies)
+- GET `/podcasts/:id/comments` → visible comments, sorted oldest-first.
+- POST `/podcasts/:id/comments` → `{ "author", "message", "parentCommentId"? }` (any user). If `parentCommentId` is set, it must belong to the same podcast.
+- GET `/podcasts/:id/comments/all` (superadmin/admin/editor) → includes hidden.
+- PATCH `/podcasts/:podcastId/comments/:commentId/status` (superadmin/admin/editor) → `{ "status": "visible" | "hidden" }`.
+- DELETE `/podcasts/:podcastId/comments/:commentId` (superadmin/admin).
+
+### Admin auth basics
+- POST `/auth/login` → store `accessToken` and send as `Authorization: Bearer <token>` for the above write routes.
+
 ## Authentication & Authorization
 
 ### POST `/auth/register`

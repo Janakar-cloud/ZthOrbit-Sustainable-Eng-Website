@@ -10,6 +10,9 @@ export interface IVideo {
   status: "draft" | "published";
   isLive: boolean;
   tags: Types.ObjectId[];
+  seriesId?: string;
+  partNumber?: number;
+  partTitle?: string;
   metadata?: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
@@ -26,6 +29,9 @@ const videoSchema = new Schema<IVideo>(
     status: { type: String, enum: ["draft", "published"], default: "published" },
     isLive: { type: Boolean, default: false },
     tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
+    seriesId: { type: String },
+    partNumber: { type: Number },
+    partTitle: { type: String },
     metadata: { type: Schema.Types.Mixed },
   },
   { timestamps: true }

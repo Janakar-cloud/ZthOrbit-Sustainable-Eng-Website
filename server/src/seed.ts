@@ -12,7 +12,7 @@ import { AboutBlock } from "./models/AboutBlock.js";
 async function main() {
   await connectDb();
 
-  const categoryNames = ["sustainability", "technology", "economy", "leadership", "ethics", "innovation"];
+  const categoryNames = ["Aether", "Materia", "Aqua", "Terra", "Civitas"];
   const tagDocs = await Promise.all(
     categoryNames.map((name) => Tag.findOneAndUpdate({ name }, { name, kind: "category" }, { upsert: true, new: true }))
   );
@@ -56,21 +56,27 @@ async function main() {
       title: "Sustainability in Sanatana Dharma Part 1",
       description: "Part 1 of the Sanatana Dharma sustainability series.",
       streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+DharmaPART+1+(1).mp4",
-      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      thumbnailUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/videos/Sustainability+in+sanatana+Dharma+PART+1.jpg",
       publishDate: new Date("2026-03-01"),
       status: "published",
       isLive: false,
-      tags: [tagMap.sustainability],
+      tags: [tagMap.Aether],
+      seriesId: "sanatana-dharma",
+      partNumber: 1,
+      partTitle: "Part 1",
     },
     {
       title: "Sustainability in Sanatana Dharma Part 2",
       description: "Part 2 of the Sanatana Dharma sustainability series.",
       streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+Dharma+PART+2.mp4",
-      thumbnailUrl: "/assets/livetv/placeholder.jpg",
+      thumbnailUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/videos/Sustainability+in+sanatana+Dharma+PART+2.jpg",
       publishDate: new Date("2026-03-02"),
       status: "published",
       isLive: false,
-      tags: [tagMap.sustainability],
+      tags: [tagMap.Aether],
+      seriesId: "sanatana-dharma",
+      partNumber: 2,
+      partTitle: "Part 2",
     },
   ]);
 
@@ -80,7 +86,7 @@ async function main() {
       title: "A Call from the Earth: Opportunities",
       description: "Opportunities presented by Earth’s environmental challenges.",
       audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/A+CALL+FROM+THE+EARTH+OPPORTUNITIES.m4a",
-      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/A+CALL+FROM+THE+EARTH+OPPORTUNITIES.jpg",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/podcast/A%20CALL%20FROM%20THE%20EARTH%20OPPORTUNITIES.jpg",
       publishDate: new Date("2026-03-01"),
       duration: "45:30",
       status: "published",
@@ -90,7 +96,7 @@ async function main() {
       title: "Artificial Intelligence: A Great Enabler Towards Sustainable Development",
       description: "How AI enables sustainable development.",
       audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/ARTIFICIAL+INTELLIGENCE+IS+A+GREAT+ENABLER+TOWARDS+SUSTAINABLE+DEVELOPMENT.m4a",
-      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/ARTIFICIAL+INTELLIGENCE+IS+A+GREAT+ENABLER+TOWARDS+SUSTAINABLE+DEVELOPMENT.jpg",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/podcast/ARTIFICIAL%20INTELLIGENCE%20IS%20A%20GREAT%20ENABLER%20TOWARDS%20SUSTAINABLE%20DEVELOPMENT.jpg",
       publishDate: new Date("2026-03-02"),
       duration: "52:15",
       status: "published",
@@ -100,7 +106,7 @@ async function main() {
       title: "Digital Disruption: Case Studies & Cyber Hygiene",
       description: "Case studies on digital disruption and cyber hygiene.",
       audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/DIGITAL+DISRUPTION+CASE+STUDIES+%26+CYBER+HYGIENE.m4a",
-      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/DIGITAL+DISRUPTION+CASE+STUDIES+%26+CYBER+HYGIENE.jpg",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/podcast/DIGITAL%20DISRUPTION%20CASE%20STUDIES%20%26%20CYBER%20HYGIENE.webp",
       publishDate: new Date("2026-03-03"),
       duration: "48:20",
       status: "published",
@@ -110,7 +116,7 @@ async function main() {
       title: "Examples to Understand Market Dynamics",
       description: "Examples that explain market dynamics for sustainable growth.",
       audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/EXAMPLES+TO+UNDERSTAND+MARKET+DYNAMICS.m4a",
-      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/EXAMPLES+TO+UNDERSTAND+MARKET+DYNAMICS.jpg",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/podcast/EXAMPLES%20TO%20UNDERSTAND%20MARKET%20DYNAMICS.jpg",
       publishDate: new Date("2026-03-04"),
       duration: "41:45",
       status: "published",
@@ -120,7 +126,7 @@ async function main() {
       title: "Finance is Not Just Profit: It is Responsibility",
       description: "Finance reimagined as responsibility as well as profit.",
       audioUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/FINANCE+IS+NOT+JUST+PROFIT.+IT+IS+RESPONSIBILITY.m4a",
-      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/podcast/FINANCE+IS+NOT+JUST+PROFIT.+IT+IS+RESPONSIBILITY.jpg",
+      imageUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/podcast/FINANCE%20IS%20NOT%20JUST%20PROFIT.%20IT%20IS%20RESPONSIBILITY.jpg",
       publishDate: new Date("2026-03-05"),
       duration: "39:30",
       status: "published",
@@ -131,12 +137,12 @@ async function main() {
   await Article.deleteMany({});
   await Article.insertMany([
     {
-      title: "Digital Ecosystems as Drivers of Sustainable Growth",
+      title: "The Digital Ecosystem as the New Driver of Sustainable Economic Growth",
       subtitle: "From economic fixes to structural transformation",
       bodyMd:
-        "In an era marked by economic uncertainty and environmental stress, digital ecosystems are redefining sustainability, resilience, and long-term momentum...",
+        "Full article hosted in S3: https://greentv-s3.s3.ap-south-1.amazonaws.com/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.docx",
       readTime: "8 min",
-      coverImage: "/assets/images/digital ecosystem as a new driver of sustainable economic growth .png",
+      coverImage: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.png",
       publishDate: new Date("2026-01-15"),
       status: "published",
       featured: true,

@@ -61,19 +61,29 @@ router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => 
   res.status(204).send();
 });
 
-const commentSchema = z.object({ author: z.string().min(1), message: z.string().min(1) });
+const commentSchema = z.object({
+  author: z.string().min(1),
+  message: z.string().min(1),
+  parentCommentId: z.string().optional(),
+});
 
 router.post("/:id/comments", async (req, res) => {
   const parsed = commentSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const exists = await Podcast.findById(req.params.id);
   if (!exists) return res.status(404).json({ error: "Podcast not found" });
+
+  if (parsed.data.parentCommentId) {
+    const parent = await PodcastComment.findOne({ _id: parsed.data.parentCommentId, podcastId: req.params.id });
+    if (!parent) return res.status(400).json({ error: "Parent comment not found for this podcast" });
+  }
+
   const comment = await PodcastComment.create({ podcastId: exists._id, ...parsed.data, createdAt: new Date(), status: "visible" });
   res.status(201).json(comment);
 });
 
 router.get("/:id/comments", async (req, res) => {
-  const comments = await PodcastComment.find({ podcastId: req.params.id, status: "visible" }).sort({ createdAt: -1 });
+  const comments = await PodcastComment.find({ podcastId: req.params.id, status: "visible" }).sort({ createdAt: 1 });
   res.json(comments);
 });
 

@@ -29,7 +29,7 @@ export default function ArticleCard({
         </h3>
 
         <p className="article-card-excerpt">
-          {article.content[0].substring(0, 150)}...
+          {(article.content[0] || "View document").substring(0, 150)}...
         </p>
 
         <div className="article-card-footer">

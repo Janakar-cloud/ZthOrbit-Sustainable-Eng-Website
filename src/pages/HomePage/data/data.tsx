@@ -99,7 +99,7 @@ export const liveTv: LiveTvItem[] = [
 
   // Latest video (same as in LiveTV.tsx)
  export const latestVideo: Video = {
-    id: 1,
+    id: '1',
     title: 'Sustainable Engineering Innovation',
     description: 'Exploring cutting-edge sustainable engineering solutions and innovations for a greener future.',
     videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
@@ -111,7 +111,7 @@ export const liveTv: LiveTvItem[] = [
   // Live TV videos
  export const liveTVVideos: Video[] = [
     {
-      id: 1,
+      id: '1',
       title: 'Digital Ecosystem Growth',
       description: 'Exploring digital ecosystems as drivers of sustainable economic growth.',
       videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
@@ -120,7 +120,7 @@ export const liveTv: LiveTvItem[] = [
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg'
     },
     {
-      id: 2,
+      id: '2',
       title: 'Waste to Worth',
       description: 'Transforming waste into valuable resources through innovative solutions.',
       videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
@@ -129,7 +129,7 @@ export const liveTv: LiveTvItem[] = [
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg'
     },
     {
-      id: 3,
+      id: '3',
       title: 'Finance & Responsibility',
       description: 'Balancing financial growth with environmental responsibility.',
       videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',

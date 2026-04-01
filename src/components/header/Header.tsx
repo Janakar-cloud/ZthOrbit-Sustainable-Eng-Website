@@ -10,7 +10,6 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
     darkMode,
     toggleDarkMode,
     showProfileMenu,
-    toggleProfileMenu,
     isAdmin,
     isLoggedIn,
     user,

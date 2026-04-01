@@ -1,14 +1,9 @@
 import axios from "axios";
-import process from "process";
-const API_URL = process.env.VITE_APP_API_URL;
-
-console.log("api url ========= "+ API_URL);
 
 const axiosClient = axios.create({
   baseURL: "/api/v1",
   timeout: 10000,
   withCredentials: true,
-
 });
 
 // Request Interceptor

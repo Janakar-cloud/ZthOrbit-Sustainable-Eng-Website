@@ -280,3 +280,61 @@ body.dark .mobile-nav a {
 body.dark .mobile-nav a:hover {
   background: #2a2a2a;
 }
+.more-menu-container {
+  position: relative;
+}
+
+.more-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* 🌞 LIGHT MODE (default) */
+.more-dropdown {  
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background: #ffffff;
+  color: #333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 160px;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+.more-dropdown button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.more-dropdown button:hover {
+  background: #f5f5f5;
+}
+
+/* 🌙 DARK MODE */
+.dark .more-dropdown {
+  background: #1e1e1e;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+.dark .more-dropdown button {
+  color: #ffffff;
+}
+
+.dark .more-dropdown button:hover {
+  background: #333;
+}
+
+/* Optional: icon color fix */
+.dark .more-menu-btn .material-icons {
+  color: #ffffff;
+}

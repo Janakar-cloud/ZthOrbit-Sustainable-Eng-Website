@@ -7,8 +7,11 @@ import VideoModal from '../../components/VideoModal'
 import { Video } from '../HomePage/type/type'
 import VideoCategoryFilters from './components/renderFilterButtons'
 import VideoGrid from './components/VideoGrid'
-import { getVideos } from '../../utils/api'
 import { VideoCategory } from './type/type'
+import { LiveVideo } from '../../hooks/videolive'
+import NoData from '../../components/Nodatafound'
+import ErrorMessage from '../../components/ErroMessage'
+import Loader from '../../components/Loader'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -17,6 +20,7 @@ interface LiveTVProps {
 export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [liveVideos, setLiveVideos] = useState<Video[]>([]);
   const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const { darkMode } = useAppContext()
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -26,73 +30,50 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     label: 'All Videos',
     icon: 'apps'
   }])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const { videocast, loading, error, refetch } = LiveVideo();
 
-  // Pull videos from backend (S3-backed) only
   useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        setLoading(true)
-        const res = await getVideos()
-        const items = (res as any)?.items ?? (res as any)?.data ?? []
-        const mapped: Video[] = items.map((item: any, idx: number) => {
-          const tags = Array.isArray(item.tags)
-            ? item.tags
-                .map((t: any) => (typeof t === 'string' ? t : t?.name))
-                .filter(Boolean)
-            : []
-          const primaryCategory = (tags[0] as string) || 'general'
+    if (!Array.isArray(videocast?.items)) return;
+    const allVideos: Video[] = videocast.items.map((item: any) => ({
+      id: item._id,
+      title: item.title,
+      description: item.description || "",
+      videoId: item.videoId || "",
+      streamUrl: item.streamUrl || item.hlsUrl || item.url,
+      category: item.tags?.[0]?.name || "",
+      isLive: item.isLive ?? false,
+      publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      thumbnail: item.thumbnailUrl || "/assets/livetv/placeholder.jpg",
+    }));
 
-          return {
-            id: idx + 1,
-            title: item.title,
-            description: item.description || '',
-            videoId: item.videoId,
-            streamUrl: item.streamUrl || item.hlsUrl || item.url,
-            category: primaryCategory,
-            publishDate: item.publishDate || '',
-            thumbnail: item.thumbnailUrl || '/assets/livetv/placeholder.jpg',
-            tags,
-            seriesId: item.seriesId,
-            partNumber: item.partNumber,
-            partTitle: item.partTitle,
-          }
-        })
-        // Sort by series/part first, then fallback to title as tiebreaker
-        const ordered = [...mapped].sort((a, b) => {
-          if (a.seriesId && b.seriesId) {
-            if (a.seriesId === b.seriesId) {
-              return (a.partNumber ?? 0) - (b.partNumber ?? 0)
-            }
-            return a.seriesId.localeCompare(b.seriesId)
-          }
-          if (a.seriesId) return -1
-          if (b.seriesId) return 1
-          return a.title.localeCompare(b.title)
-        })
 
-        setVideos(ordered)
+    const liveVideos = allVideos.filter(video => !video.isLive);
+    setVideos(allVideos);
+    setLiveVideos(liveVideos);
+    const categoryList = buildCategoryList(allVideos);
+    setVideoCategories(categoryList);
 
-        const derivedCategories: VideoCategory[] = Array.from(
-          new Set(mapped.map((v) => v.category))
-        ).map((cat) => ({ key: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1), icon: 'label' }))
+  }, [videocast]);
 
-        setVideoCategories([
-          { key: 'all', label: 'All Videos', icon: 'apps' },
-          ...derivedCategories,
-        ])
-      } catch (err: any) {
-        setError(err?.message || 'Failed to load videos')
-      } finally {
-        setLoading(false)
-      }
-    }
 
-    fetchVideos()
-  }, [])
+
+  const buildCategoryList = (videos: Video[]) => {
+    return [
+      { key: 'all', label: 'All Videos', icon: 'apps' },
+      ...Array.from(new Set(videos.map(v => v.category)))
+        .filter(Boolean)
+        .map(cat => ({
+          key: cat,
+          label: cat,
+          icon: 'video_library'
+        }))
+    ];
+  };
 
   //  Load saved session (index + time)
   useEffect(() => {
@@ -145,8 +126,6 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     })
   }
 
-  
-
   // select popvideo make live video pause
   useEffect(() => {
     if (videoRef.current) {
@@ -168,9 +147,20 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     setSelectedVideo(video)
   }
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>{error}</div>
-  if (!videos.length) return <div>No videos available.</div>
+
+  // BLOCK RENDER UNTIL READY
+  if (videos.length === 0) {
+    return (
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh"
+      }}>
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className={`livetv ${darkMode ? 'dark' : ''}`}>
@@ -185,7 +175,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
             ref={videoRef}
             key={currentHeroVideoIndex}
             className="hero-video-player"
-            controls
+            controls={false}
             autoPlay
             playsInline
             preload="auto"
@@ -193,7 +183,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
             onTimeUpdate={handleTimeUpdate}
           >
             <source
-              src={videos[currentHeroVideoIndex]?.streamUrl || ''}
+              src={liveVideos[currentHeroVideoIndex]?.streamUrl || ''}
               type="video/mp4"
             />
           </video>
@@ -210,13 +200,13 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           <div className="hero-video-overlay">
             <div className="hero-video-info">
               <span className="hero-video-category">
-                {videos[currentHeroVideoIndex].category}
+                {liveVideos[currentHeroVideoIndex].category}
               </span>
               <h2 className="hero-video-title">
-                {videos[currentHeroVideoIndex].title}
+                {liveVideos[currentHeroVideoIndex].title}
               </h2>
               <p className="hero-video-description">
-                {videos[currentHeroVideoIndex].description}
+                {liveVideos[currentHeroVideoIndex].description}
               </p>
             </div>
           </div>
@@ -232,12 +222,31 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           onCategoryChange={setSelectedCategory}
         />
 
-        <VideoGrid
-          videos={filteredVideos}
-          onPlay={handlePlayVideo}
-          className="livetv-grid"
-          cardClassName="livetv-card"
-        />
+        {/* Loading */}
+        {loading && (
+          <Loader />
+        )}
+
+        {/* Error */}
+        {error && (
+          <ErrorMessage message={error} onRetry={() => { refetch() }} />
+        )}
+
+        {/* Data */}
+        {!loading && !error && (
+          <>
+            {filteredVideos.length > 0 ? (
+              <VideoGrid
+                videos={filteredVideos}
+                onPlay={handlePlayVideo}
+                className="livetv-grid"
+                cardClassName="livetv-card"
+              />
+            ) : (
+              <NoData message="No videos available" onRetry={() => { refetch() }} />
+            )}
+          </>
+        )}
 
       </div>
 

@@ -4,20 +4,16 @@ export interface HomePageProps {
 }
 
 export interface Video {
-  id: number
-  title: string
-  description: string
-  videoId?: string
-  streamUrl?: string
-  category: string
-  publishDate: string
-  thumbnail: string
-  tags?: string[]
-  seriesId?: string
-  partNumber?: number
-  partTitle?: string
+  id: string;
+  title: string;
+  description: string;
+  videoId?: string;
+  streamUrl: string;
+  category: string;
+  isLive: boolean;
+  publishDate: string;   // formatted date
+  thumbnail: string;
 }
-
 export interface Podcast {
   id: number
   title: string

@@ -108,6 +108,22 @@ export default function Podcast({ onNavigate }: PodcastProps) {
     setCurrentlyPlaying(null)
   }
 
+
+   // BLOCK RENDER UNTIL READY
+    if (filteredPodcasts.length === 0) {
+      return (
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh"
+        }}>
+          <Loader />
+        </div>
+      );
+    }
+  
+
   return (
     <div className={`podcast-page ${darkMode ? 'dark' : ''}`}>
       <Header onNavigate={onNavigate} />

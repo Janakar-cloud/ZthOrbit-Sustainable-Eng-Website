@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
   if (tag) filter.tags = tag;
   if (status) filter.status = status;
   const [items, total] = await Promise.all([
-    Podcast.find(filter).sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
+    Podcast.find(filter).populate("tags", "name kind").sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
     Podcast.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });

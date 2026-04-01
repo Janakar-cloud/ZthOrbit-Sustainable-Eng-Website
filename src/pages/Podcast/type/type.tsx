@@ -19,6 +19,7 @@ export interface PodcastEpisode {
   image: string
   duration: string
   category: string
+  categories: string[]
   publishDate: string
   commentsEnabled: boolean
   comments: Comment[]

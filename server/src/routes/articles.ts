@@ -24,14 +24,14 @@ router.get("/", async (req, res) => {
     ];
   }
   const [items, total] = await Promise.all([
-    Article.find(filter).sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
+    Article.find(filter).populate("tags", "name kind").sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
     Article.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });
 });
 
 router.get("/:id", async (req, res) => {
-  const article = await Article.findById(req.params.id);
+  const article = await Article.findById(req.params.id).populate("tags", "name kind");
   if (!article) return res.status(404).json({ error: "Not found" });
   res.json(article);
 });

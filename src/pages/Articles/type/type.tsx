@@ -8,6 +8,7 @@ export interface Article {
   title: string
   subtitle: string
   category: string
+  categories: string[]
   readTime: string
   date: string
   content: string[]

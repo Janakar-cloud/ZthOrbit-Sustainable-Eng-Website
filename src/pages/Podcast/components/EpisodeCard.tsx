@@ -17,7 +17,9 @@ const EpisodeCard = React.memo(function EpisodeCard({
           className="episode-image"
         />
         <div className="episode-category-badge">
-          {podcast.category}
+          {(podcast.categories?.length ? podcast.categories : [podcast.category]).map(c => (
+            <span key={c} style={{ marginRight: 4 }}>{c}</span>
+          ))}
         </div>
       </div>
 

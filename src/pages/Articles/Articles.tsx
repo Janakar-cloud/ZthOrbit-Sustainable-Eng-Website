@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import '../../style/Articles.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -6,8 +6,9 @@ import Footer from '../../components/footer/Footer'
 import CategoryFilter from '../Podcast/components/CategoryFilter'
 import PodcastHero from '../Podcast/components/PodcastHero'
 import { ArticlesProps, Article } from './type/type'
+import { Category } from '../Podcast/type/type'
 import ArticlesList from './components/ArticlesList'
-import {categories } from './data/data'
+import { categories as staticCategories } from './data/data'
 import ArticleDetails from './components/ArticleDetails'
 import { ArticlesHooks } from '../../hooks/articles'
 import Loader from '../../components/Loader'
@@ -24,33 +25,56 @@ export default function Articles({ onNavigate }: ArticlesProps) {
   useEffect(() => {
     if (!Array.isArray(articlesCast?.items)) return
 
-    const formatted = articlesCast.items.map((p: any) => ({
-      id: p._id,
-      title: p.title,
-      subtitle: p.subtitle || '',
-      category: (p.tags?.[0] || 'general').toLowerCase(),
-      readTime: p.readTime || '',
-      content: (() => {
-        const docUrl = typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || '') : ''
-        const paragraphs = p.bodyMd ? p.bodyMd.split('\n\n') : []
-        // Drop the raw URL paragraph if present; will show embed instead.
-        return paragraphs.filter((a: any) => !docUrl || !a.includes(docUrl))
-      })(),
-      featured: p.featured,
-      image: p.coverImage || '',
-      docUrl: typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || undefined) : undefined,
-      date: new Date(p.publishDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-    }))
+    const formatted = articlesCast.items.map((p: any) => {
+      const cats: string[] = Array.isArray(p.tags)
+        ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
+        : []
+      return {
+        id: p._id,
+        title: p.title,
+        subtitle: p.subtitle || '',
+        category: cats[0] || 'general',
+        categories: cats,
+        readTime: p.readTime || '',
+        content: (() => {
+          const docUrl = typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || '') : ''
+          const paragraphs = p.bodyMd ? p.bodyMd.split('\n\n') : []
+          return paragraphs.filter((a: any) => !docUrl || !a.includes(docUrl))
+        })(),
+        featured: p.featured,
+        image: p.coverImage || '',
+        docUrl: typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || undefined) : undefined,
+        date: new Date(p.publishDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+      }
+    })
     setArticles(formatted)
   }, [articlesCast])
 
+  // Build categories dynamically from API data, fall back to static list
+  const categories: Category[] = useMemo(() => {
+    const iconMap: Record<string, string> = {
+      sustainability: 'eco', technology: 'computer', economy: 'trending_up',
+      leadership: 'groups', ethics: 'balance', finance: 'account_balance',
+      innovation: 'lightbulb', health: 'favorite', education: 'school',
+    }
+    const seen = new Set<string>()
+    const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
+    articles.forEach(a => (a.categories || []).forEach(c => {
+      if (!seen.has(c)) {
+        seen.add(c)
+        dynamic.push({ id: c, name: c.charAt(0).toUpperCase() + c.slice(1), icon: iconMap[c] || 'label' })
+      }
+    }))
+    return dynamic.length > 1 ? dynamic : staticCategories
+  }, [articles])
+
   const filteredArticles = selectedCategory === 'all'
     ? articles
-    : articles.filter(article => article.category === selectedCategory)
+    : articles.filter(article => (article.categories || []).includes(selectedCategory))
 
   // BLOCK RENDER UNTIL READY
   if (articles.length === 0) {

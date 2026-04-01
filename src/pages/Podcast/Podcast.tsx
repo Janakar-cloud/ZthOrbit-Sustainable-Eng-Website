@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import '../../style/Podcast.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
 import Footer from '../../components/footer/Footer'
-import { PodcastProps, PodcastEpisode, Comment } from './type/type'
-import { categories } from './data/data'
+import { PodcastProps, PodcastEpisode, Comment, Category } from './type/type'
+import { categories as staticCategories } from './data/data'
 import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
@@ -28,31 +28,54 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   // Sync API data safely
   useEffect(() => {
     if (!Array.isArray(podcastList?.items)) return
-    const formatted = podcastList.items.map((p: any) => ({
-      id: p._id,
-      title: p.title,
-      audioFile: p.audioUrl,
-      image: p.imageUrl,
-      category: p.category,
-      comments: p.comments || [],
-      commentsEnabled: p.commentsEnabled ?? true,
-      description: p.description,
-      publishDate: new Date(p.publishDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      duration: p.duration,
-    }))
-
+    const formatted = podcastList.items.map((p: any) => {
+      const cats: string[] = Array.isArray(p.tags)
+        ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
+        : []
+      return {
+        id: p._id,
+        title: p.title,
+        audioFile: p.audioUrl,
+        image: p.imageUrl,
+        category: cats[0] || 'general',
+        categories: cats,
+        comments: p.comments || [],
+        commentsEnabled: p.commentsEnabled ?? true,
+        description: p.description,
+        publishDate: new Date(p.publishDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        duration: p.duration,
+      }
+    })
     setPodcasts(formatted)
   }, [podcastList])
+
+  // Build categories dynamically from API data, fall back to static list
+  const categories: Category[] = useMemo(() => {
+    const iconMap: Record<string, string> = {
+      sustainability: 'eco', technology: 'computer', economy: 'trending_up',
+      leadership: 'groups', ethics: 'balance', finance: 'account_balance',
+      innovation: 'lightbulb', health: 'favorite', education: 'school',
+    }
+    const seen = new Set<string>()
+    const dynamic: Category[] = [{ id: 'all', name: 'All Episodes', icon: 'podcasts' }]
+    podcasts.forEach(p => p.categories.forEach(c => {
+      if (!seen.has(c)) {
+        seen.add(c)
+        dynamic.push({ id: c, name: c.charAt(0).toUpperCase() + c.slice(1), icon: iconMap[c] || 'label' })
+      }
+    }))
+    return dynamic.length > 1 ? dynamic : staticCategories
+  }, [podcasts])
 
   // Filter
   const filteredPodcasts =
     selectedCategory === 'all'
       ? podcasts
-      : podcasts.filter((p) => p.category === selectedCategory)
+      : podcasts.filter((p) => p.categories.includes(selectedCategory))
 
   //Play
   const handlePlayPodcast = (podcast: PodcastEpisode) => {

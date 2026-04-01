@@ -7,9 +7,19 @@ import { connectDb } from "./config/db.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
+import { syncS3ToDb } from "./utils/s3Sync.js";
 
 async function main() {
   await connectDb();
+
+  // Non-blocking S3 → DB sync on every startup
+  syncS3ToDb()
+    .then((r) =>
+      console.log(
+        `[S3 Sync] Done in ${r.durationMs}ms — videos +${r.videos.added}/~${r.videos.updated} | podcasts +${r.podcasts.added}/~${r.podcasts.updated} | articles +${r.articles.added}/~${r.articles.updated}`
+      )
+    )
+    .catch((err) => console.error("[S3 Sync] startup sync failed:", err.message));
 
   const app = express();
   app.disable("x-powered-by");

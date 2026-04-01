@@ -11,6 +11,23 @@ export const s3 = new S3Client({
   },
 });
 
+/**
+ * Convert a stored S3 public URL back to its key, then generate a fresh
+ * pre-signed GET URL valid for `expiresIn` seconds (default 3600 = 1 hour).
+ * Falls back to the original URL if parsing fails.
+ */
+export async function signStreamUrl(storedUrl: string, expiresIn = 3600): Promise<string> {
+  try {
+    const bucketHost = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/`;
+    if (!storedUrl.startsWith(bucketHost)) return storedUrl; // not an S3 URL — return as-is
+    const key = decodeURIComponent(storedUrl.slice(bucketHost.length));
+    const command = new GetObjectCommand({ Bucket: env.s3.bucket, Key: key });
+    return await getSignedUrl(s3, command, { expiresIn });
+  } catch {
+    return storedUrl;
+  }
+}
+
 export async function createPresignedUpload(keyPrefix: string, contentType: string) {
   const key = `${keyPrefix}/${randomUUID()}`;
   const command = new PutObjectCommand({

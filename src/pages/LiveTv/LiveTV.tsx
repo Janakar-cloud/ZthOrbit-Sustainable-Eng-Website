@@ -1,4 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
+
+function getMimeType(url: string): string {
+  const ext = (url ?? '').split('?')[0].split('.').pop()?.toLowerCase() ?? '';
+  const map: Record<string, string> = {
+    mp4: 'video/mp4', m4v: 'video/mp4',
+    mov: 'video/quicktime',
+    webm: 'video/webm',
+    mkv: 'video/x-matroska',
+    avi: 'video/x-msvideo',
+    ts: 'video/mp2t',
+    ogv: 'video/ogg',
+  };
+  return map[ext] ?? 'video/mp4';
+}
 import '../../style/LiveTV.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -184,7 +198,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           >
             <source
               src={liveVideos[currentHeroVideoIndex]?.streamUrl || ''}
-              type="video/mp4"
+              type={getMimeType(liveVideos[currentHeroVideoIndex]?.streamUrl || '')}
             />
           </video>
 

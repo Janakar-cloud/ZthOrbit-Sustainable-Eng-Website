@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { Video } from "../models/Video.js";
 import { requireAuth } from "../middleware/auth.js";
+import { signStreamUrl } from "../utils/s3.js";
 
 const router = Router();
 
@@ -29,7 +30,18 @@ router.get("/", async (req, res) => {
       .populate("tags", "name kind"),
     Video.countDocuments(filter),
   ]);
-  res.json({ items, total, page, pageSize });
+
+  // Sign every streamUrl so private S3 objects are accessible
+  const signedItems = await Promise.all(
+    items.map(async (v) => {
+      const obj = v.toObject() as any;
+      obj.streamUrl = await signStreamUrl(obj.streamUrl || "");
+      obj.thumbnailUrl = obj.thumbnailUrl ? await signStreamUrl(obj.thumbnailUrl) : "";
+      return obj;
+    })
+  );
+
+  res.json({ items: signedItems, total, page, pageSize });
 });
 
 const videoSchema = z.object({

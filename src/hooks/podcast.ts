@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { getPodcasts } from "../services/podcast";
-import { PodcastApiResponse } from "../types/podcast";
+import { PodcastApiResponse, PodcastEpisode } from "../types/podcast";
+
+function dedupeByTitle(items: PodcastEpisode[]): PodcastEpisode[] {
+  const seen = new Set<string>();
+  return items.filter(item => {
+    const key = item.title.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 export const podcastEpisode = () => {
   const [podcast, setPodcast] = useState<PodcastApiResponse>();
@@ -11,6 +21,7 @@ export const podcastEpisode = () => {
     try {
       setLoading(true);
       const data: PodcastApiResponse = await getPodcasts();
+      if (data?.items) data.items = dedupeByTitle(data.items);
       setPodcast(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong");

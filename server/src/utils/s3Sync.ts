@@ -28,6 +28,11 @@ function titleFromKey(key: string): string {
   return baseName(fileName);
 }
 
+/** Escape special regex characters so a title can be used inside RegExp */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /** List every object (handles >1000 via continuation token) */
 async function listAllKeys(prefix: string): Promise<{ key: string; lastModified: Date }[]> {
   const results: { key: string; lastModified: Date }[] = [];
@@ -90,7 +95,10 @@ async function syncVideos(thumbMap: Map<string, string>): Promise<{ added: numbe
     const thumbnail = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
-    const existing = await Video.findOne({ streamUrl });
+    const titleRegex = new RegExp(`^${escapeRegex(title)}$`, "i");
+    const existing = await Video.findOne({
+      $or: [{ streamUrl }, { title: titleRegex }],
+    });
     if (existing) {
       // Always re-sync title and thumbnail so renames/new thumbnails in S3 reflect immediately
       const needsUpdate =
@@ -132,7 +140,10 @@ async function syncPodcasts(thumbMap: Map<string, string>): Promise<{ added: num
     const imageUrl  = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
-    const existing = await Podcast.findOne({ audioUrl });
+    const titleRegex = new RegExp(`^${escapeRegex(title)}$`, "i");
+    const existing = await Podcast.findOne({
+      $or: [{ audioUrl }, { title: titleRegex }],
+    });
     if (existing) {
       const needsUpdate =
         existing.title !== title ||
@@ -173,8 +184,10 @@ async function syncArticles(thumbMap: Map<string, string>): Promise<{ added: num
     const coverImage = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
-    // Use the S3 file URL as unique identifier (stored inside bodyMd)
-    const existing = await Article.findOne({ bodyMd });
+    const titleRegex = new RegExp(`^${escapeRegex(title)}$`, "i");
+    const existing = await Article.findOne({
+      $or: [{ bodyMd }, { title: titleRegex }],
+    });
     if (existing) {
       const needsUpdate =
         existing.title !== title ||

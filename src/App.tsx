@@ -34,7 +34,7 @@ function pageFromPath(pathname: string): string {
 }
 
 function App() {
-  const { activePage, setActivePage } = useAppContext()
+  const { activePage, setActivePage, isAdmin } = useAppContext()
 
   // Set initial page from URL on mount
   useEffect(() => {
@@ -60,6 +60,13 @@ function App() {
     window.scrollTo(0, 0)
   }, [setActivePage])
 
+  // Redirect to login when the axios interceptor fires force-logout (expired/invalid token)
+  useEffect(() => {
+    const onForceLogout = () => handleNavigate('login')
+    window.addEventListener('auth:force-logout', onForceLogout)
+    return () => window.removeEventListener('auth:force-logout', onForceLogout)
+  }, [handleNavigate])
+
   const handleLogin = () => {
     handleNavigate('admin')
   }
@@ -74,7 +81,11 @@ function App() {
       {activePage === 'about' && <AboutUs onNavigate={handleNavigate} />}
       {activePage === 'login' && <Login onNavigate={handleNavigate} onLogin={handleLogin} />}
       {activePage === 'signup' && <Signup onNavigate={handleNavigate} onComplete={handleSignupComplete} />}
-      {activePage === 'admin' && <AdminDashboard onNavigate={handleNavigate} />}
+      {activePage === 'admin' && (
+        isAdmin
+          ? <AdminDashboard onNavigate={handleNavigate} />
+          : <Login onNavigate={handleNavigate} onLogin={handleLogin} />
+      )}
       {activePage === 'articles' && <Articles onNavigate={handleNavigate} />}
       {activePage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
       {activePage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}

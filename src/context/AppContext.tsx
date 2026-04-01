@@ -28,6 +28,8 @@ function decodeJwtPayload(token: string): AuthUser | null {
     if (!base64) return null
     const json = atob(base64.replace(/-/g, '+').replace(/_/g, '/'))
     const payload = JSON.parse(json)
+    // Reject expired tokens
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null
     if (payload.id && payload.role && payload.email) {
       return { id: payload.id, role: payload.role, email: payload.email }
     }
@@ -43,13 +45,30 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
 
-  // Restore auth state from localStorage on mount
+  // Restore auth state from localStorage on mount (rejects expired tokens)
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
     if (token) {
       const decoded = decodeJwtPayload(token)
-      if (decoded) setUser(decoded)
+      if (decoded) {
+        setUser(decoded)
+      } else {
+        // Token is expired or invalid — clear storage
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+      }
     }
+  }, [])
+
+  // Listen for force-logout dispatched by the axios interceptor on unrecoverable 401
+  useEffect(() => {
+    const onForceLogout = () => {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      setUser(null)
+    }
+    window.addEventListener('auth:force-logout', onForceLogout)
+    return () => window.removeEventListener('auth:force-logout', onForceLogout)
   }, [])
 
   const loginWithTokens = useCallback((accessToken: string, refreshToken: string) => {

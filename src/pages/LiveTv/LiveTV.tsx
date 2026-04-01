@@ -66,9 +66,8 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     }));
 
 
-    const liveVideos = allVideos.filter(video => !video.isLive);
     setVideos(allVideos);
-    setLiveVideos(liveVideos);
+    setLiveVideos(allVideos);
     const categoryList = buildCategoryList(allVideos);
     setVideoCategories(categoryList);
 
@@ -96,6 +95,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
     if (savedIndex !== null) {
       setCurrentHeroVideoIndex(Number(savedIndex))
+      // index will be clamped after videos load in the reset effect
     }
 
     // restore time after video loads
@@ -113,10 +113,10 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     return () => clearInterval(clockTimer)
   }, [])
 
-  // Reset hero index if videos change
+  // Clamp hero index to valid range whenever videos change
   useEffect(() => {
     if (videos.length > 0) {
-      setCurrentHeroVideoIndex(0)
+      setCurrentHeroVideoIndex(prev => Math.min(prev, videos.length - 1))
     }
   }, [videos])
 
@@ -214,13 +214,13 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           <div className="hero-video-overlay">
             <div className="hero-video-info">
               <span className="hero-video-category">
-                {liveVideos[currentHeroVideoIndex].category}
+                {liveVideos[currentHeroVideoIndex]?.category}
               </span>
               <h2 className="hero-video-title">
-                {liveVideos[currentHeroVideoIndex].title}
+                {liveVideos[currentHeroVideoIndex]?.title}
               </h2>
               <p className="hero-video-description">
-                {liveVideos[currentHeroVideoIndex].description}
+                {liveVideos[currentHeroVideoIndex]?.description}
               </p>
             </div>
           </div>

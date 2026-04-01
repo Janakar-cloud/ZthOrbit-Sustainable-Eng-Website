@@ -5,10 +5,12 @@ import { randomUUID } from "crypto";
 
 export const s3 = new S3Client({
   region: env.s3.region,
-  credentials: {
-    accessKeyId: env.s3.accessKeyId,
-    secretAccessKey: env.s3.secretAccessKey,
-  },
+  // Only use explicit credentials if both keys are present.
+  // If omitted, the SDK uses the default credential chain
+  // (IAM instance role on EC2, env vars, ~/.aws/credentials, etc.)
+  ...(env.s3.accessKeyId && env.s3.secretAccessKey
+    ? { credentials: { accessKeyId: env.s3.accessKeyId, secretAccessKey: env.s3.secretAccessKey } }
+    : {}),
 });
 
 /**

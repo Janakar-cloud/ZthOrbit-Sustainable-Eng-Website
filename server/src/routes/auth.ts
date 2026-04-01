@@ -15,9 +15,9 @@ import { randomInt } from "crypto";
 const router = Router();
 
 const registerSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().max(320),
   password: z.string().min(8),
-  name: z.string().optional(),
+  name: z.string().max(100).optional(),
 });
 
 router.post("/register", async (req, res) => {
@@ -81,7 +81,7 @@ router.post("/logout", async (req, res) => {
   res.json({ success: true });
 });
 
-const resetRequestSchema = z.object({ email: z.string().email() });
+const resetRequestSchema = z.object({ email: z.string().email().max(320) });
 
 router.post("/request-reset", async (req, res) => {
   const parsed = resetRequestSchema.safeParse(req.body);

@@ -90,7 +90,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
   };
 
   const handleForgotPassword = () => {
-    setStatus({ message: 'Password reset flow not yet wired.', variant: 'info' });
+    onNavigate('forgot-password');
   };
 
   const handleResend = async () => {

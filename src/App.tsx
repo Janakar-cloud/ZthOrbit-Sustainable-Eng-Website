@@ -2,6 +2,8 @@ import { useEffect, useCallback } from 'react'
 import HomePage from './pages/HomePage/HomePage'
 import AboutUs from './pages/AboutUs/AboutUs'
 import Login from './pages/Login/Login'
+import ForgotPassword from './pages/Login/ForgotPassword'
+import ResetPassword from './pages/Login/ResetPassword'
 import Signup from './pages/Signup/Signup'
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard'
 import Articles from './pages/Articles/Articles'
@@ -18,6 +20,8 @@ const PATH_TO_PAGE: Record<string, string> = {
   '/articles': 'articles',
   '/podcast': 'podcast',
   '/livetv': 'livetv',
+  '/forgot-password': 'forgot-password',
+  '/reset': 'reset',
   // '/casestories': 'casestories',
 }
 
@@ -74,6 +78,8 @@ function App() {
       {activePage === 'articles' && <Articles onNavigate={handleNavigate} />}
       {activePage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
       {activePage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
+      {activePage === 'forgot-password' && <ForgotPassword onNavigate={handleNavigate} />}
+      {activePage === 'reset' && <ResetPassword onNavigate={handleNavigate} />}
     </>
   )
 }

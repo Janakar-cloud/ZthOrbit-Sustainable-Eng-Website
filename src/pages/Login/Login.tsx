@@ -24,6 +24,8 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<StatusState>(null);
   const { loginWithTokens } = useAppContext();
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const storeTokens = (accessToken: string, refreshToken: string) => {
     loginWithTokens(accessToken, refreshToken);
@@ -108,6 +110,51 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
     }
   };
 
+  const handleEmailChange = (value: any) => {
+    setEmail(value);
+
+    // live validation (optional)
+    if (emailError) {
+      validateEmail(value);
+    }
+  };
+
+  const validateEmail = (value = email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!value) {
+      setEmailError("Email is required");
+    } else if (!emailRegex.test(value)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handlePasswordChange = (value: any) => {
+    setPassword(value);
+
+    // live validation
+    if (passwordError) {
+      validatePassword(value);
+    }
+  };
+
+  const validatePassword = (value = password) => {
+    // 🔒 Rules:
+    // min 6 chars, at least 1 letter & 1 number
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+
+    if (!value) {
+      setPasswordError("Password is required");
+    } else if (!passwordRegex.test(value)) {
+      setPasswordError(
+        "Password must be at least 6 characters and include letters & numbers"
+      );
+    } else {
+      setPasswordError("");
+    }
+  };
   return (
     <div className="login-page">
       <div className="login-container">
@@ -144,7 +191,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="login-form">
-              <div className="form-group">
+              <div className="login-form-group">
                 <label htmlFor="email">Email Address</label>
                 <div className="input-wrapper">
                   <span className="material-icons">mail</span>
@@ -153,14 +200,17 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                     id="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => handleEmailChange(e.target.value)}
                     required
                   />
                 </div>
+                {emailError && <p className="error-text">{emailError}</p>}
               </div>
 
+
+
               {mode !== 'verify' && (
-                <div className="form-group">
+                <div className="login-form-group">
                   <label htmlFor="password">Password</label>
                   <div className="input-wrapper">
                     <span className="material-icons">lock</span>
@@ -169,7 +219,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                       id="password"
                       placeholder="Enter your password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => handlePasswordChange(e.target.value)}
                       required
                     />
                   </div>
@@ -197,7 +247,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
               )}
 
               {mode === 'login' && (
-                <div className="form-actions">
+                <div className="login-form-actions">
                   <label className="remember-me">
                     <input
                       type="checkbox"
@@ -222,14 +272,14 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                 </div>
               )}
 
-              <button type="submit" className="btn-primary" disabled={isLoading}>
+              <button type="submit" className="sigin-btn-primary" disabled={isLoading}>
                 {isLoading
                   ? 'Please wait...'
                   : mode === 'register'
-                  ? 'Send Code'
-                  : mode === 'verify'
-                  ? 'Verify & Sign In'
-                  : 'Sign In'}
+                    ? 'Send Code'
+                    : mode === 'verify'
+                      ? 'Verify & Sign In'
+                      : 'Sign In'}
               </button>
 
               <div className="login-footer">
@@ -261,10 +311,11 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
             </form>
           </div>
 
+
           <div className="back-home">
-            <button onClick={() => onNavigate('home')} className="back-button">
+            <button onClick={() => onNavigate('home')} className="back-button pill">
               <span className="material-icons">arrow_back</span>
-              Back to Home
+              <span>Back to Home</span>
             </button>
           </div>
         </div>

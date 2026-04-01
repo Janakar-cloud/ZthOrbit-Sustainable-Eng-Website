@@ -90,10 +90,12 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
     <div className="signup-page">
       <div className="signup-container">
         <div className="signup-header">
-          <button onClick={() => onNavigate('login')} className="back-link">
-            <span className="material-icons">arrow_back</span>
-            Back to Login
-          </button>
+        <div className="back-home">
+            <button onClick={() => onNavigate('home')} className="back-button pill">
+              <span className="material-icons">arrow_back</span>
+              <span>Back to Home</span>
+            </button>
+          </div>
           <div className="logo-small">
             <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-small-image" />
             <span>Green Generation TV</span>

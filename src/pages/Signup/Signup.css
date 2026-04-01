@@ -404,7 +404,7 @@
 
 /* Logo Small Image Styles */
 .logo-small-image {
-  width: 30px;
-  height: 30px;
+  /* width: 30px; */
+  height: 50px;
   object-fit: contain;
 }

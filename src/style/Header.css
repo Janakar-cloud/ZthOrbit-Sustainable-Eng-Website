@@ -319,7 +319,7 @@ body.dark .mobile-nav a:hover {
   background: #f5f5f5;
 }
 
-/* 🌙 DARK MODE */
+/* DARK MODE */
 .dark .more-dropdown {
   background: #1e1e1e;
   color: #ffffff;
@@ -338,3 +338,26 @@ body.dark .mobile-nav a:hover {
 .dark .more-menu-btn .material-icons {
   color: #ffffff;
 }
+
+.more-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-btn svg {
+  font-size: 16px;
+}
+
+/* Brand colors */
+.more-dropdown button:nth-child(4) svg { color: #1877f2; } /* Facebook */
+.more-dropdown button:nth-child(5) svg { color: #1da1f2; } /* Twitter */
+.more-dropdown button:nth-child(6) svg { color: #0077b5; } /* LinkedIn */
+.more-dropdown button:nth-child(7) svg { color: #ff0000; } /* YouTube */
+.more-dropdown button:nth-child(8) svg { color: #e1306c; } /* Instagram */

@@ -730,7 +730,7 @@
   max-width: 900px;
 }
 
-.form-group {
+/* .form-group {
   margin-bottom: 2rem;
 }
 
@@ -740,8 +740,8 @@
   color: #334155;
   margin-bottom: 0.75rem;
   font-size: 0.95rem;
-}
-
+} */
+/* 
 .form-group input[type="text"],
 .form-group textarea,
 .form-group select {
@@ -768,7 +768,7 @@
 .form-group textarea {
   resize: vertical;
   min-height: 120px;
-}
+} */
 
 .form-row {
   display: grid;

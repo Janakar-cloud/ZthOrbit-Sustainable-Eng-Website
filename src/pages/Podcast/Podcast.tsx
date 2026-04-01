@@ -110,7 +110,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
 
 
    // BLOCK RENDER UNTIL READY
-    if (filteredPodcasts.length === 0) {
+    if (podcasts.length === 0) {
       return (
         <div style={{
           display: "flex",

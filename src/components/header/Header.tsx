@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import '../../style/Header.css'
 import { useAppContext } from '../../context/AppContext'
 import { logout as apiLogout } from '../../utils/api'
+import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram, FaInfoCircle, FaUsers, FaSun, FaMoon } from 'react-icons/fa'; // install react-icons if not added
+
 
 export default function Header({ onNavigate }: { onNavigate: (page: string) => void }) {
   const {
@@ -94,12 +96,17 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
               {moreMenuOpen && (
                 <div className="more-dropdown">
                   <button onClick={() => handleNavigate('about')}>
-                    About Us
+                    <FaUsers />About Us
                   </button>
 
-                  {/* <button onClick={() => handleNavigate('articles')}>
-                    Articles
-                  </button> */}
+
+                  {/* Learn More */}
+                  <button onClick={() => {
+                    setMoreMenuOpen(false); // 👈 close menu
+                    window.open('https://seetharaman.com/', '_blank');
+                  }}>
+                    <FaInfoCircle /> Learn More
+                  </button>
 
                   {isAdmin && (
                     <button onClick={() => handleNavigate('admin')}>
@@ -107,8 +114,72 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                     </button>
                   )}
 
-                  <button onClick={toggleDarkMode}>
-                    {darkMode ? 'Light Mode' : 'Dark Mode'}
+                  {/* Facebook Button */}
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => {
+                      setMoreMenuOpen(false); // 
+                      window.open('https://seetharaman.com/', '_blank');
+                    }}>
+                    <FaFacebook /> Facebook
+                  </button>
+
+                  {/* Twitter / X */}
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => {
+                      setMoreMenuOpen(false); // 
+                      window.open('https://x.com/DrSeetharaman_', '_blank');
+                    }}>
+                    <FaTwitter /> Twitter
+                  </button>
+
+
+
+                  {/* LinkedIn */}
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => {
+                      setMoreMenuOpen(false); // 
+                      window.open('https://www.linkedin.com/in/dr-r-seetharaman/', '_blank');
+                    }}>
+                    <FaLinkedin /> LinkedIn
+                  </button>
+
+
+
+                  {/* Youtube */}
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => {
+                      setMoreMenuOpen(false); // 
+                      window.open('https://www.youtube.com/@DrSeetharaman', '_blank');
+                    }}>
+                    <FaYoutube /> YouTube
+                  </button>
+
+
+                  {/* Instagram */}
+                  <button
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => {
+                      setMoreMenuOpen(false); // 
+                      window.open('https://www.instagram.com/dr.seetharaman/', '_blank');
+                    }}>
+                    <FaInstagram /> Instagram
+                  </button>
+
+
+                  <button onClick={toggleDarkMode} className="theme-btn">
+                    {darkMode ? (
+                      <>
+                        <FaSun /> Light Mode
+                      </>
+                    ) : (
+                      <>
+                        <FaMoon /> Dark Mode
+                      </>
+                    )}
                   </button>
 
                   {isLoggedIn && (
@@ -138,13 +209,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                     </div>
                   )}
 
-                  <button className="dropdown-item" onClick={toggleDarkMode}>
-                    <span className="material-icons">
-                      {darkMode ? 'light_mode' : 'dark_mode'}
-                    </span>
-                    <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                  </button>
-
+             
                   {isLoggedIn && (
                     <button className="dropdown-item logout" onClick={handleLogout}>
                       <span className="material-icons">logout</span>

@@ -31,6 +31,9 @@ export interface Category {
 
 
 export interface ArticlesListProps {
+  loading: boolean
+  error: string | null
+  refetch: () => void
   articles: Article[]
   categories: Category[]
   onSelectArticle: (article: Article) => void

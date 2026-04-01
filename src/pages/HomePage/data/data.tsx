@@ -103,6 +103,8 @@ export const liveTv: LiveTvItem[] = [
     title: 'Sustainable Engineering Innovation',
     description: 'Exploring cutting-edge sustainable engineering solutions and innovations for a greener future.',
     videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
+    streamUrl: '',
+    isLive: false,
     category: 'sustainability',
     publishDate: 'Jan 20, 2026',
     thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
@@ -115,6 +117,8 @@ export const liveTv: LiveTvItem[] = [
       title: 'Digital Ecosystem Growth',
       description: 'Exploring digital ecosystems as drivers of sustainable economic growth.',
       videoId: '1YOyDTaOeadAxkUyjZI8DbsZHX8OVFdqJ',
+      streamUrl: '',
+      isLive: false,
       category: 'technology',
       publishDate: 'Jan 20, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg'
@@ -124,6 +128,8 @@ export const liveTv: LiveTvItem[] = [
       title: 'Waste to Worth',
       description: 'Transforming waste into valuable resources through innovative solutions.',
       videoId: '121y0xbR6SEQSMZSIg0PVZA8Wn1DHzx7P',
+      streamUrl: '',
+      isLive: false,
       category: 'sustainability',
       publishDate: 'Jan 18, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg'
@@ -133,15 +139,19 @@ export const liveTv: LiveTvItem[] = [
       title: 'Finance & Responsibility',
       description: 'Balancing financial growth with environmental responsibility.',
       videoId: '1251b1AGfXIPIP_hGkk-mlnhr5s0TsnfJ',
+      streamUrl: '',
+      isLive: false,
       category: 'finance',
       publishDate: 'Jan 15, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg'
     },
     {
-      id: 4,
+      id: '4',
       title: 'Digital Convergence in India',
       description: 'India\'s digital transformation and financial inclusion in 2026.',
       videoId: '1RFsLTZ8tI6z8-C9JgLfVhE7QGz9vXdqN',
+      streamUrl: '',
+      isLive: false,
       category: 'technology',
       publishDate: 'Jan 12, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg'

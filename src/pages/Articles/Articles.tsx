@@ -63,7 +63,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
     }
     const seen = new Set<string>()
     const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
-    articles.forEach(a => (a.categories || []).forEach(c => {
+    articles.forEach(a => [a.category].filter(Boolean).forEach(c => {
       if (!seen.has(c)) {
         seen.add(c)
         dynamic.push({ id: c, name: c.charAt(0).toUpperCase() + c.slice(1), icon: iconMap[c] || 'label' })
@@ -74,7 +74,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
 
   const filteredArticles = selectedCategory === 'all'
     ? articles
-    : articles.filter(article => (article.categories || []).includes(selectedCategory))
+    : articles.filter(article => article.category === selectedCategory)
 
   // BLOCK RENDER UNTIL READY
   if (articles.length === 0) {

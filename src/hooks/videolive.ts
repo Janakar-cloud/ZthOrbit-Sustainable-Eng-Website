@@ -21,7 +21,7 @@ export const LiveVideo = () => {
     try {
       setLoading(true);
       const data: VideoLiveResponse = await getVideo();
-      if (data?.data) data.data = dedupeByTitle(data.data);
+      if (data?.items) data.items = dedupeByTitle(data.items);
       setVideocast(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong");

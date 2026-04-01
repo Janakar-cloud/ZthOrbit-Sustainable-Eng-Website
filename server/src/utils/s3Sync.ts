@@ -12,22 +12,20 @@ function s3Url(key: string): string {
   return `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/${encodedKey}`;
 }
 
-/** Normalise a raw S3 filename for fuzzy thumbnail matching */
-function normalise(name: string): string {
-  return decodeURIComponent(name.replace(/\+/g, " "))
-    .replace(/\.[^.]+$/, "")   // strip extension
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+/** Decode an S3 key component (handles both %xx and + encoding) */
+function decodeKey(raw: string): string {
+  return decodeURIComponent(raw.replace(/\+/g, " "));
 }
 
-/** Derive a human-readable title from the decoded filename (no extension) */
+/** Strip the file extension and return the bare base name */
+function baseName(name: string): string {
+  return decodeKey(name).replace(/\.[^.]+$/, "").trim();
+}
+
+/** Derive a human-readable title from the decoded filename (no extension, no path) */
 function titleFromKey(key: string): string {
-  const fileName = key.split("/").pop() || key;
-  const decoded = decodeURIComponent(fileName.replace(/\+/g, " ")).replace(/\.[^.]+$/, "");
-  // CamelCase → insert spaces, then title-case
-  return decoded.charAt(0).toUpperCase() + decoded.slice(1);
+  const fileName = key.split("/").pop() ?? key;
+  return baseName(fileName);
 }
 
 /** List every object (handles >1000 via continuation token) */
@@ -53,33 +51,29 @@ async function listAllKeys(prefix: string): Promise<{ key: string; lastModified:
   return results;
 }
 
-/** Build a normalised-name → url map from all objects under a thumbnail prefix */
+/**
+ * Build a base-name → url map from all objects under a thumbnail prefix.
+ * Key is the decoded filename WITHOUT extension, lowercased for case-insensitive lookup.
+ * e.g. "Thumbnail/videos/My Session.jpg" → map key "my session"
+ */
 async function buildThumbnailMap(prefix: string): Promise<Map<string, string>> {
   const items = await listAllKeys(prefix);
   const map = new Map<string, string>();
   for (const { key } of items) {
     const fileName = key.split("/").pop() ?? key;
-    map.set(normalise(fileName), s3Url(key));
+    map.set(baseName(fileName).toLowerCase(), s3Url(key));
   }
   return map;
 }
 
-/** Find the best-matching thumbnail URL by progressive prefix overlap */
+/**
+ * Exact same-name match: the thumbnail file must have the SAME base name
+ * as the media file (different extension is fine).
+ * e.g. media "My Session.mp4" matches thumbnail "My Session.jpg"
+ */
 function matchThumbnail(mediaFileName: string, thumbMap: Map<string, string>): string {
-  const normMedia = normalise(mediaFileName);
-  // exact match
-  if (thumbMap.has(normMedia)) return thumbMap.get(normMedia)!;
-  // longest common prefix among candidates
-  let best = "";
-  let bestUrl = "";
-  for (const [normThumb, url] of thumbMap) {
-    const shorter = normMedia.length < normThumb.length ? normMedia : normThumb;
-    const longer  = normMedia.length < normThumb.length ? normThumb  : normMedia;
-    if (longer.startsWith(shorter) || normMedia.startsWith(normThumb.slice(0, 10))) {
-      if (normThumb.length > best.length) { best = normThumb; bestUrl = url; }
-    }
-  }
-  return bestUrl;
+  const key = baseName(mediaFileName).toLowerCase();
+  return thumbMap.get(key) ?? "";
 }
 
 // ─── per-type sync functions ─────────────────────────────────────────────────
@@ -98,9 +92,15 @@ async function syncVideos(thumbMap: Map<string, string>): Promise<{ added: numbe
 
     const existing = await Video.findOne({ streamUrl });
     if (existing) {
-      // only update thumbnail if we now have one and didn't before
-      if (!existing.thumbnailUrl && thumbnail) {
-        await Video.updateOne({ _id: existing._id }, { thumbnailUrl: thumbnail });
+      // Always re-sync title and thumbnail so renames/new thumbnails in S3 reflect immediately
+      const needsUpdate =
+        existing.title !== title ||
+        (thumbnail && existing.thumbnailUrl !== thumbnail);
+      if (needsUpdate) {
+        await Video.updateOne(
+          { _id: existing._id },
+          { title, ...(thumbnail && { thumbnailUrl: thumbnail }) }
+        );
         updated++;
       }
     } else {
@@ -134,8 +134,14 @@ async function syncPodcasts(thumbMap: Map<string, string>): Promise<{ added: num
 
     const existing = await Podcast.findOne({ audioUrl });
     if (existing) {
-      if (!existing.imageUrl && imageUrl) {
-        await Podcast.updateOne({ _id: existing._id }, { imageUrl });
+      const needsUpdate =
+        existing.title !== title ||
+        (imageUrl && existing.imageUrl !== imageUrl);
+      if (needsUpdate) {
+        await Podcast.updateOne(
+          { _id: existing._id },
+          { title, ...(imageUrl && { imageUrl }) }
+        );
         updated++;
       }
     } else {
@@ -170,8 +176,14 @@ async function syncArticles(thumbMap: Map<string, string>): Promise<{ added: num
     // Use the S3 file URL as unique identifier (stored inside bodyMd)
     const existing = await Article.findOne({ bodyMd });
     if (existing) {
-      if (!existing.coverImage && coverImage) {
-        await Article.updateOne({ _id: existing._id }, { coverImage });
+      const needsUpdate =
+        existing.title !== title ||
+        (coverImage && existing.coverImage !== coverImage);
+      if (needsUpdate) {
+        await Article.updateOne(
+          { _id: existing._id },
+          { title, ...(coverImage && { coverImage }) }
+        );
         updated++;
       }
     } else {

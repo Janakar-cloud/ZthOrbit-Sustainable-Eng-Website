@@ -13,13 +13,22 @@ async function main() {
   await connectDb();
 
   // Non-blocking S3 → DB sync on every startup
-  syncS3ToDb()
-    .then((r) =>
-      console.log(
-        `[S3 Sync] Done in ${r.durationMs}ms — videos +${r.videos.added}/~${r.videos.updated} | podcasts +${r.podcasts.added}/~${r.podcasts.updated} | articles +${r.articles.added}/~${r.articles.updated}`
+  const runSync = (label: string) =>
+    syncS3ToDb()
+      .then((r) =>
+        console.log(
+          `[S3 Sync] ${label} done in ${r.durationMs}ms — videos +${r.videos.added}/~${r.videos.updated} | podcasts +${r.podcasts.added}/~${r.podcasts.updated} | articles +${r.articles.added}/~${r.articles.updated}`
+        )
       )
-    )
-    .catch((err) => console.error("[S3 Sync] startup sync failed:", err.message));
+      .catch((err) => console.error(`[S3 Sync] ${label} failed:`, err.message));
+
+  runSync("startup");
+
+  // Scheduled sync every SYNC_INTERVAL_MS (default 5 min). Set to 0 to disable.
+  if (env.syncIntervalMs > 0) {
+    setInterval(() => runSync("scheduled"), env.syncIntervalMs);
+    console.log(`[S3 Sync] Scheduled every ${env.syncIntervalMs / 1000 / 60} min`);
+  }
 
   const app = express();
   app.disable("x-powered-by");

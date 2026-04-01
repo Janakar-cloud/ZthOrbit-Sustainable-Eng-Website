@@ -77,4 +77,6 @@ export const env = {
     cookieDomain: process.env.CF_COOKIE_DOMAIN || "",
   },
   envPath: envPath || "",
+  // S3 → DB auto-sync interval in ms. Default: 15 minutes. Set to 0 to disable.
+  syncIntervalMs: Number(process.env.SYNC_INTERVAL_MS ?? 5 * 60 * 1000),
 };

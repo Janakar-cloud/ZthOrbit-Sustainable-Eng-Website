@@ -8,11 +8,69 @@ import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
 import {Video, Podcast, HomePageProps} from './type/type'
 import {latestVideo,articlesData,liveTVVideos,liveTv,ourVideo,podcast,podcastEpisodes} from './data/data'
+import { useHomeData } from '../../hooks/home'
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [selectedPodcast, setSelectedPodcast] = useState<Podcast | null>(null)
   const { darkMode,setActivePage } = useAppContext()
+  const { data: homeData } = useHomeData()
+
+  // Map API videos → WorkSection items + modal items (fallback to static)
+  const liveTvItems = homeData?.videos.length
+    ? homeData.videos.map((v, i) => ({
+        id: i + 1,
+        title: v.title,
+        description: v.description,
+        image: v.thumbnailUrl || '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg',
+      }))
+    : liveTv
+
+  const videosForModal: Video[] = homeData?.videos.length
+    ? homeData.videos.map((v, i) => ({
+        id: String(i + 1),
+        title: v.title,
+        description: v.description,
+        streamUrl: v.streamUrl,
+        thumbnail: v.thumbnailUrl || '',
+        isLive: v.isLive,
+        category: '',
+        publishDate: v.publishDate || '',
+      }))
+    : liveTVVideos
+
+  // Map API podcasts → WorkSection items + modal items (fallback to static)
+  const podcastItems = homeData?.podcasts.length
+    ? homeData.podcasts.map((p, i) => ({
+        id: i + 1,
+        title: p.title,
+        description: p.description,
+        image: p.imageUrl || '/assets/podcast/back-view-happy-young-man-looking-opportunity-door-wooden-background-success-future-abstraction-concept_670147-37595.jpg',
+      }))
+    : podcast
+
+  const podcastsForModal: Podcast[] = homeData?.podcasts.length
+    ? homeData.podcasts.map((p, i) => ({
+        id: i + 1,
+        title: p.title,
+        description: p.description,
+        audioFile: p.audioUrl,
+        image: p.imageUrl || '',
+        duration: p.duration || '',
+        category: '',
+        publishDate: p.publishDate || '',
+      }))
+    : podcastEpisodes
+
+  // Map API articles → WorkSection items (fallback to static)
+  const articleItems = homeData?.articles.length
+    ? homeData.articles.map((a, i) => ({
+        id: i + 1,
+        title: a.title,
+        description: a.subtitle || '',
+        image: a.coverImage || '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png',
+      }))
+    : articlesData
 
   
   /* -------------------- HANDLERS -------------------- */
@@ -126,25 +184,25 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <WorkSection
           title="Live TV"
           subtitle="Discover our latest live broadcasts and streaming content."
-          items={liveTv}
+          items={liveTvItems}
           viewAll={() => {
              onNavigate('livetv')
              setActivePage('livetv')
           }}
-          onItemClick={(_, poistion) => playVideo(liveTVVideos[poistion])}
+          onItemClick={(_, position) => playVideo(videosForModal[position])}
         />
 
        {/* Podcasts */}
         <WorkSection
           title="Podcasts"
           subtitle="Listen to inspiring conversations and insights on sustainability."
-          items={podcast}
+          items={podcastItems}
           viewAll={() => {
             onNavigate('podcast')
             setActivePage('podcast')
             }
           }
-          onItemClick={(_, poistion) => playPodcast(podcastEpisodes[poistion])}
+          onItemClick={(_, position) => playPodcast(podcastsForModal[position])}
         />
 
 
@@ -152,7 +210,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         <WorkSection
           title="Articles"
           subtitle="Read thought leadership on sustainable development and innovation."
-          items={articlesData}
+          items={articleItems}
           viewAll={() => {
             onNavigate('articles')
             setActivePage('articles')

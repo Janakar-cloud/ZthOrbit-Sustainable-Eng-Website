@@ -15,10 +15,12 @@ import posts from "./posts.js";
 import notifications from "./notifications.js";
 import reference from "./reference.js";
 import search from "./search.js";
+import home from "./home.js";
 
 const router = Router();
 
 router.use("/auth", auth);
+router.use("/home", home);
 router.use("/live", live);
 router.use("/videos", videos);
 router.use("/podcasts", podcasts);

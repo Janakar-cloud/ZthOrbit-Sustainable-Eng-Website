@@ -4,7 +4,7 @@ import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
 
 const router = Router();
-const LIMIT = 6;
+const LIMIT = 4;
 const COPY_SUFFIX_RE = /\s*\(\d+\)\s*$/;
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 

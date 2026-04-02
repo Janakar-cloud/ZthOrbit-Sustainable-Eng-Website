@@ -2,12 +2,34 @@ import { Router } from "express";
 import { z } from "zod";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
+import { Tag } from "../models/Tag.js";
 import { requireAuth } from "../middleware/auth.js";
 import { escapeRegex } from "../utils/regex.js";
 import { filterCanonicalMedia } from "../utils/mediaTitle.js";
 
 const router = Router();
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
+
+function extractCategoryNames(tags: Array<{ name?: string; kind?: string }> = []): string[] {
+  return tags
+    .filter((tag) => tag?.kind === "category" && typeof tag?.name === "string")
+    .map((tag) => tag.name!.trim())
+    .filter(Boolean);
+}
+
+async function resolveCategoryIds(category: unknown): Promise<string[] | null> {
+  if (typeof category !== "string") return null;
+
+  const value = category.trim();
+  if (!value || value.toLowerCase() === "all") return null;
+
+  const categoryTags = await Tag.find({
+    kind: "category",
+    name: new RegExp(`^${escapeRegex(value)}$`, "i"),
+  }).select("_id");
+
+  return categoryTags.map((tag) => String(tag._id));
+}
 
 // Unified media list (combines videos and podcasts)
 router.get("/", async (req, res) => {
@@ -17,8 +39,13 @@ router.get("/", async (req, res) => {
   const skip = (page - 1) * limit;
 
   const filter: any = {};
-  if (category) filter.tags = category;
   if (status) filter.status = status;
+
+  const resolvedCategoryIds = await resolveCategoryIds(category);
+  if (resolvedCategoryIds?.length === 0) {
+    return res.json({ data: [], meta: { page, limit, total: 0 } });
+  }
+  if (resolvedCategoryIds?.length) filter.tags = { $in: resolvedCategoryIds };
 
   let items: any[] = [];
   let total = 0;
@@ -30,7 +57,7 @@ router.get("/", async (req, res) => {
     if (search) videoFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [videos, count] = await Promise.all([
-      Video.find(videoFilter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Video.find(videoFilter).populate("tags", "name kind").sort({ createdAt: -1 }).skip(skip).limit(limit),
       Video.countDocuments(videoFilter),
     ]);
     
@@ -40,7 +67,8 @@ router.get("/", async (req, res) => {
       description: v.description,
       mediaType: "video",
       menu: "LiveTv",
-      category: v.tags?.[0] || "",
+      category: extractCategoryNames(v.tags)[0] || "",
+      categories: extractCategoryNames(v.tags),
       tags: v.tags || [],
       duration: v.duration ? parseDuration(v.duration) : 0,
       fileUrl: v.streamUrl,
@@ -56,7 +84,7 @@ router.get("/", async (req, res) => {
     if (search) podcastFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [podcasts, count] = await Promise.all([
-      Podcast.find(podcastFilter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Podcast.find(podcastFilter).populate("tags", "name kind").sort({ createdAt: -1 }).skip(skip).limit(limit),
       Podcast.countDocuments(podcastFilter),
     ]);
     
@@ -66,7 +94,8 @@ router.get("/", async (req, res) => {
       description: p.description,
       mediaType: "audio",
       menu: "Podcast",
-      category: p.tags?.[0] || "",
+      category: extractCategoryNames(p.tags)[0] || "",
+      categories: extractCategoryNames(p.tags),
       tags: p.tags || [],
       duration: p.duration ? parseDuration(p.duration) : 0,
       fileUrl: p.audioUrl,
@@ -88,8 +117,8 @@ router.get("/", async (req, res) => {
     }
     
     const [videos, podcasts, vCount, pCount] = await Promise.all([
-      Video.find(videoFilter).sort({ createdAt: -1 }).limit(limit),
-      Podcast.find(podcastFilter).sort({ createdAt: -1 }).limit(limit),
+      Video.find(videoFilter).populate("tags", "name kind").sort({ createdAt: -1 }).limit(limit),
+      Podcast.find(podcastFilter).populate("tags", "name kind").sort({ createdAt: -1 }).limit(limit),
       Video.countDocuments(videoFilter),
       Podcast.countDocuments(podcastFilter),
     ]);
@@ -100,7 +129,8 @@ router.get("/", async (req, res) => {
       description: v.description,
       mediaType: "video",
       menu: "LiveTv",
-      category: v.tags?.[0] || "",
+      category: extractCategoryNames(v.tags)[0] || "",
+      categories: extractCategoryNames(v.tags),
       tags: v.tags || [],
       duration: v.duration ? parseDuration(v.duration) : 0,
       fileUrl: v.streamUrl,
@@ -116,7 +146,8 @@ router.get("/", async (req, res) => {
       description: p.description,
       mediaType: "audio",
       menu: "Podcast",
-      category: p.tags?.[0] || "",
+      category: extractCategoryNames(p.tags)[0] || "",
+      categories: extractCategoryNames(p.tags),
       tags: p.tags || [],
       duration: p.duration ? parseDuration(p.duration) : 0,
       fileUrl: p.audioUrl,
@@ -136,9 +167,20 @@ router.get("/", async (req, res) => {
   res.json({ data: items, meta: { page, limit, total } });
 });
 
+router.get("/categories", async (_req, res) => {
+  const categoryTags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
+  res.json({
+    data: categoryTags.map((tag) => ({
+      id: String(tag._id),
+      name: tag.name,
+      kind: tag.kind,
+    })),
+  });
+});
+
 // Get single media item
 router.get("/:id", async (req, res) => {
-  const video = await Video.findById(req.params.id);
+  const video = await Video.findById(req.params.id).populate("tags", "name kind");
   if (video) {
     return res.json({
       id: video.id,
@@ -146,7 +188,8 @@ router.get("/:id", async (req, res) => {
       description: video.description,
       mediaType: "video",
       menu: "LiveTv",
-      category: video.tags?.[0] || "",
+      category: extractCategoryNames(video.tags as any[])[0] || "",
+      categories: extractCategoryNames(video.tags as any[]),
       tags: video.tags || [],
       duration: video.duration ? parseDuration(video.duration) : 0,
       fileUrl: video.streamUrl,
@@ -157,7 +200,7 @@ router.get("/:id", async (req, res) => {
     });
   }
 
-  const podcast = await Podcast.findById(req.params.id);
+  const podcast = await Podcast.findById(req.params.id).populate("tags", "name kind");
   if (podcast) {
     return res.json({
       id: podcast.id,
@@ -165,7 +208,8 @@ router.get("/:id", async (req, res) => {
       description: podcast.description,
       mediaType: "audio",
       menu: "Podcast",
-      category: podcast.tags?.[0] || "",
+      category: extractCategoryNames(podcast.tags as any[])[0] || "",
+      categories: extractCategoryNames(podcast.tags as any[]),
       tags: podcast.tags || [],
       duration: podcast.duration ? parseDuration(podcast.duration) : 0,
       fileUrl: podcast.audioUrl,

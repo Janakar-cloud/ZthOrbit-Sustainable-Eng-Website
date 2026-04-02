@@ -14,7 +14,8 @@
     { "key": "accessToken", "value": "" },
     { "key": "refreshToken", "value": "" },
     { "key": "defaultEmail", "value": "superadmin@zthorbit.local" },
-    { "key": "defaultPassword", "value": "ChangeMe123!" }
+    { "key": "defaultPassword", "value": "ChangeMe123!" },
+    { "key": "lastCategoryId", "value": "" }
   ],
   "item": [
     {
@@ -175,6 +176,30 @@
       ]
     },
     {
+      "name": "Home",
+      "item": [
+        {
+          "name": "Get home feed (latest 4 each)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/home", "host": ["{{baseUrl}}"], "path": ["home"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": [
+                "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+                "const json = pm.response.json();",
+                "pm.test('videos capped at 4', function () { pm.expect((json.videos || []).length).to.be.at.most(4); });",
+                "pm.test('podcasts capped at 4', function () { pm.expect((json.podcasts || []).length).to.be.at.most(4); });",
+                "pm.test('articles capped at 4', function () { pm.expect((json.articles || []).length).to.be.at.most(4); });"
+              ] }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Live",
       "item": [
         {
@@ -225,6 +250,18 @@
             "url": { "raw": "{{baseUrl}}/media?menu=LiveTv&page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["media"], "query": [ { "key": "menu", "value": "LiveTv" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" } ] }
           },
           "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"] } } ]
+        },
+        {
+          "name": "List shared media categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/media/categories", "host": ["{{baseUrl}}"], "path": ["media", "categories"] }
+          },
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('category payload exists', function () { pm.expect(pm.response.json().data).to.be.an('array'); });",
+            "const id = pm.response.json().data?.[0]?.id; if (id) { pm.environment.set('lastCategoryId', id); }"
+          ] } } ]
         },
         {
           "name": "List podcasts (Podcast menu)",
@@ -682,12 +719,15 @@
       "name": "Reference",
       "item": [
         {
-          "name": "Get categories (public)",
+          "name": "Get shared categories (public)",
           "request": {
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/api/categories?type=media", "host": ["{{baseUrl}}"], "path": ["api", "categories"], "query": [ { "key": "type", "value": "media" } ] }
           },
-          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('status 200', function () { pm.response.to.have.status(200); });"] } } ]
+          "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('category objects returned', function () { pm.expect(pm.response.json().data).to.be.an('array'); });"
+          ] } } ]
         },
         {
           "name": "Get menus (public)",

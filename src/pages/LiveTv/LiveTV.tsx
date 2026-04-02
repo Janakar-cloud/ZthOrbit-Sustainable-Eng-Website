@@ -23,6 +23,7 @@ import VideoCategoryFilters from './components/renderFilterButtons'
 import VideoGrid from './components/VideoGrid'
 import { VideoCategory } from './type/type'
 import { LiveVideo } from '../../hooks/videolive'
+import { useSharedCategories } from '../../hooks/categories'
 import NoData from '../../components/Nodatafound'
 import ErrorMessage from '../../components/ErroMessage'
 import Loader from '../../components/Loader'
@@ -46,6 +47,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   }])
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const { videocast, loading, error, refetch } = LiveVideo();
+  const { categories: sharedCategories } = useSharedCategories();
 
   useEffect(() => {
     if (!Array.isArray(videocast?.items)) return;
@@ -56,8 +58,8 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       title: item.title,
       description: item.description || "",
       videoId: item.videoId || "",
-      streamUrl: item.streamUrl || item.hlsUrl || item.url,
-      category: item.tags?.[0]?.name || "",
+      streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
+      category: item.category || item.tags?.[0]?.name || "",
       isLive: item.isLive ?? false,
       publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
         month: "short",
@@ -70,21 +72,29 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
     setVideos(allVideos);
     setLiveVideos(allVideos);
-    const categoryList = buildCategoryList(allVideos);
+    const categoryList = buildCategoryList(sharedCategories, allVideos);
     setVideoCategories(categoryList);
 
   }, [videocast]);
 
+  useEffect(() => {
+    setVideoCategories(buildCategoryList(sharedCategories, videos));
+  }, [sharedCategories, videos]);
 
 
-  const buildCategoryList = (videos: Video[]) => {
+
+  const buildCategoryList = (shared: Array<{ name: string }>, videos: Video[]) => {
+    const names = shared.length > 0
+      ? shared.map((category) => category.name.toLowerCase())
+      : Array.from(new Set(videos.map(v => v.category.toLowerCase()).filter(Boolean)));
+
     return [
       { key: 'all', label: 'All Videos', icon: 'apps' },
-      ...Array.from(new Set(videos.map(v => v.category)))
+      ...Array.from(new Set(names))
         .filter(Boolean)
         .map(cat => ({
           key: cat,
-          label: cat,
+          label: cat.charAt(0).toUpperCase() + cat.slice(1),
           icon: 'video_library'
         }))
     ];

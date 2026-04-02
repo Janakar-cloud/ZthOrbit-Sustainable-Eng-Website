@@ -10,6 +10,7 @@ import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
 import PodcastComments from './components/PodcastComments/PodcastComments'
 import { podcastEpisode } from '../../hooks/podcast'
+import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
 import ErrorMessage from '../../components/ErroMessage'
 import NoData from '../../components/Nodatafound'
@@ -24,6 +25,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([])
 
   const { podcast: podcastList, loading, error, refetch } = podcastEpisode()
+  const { categories: sharedCategories } = useSharedCategories()
 
   // Sync API data safely
   useEffect(() => {
@@ -62,16 +64,17 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       leadership: 'groups', ethics: 'balance', finance: 'account_balance',
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
-    const seen = new Set<string>()
     const dynamic: Category[] = [{ id: 'all', name: 'All Episodes', icon: 'podcasts' }]
-    podcasts.forEach(p => p.categories.forEach(c => {
-      if (!seen.has(c)) {
-        seen.add(c)
-        dynamic.push({ id: c, name: c.charAt(0).toUpperCase() + c.slice(1), icon: iconMap[c] || 'label' })
-      }
-    }))
+    const names = sharedCategories.length > 0
+      ? sharedCategories.map((category) => category.name.toLowerCase())
+      : Array.from(new Set(podcasts.flatMap((podcast) => podcast.categories)))
+
+    names.forEach((name) => {
+      dynamic.push({ id: name, name: name.charAt(0).toUpperCase() + name.slice(1), icon: iconMap[name] || 'label' })
+    })
+
     return dynamic.length > 1 ? dynamic : staticCategories
-  }, [podcasts])
+  }, [podcasts, sharedCategories])
 
   // Filter
   const filteredPodcasts =

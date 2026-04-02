@@ -18,7 +18,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   // Map API videos → WorkSection items + modal items (fallback to static)
   const liveTvItems = homeData
-    ? homeData.videos.map((v, i) => ({
+    ? homeData.videos.slice(0, 4).map((v, i) => ({
         id: i + 1,
         title: v.title,
         description: v.description,
@@ -27,7 +27,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : liveTv
 
   const videosForModal: Video[] = homeData
-    ? homeData.videos.map((v, i) => ({
+    ? homeData.videos.slice(0, 4).map((v, i) => ({
         id: String(i + 1),
         title: v.title,
         description: v.description,
@@ -41,7 +41,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   // Map API podcasts → WorkSection items + modal items (fallback to static)
   const podcastItems = homeData
-    ? homeData.podcasts.map((p, i) => ({
+    ? homeData.podcasts.slice(0, 4).map((p, i) => ({
         id: i + 1,
         title: p.title,
         description: p.description,
@@ -50,7 +50,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : podcast
 
   const podcastsForModal: Podcast[] = homeData
-    ? homeData.podcasts.map((p, i) => ({
+    ? homeData.podcasts.slice(0, 4).map((p, i) => ({
         id: i + 1,
         title: p.title,
         description: p.description,
@@ -64,7 +64,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   // Map API articles → WorkSection items (fallback to static)
   const articleItems = homeData
-    ? homeData.articles.map((a, i) => ({
+    ? homeData.articles.slice(0, 4).map((a, i) => ({
         id: i + 1,
         title: a.title,
         description: a.subtitle || '',

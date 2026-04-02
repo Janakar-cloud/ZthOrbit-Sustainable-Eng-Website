@@ -9,21 +9,22 @@ const router = Router();
 
 // Get categories (aggregated from tags/content)
 router.get("/categories", async (req, res) => {
-  const type = req.query.type as string | undefined;
-  let categories: string[] = [];
+  const type = (req.query.type as string | undefined)?.toLowerCase();
+  const tags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
 
-  if (type === "media" || !type) {
-    const videoTags = await Video.distinct("tags");
-    const podcastTags = await Podcast.distinct("tags");
-    categories = [...new Set([...videoTags.map(String), ...podcastTags.map(String)])];
-  } else if (type === "article") {
-    categories = (await Article.distinct("tags")).map(String);
-  } else if (type === "post") {
-    // Posts don't have categories in current schema, return empty or add field
-    categories = [];
-  }
+  const data = tags.map((tag) => ({
+    id: String(tag._id),
+    name: tag.name,
+    kind: tag.kind,
+    appliesTo:
+      type === "article"
+        ? ["articles"]
+        : type === "media"
+          ? ["videos", "podcasts", "articles"]
+          : ["videos", "podcasts", "articles"],
+  }));
 
-  res.json({ data: categories.sort() });
+  res.json({ data });
 });
 
 // Get menus (static list)

@@ -11,6 +11,7 @@ import ArticlesList from './components/ArticlesList'
 import { categories as staticCategories } from './data/data'
 import ArticleDetails from './components/ArticleDetails'
 import { ArticlesHooks } from '../../hooks/articles'
+import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
 
 
@@ -21,6 +22,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
   const { darkMode, setActivePage } = useAppContext()
   const [articles, setArticles] = useState<Article[]>([])
   const { articlesCast, loading, error, refetch } = ArticlesHooks();
+  const { categories: sharedCategories } = useSharedCategories();
 
   useEffect(() => {
     if (!Array.isArray(articlesCast?.items)) return
@@ -63,16 +65,17 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       leadership: 'groups', ethics: 'balance', finance: 'account_balance',
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
-    const seen = new Set<string>()
     const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
-    articles.forEach(a => [a.category].filter(Boolean).forEach(c => {
-      if (!seen.has(c)) {
-        seen.add(c)
-        dynamic.push({ id: c, name: c.charAt(0).toUpperCase() + c.slice(1), icon: iconMap[c] || 'label' })
-      }
-    }))
+    const names = sharedCategories.length > 0
+      ? sharedCategories.map((category) => category.name.toLowerCase())
+      : Array.from(new Set(articles.map((article) => article.category).filter(Boolean)))
+
+    names.forEach((name) => {
+      dynamic.push({ id: name, name: name.charAt(0).toUpperCase() + name.slice(1), icon: iconMap[name] || 'label' })
+    })
+
     return dynamic.length > 1 ? dynamic : staticCategories
-  }, [articles])
+  }, [articles, sharedCategories])
 
   const filteredArticles = selectedCategory === 'all'
     ? articles

@@ -7,7 +7,7 @@ interface FooterProps {
 
 export default function Footer({ onNavigate }: FooterProps) {
 
-  const {setActivePage } = useAppContext()
+  const { setActivePage } = useAppContext()
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -34,8 +34,8 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="footer-links">
             <h5 className="footer-heading">Explore</h5>
             <ul className="footer-list">
-              <li><a onClick={() =>{ setActivePage('home'); onNavigate('home')}}>Home</a></li>
-              <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv')}}>Videos</a></li>
+              <li><a onClick={() => { setActivePage('home'); onNavigate('home') }}>Home</a></li>
+              <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv') }}>Videos</a></li>
             </ul>
           </div>
 
@@ -43,9 +43,17 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="footer-links">
             <h5 className="footer-heading">Company</h5>
             <ul className="footer-list">
-              <li><a onClick={() => { setActivePage('about');onNavigate('about')}}>About Us</a></li>
-              <li><a onClick={() => {setActivePage('articles');onNavigate('articles')}}>Blog</a></li>
-              <li><a onClick={() => {setActivePage('about'); onNavigate('about')}}>Contact</a></li>
+              <li><a onClick={() => { setActivePage('about'); onNavigate('about') }}>About Us</a></li>
+              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles') }}>Blog</a></li>
+              <li><a onClick={() => {
+                setActivePage('about');
+                onNavigate('about')
+                setTimeout(() => {
+                  document.getElementById('contact')?.scrollIntoView({
+                    behavior: 'smooth',
+                  });
+                }, 100); // delay ensures page loads
+              }}>Contact</a></li>
             </ul>
           </div>
 

@@ -23,7 +23,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
 
   const moreRef = useRef<HTMLDivElement>(null)
 
-  // ✅ Close 3-dot menu on outside click
+  // Close 3-dot menu on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
@@ -76,12 +76,14 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('livetv') }} className={isActive('livetv')}>LiveTV</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('podcast') }} className={isActive('podcast')}>Podcast</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('articles') }} className={isActive('articles')}>Articles</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('about') }} className={isActive('about')}>About Us</a>
+
           </nav>
 
           {/* Right Actions */}
           <div className="header-actions">
 
-            {/* 👇 THREE DOT MENU */}
+            {/* THREE DOT MENU */}
             <div
               className={`more-menu-container ${darkMode ? 'dark' : ''}`}
               ref={moreRef}
@@ -94,10 +96,6 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
 
               {moreMenuOpen && (
                 <div className="more-dropdown">
-                  <button onClick={() => handleNavigate('about')}>
-                    <FaUsers />About Us
-                  </button>
-
 
                   {/* Learn More */}
                   <button onClick={() => {
@@ -208,7 +206,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                     </div>
                   )}
 
-             
+
                   {isLoggedIn && (
                     <button className="dropdown-item logout" onClick={handleLogout}>
                       <span className="material-icons">logout</span>

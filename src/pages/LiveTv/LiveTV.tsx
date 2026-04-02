@@ -49,7 +49,9 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
   useEffect(() => {
     if (!Array.isArray(videocast?.items)) return;
-    const allVideos: Video[] = videocast.items.map((item: any) => ({
+    const allVideos: Video[] = videocast.items
+      .filter((item: any) => typeof item.thumbnailUrl === 'string' && item.thumbnailUrl.trim().length > 0)
+      .map((item: any) => ({
       id: item._id,
       title: item.title,
       description: item.description || "",
@@ -62,7 +64,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         day: "numeric",
         year: "numeric",
       }),
-      thumbnail: item.thumbnailUrl || "/assets/livetv/placeholder.jpg",
+      thumbnail: item.thumbnailUrl,
     }));
 
 
@@ -163,7 +165,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
 
   // BLOCK RENDER UNTIL READY
-  if (videos.length === 0) {
+  if (loading) {
     return (
       <div style={{
         display: "flex",
@@ -174,6 +176,18 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         <Loader />
       </div>
     );
+  }
+
+  if (!loading && videos.length === 0) {
+    return (
+      <div className={`livetv ${darkMode ? 'dark' : ''}`}>
+        <Header onNavigate={onNavigate} />
+        <div className="livetv-container">
+          <NoData message="No videos available" onRetry={() => { refetch() }} />
+        </div>
+        <Footer onNavigate={onNavigate} />
+      </div>
+    )
   }
 
   return (

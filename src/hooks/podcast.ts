@@ -12,6 +12,10 @@ function dedupeByTitle(items: PodcastEpisode[]): PodcastEpisode[] {
   });
 }
 
+function hasValue(value?: string): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export const podcastEpisode = () => {
   const [podcast, setPodcast] = useState<PodcastApiResponse>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,7 +25,7 @@ export const podcastEpisode = () => {
     try {
       setLoading(true);
       const data: PodcastApiResponse = await getPodcasts();
-      if (data?.items) data.items = dedupeByTitle(data.items);
+      if (data?.items) data.items = dedupeByTitle(data.items.filter(item => hasValue(item.imageUrl)));
       setPodcast(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong");

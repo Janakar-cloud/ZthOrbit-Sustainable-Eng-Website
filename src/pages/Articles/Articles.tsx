@@ -25,7 +25,9 @@ export default function Articles({ onNavigate }: ArticlesProps) {
   useEffect(() => {
     if (!Array.isArray(articlesCast?.items)) return
 
-    const formatted = articlesCast.items.map((p: any) => {
+    const formatted = articlesCast.items
+      .filter((p: any) => typeof p.coverImage === 'string' && p.coverImage.trim().length > 0)
+      .map((p: any) => {
       const cats: string[] = Array.isArray(p.tags)
         ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
         : []
@@ -77,7 +79,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
     : articles.filter(article => article.category === selectedCategory)
 
   // BLOCK RENDER UNTIL READY
-  if (articles.length === 0) {
+  if (loading) {
     return (
       <div style={{
         display: "flex",
@@ -88,6 +90,26 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         <Loader />
       </div>
     );
+  }
+
+  if (!loading && articles.length === 0) {
+    return (
+      <div className={`articles-page ${darkMode ? 'dark' : ''}`}>
+        <Header onNavigate={onNavigate} />
+        <PodcastHero
+          title="Thought Leadership in Sustainable Development"
+          subtitle="Deep insights on global economics, technology, sustainability, and conscious leadership"
+          imgStatus={false}
+          className='articles-hero'
+          buttonStatus={false}
+          onHandleNavigate={() => undefined}
+        />
+        <div className="articles-container">
+          <NoData message="No articles found." onRetry={() => { refetch() }} />
+        </div>
+        <Footer onNavigate={onNavigate} />
+      </div>
+    )
   }
 
   if (selectedArticle) {

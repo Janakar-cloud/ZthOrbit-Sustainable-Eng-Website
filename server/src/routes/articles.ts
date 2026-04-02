@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
+const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
 router.get("/", async (req, res) => {
   const { tag, featured, status, search } = req.query;
@@ -15,6 +16,7 @@ router.get("/", async (req, res) => {
   if (tag) filter.tags = tag;
   if (featured !== undefined) filter.featured = featured === "true";
   if (status) filter.status = status;
+  filter.coverImage = HAS_IMAGE;
   if (search) {
     const safe = escapeRegex(search as string);
     filter.$or = [

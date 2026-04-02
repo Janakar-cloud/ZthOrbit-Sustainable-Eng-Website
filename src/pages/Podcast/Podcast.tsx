@@ -28,7 +28,9 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   // Sync API data safely
   useEffect(() => {
     if (!Array.isArray(podcastList?.items)) return
-    const formatted = podcastList.items.map((p: any) => {
+    const formatted = podcastList.items
+      .filter((p: any) => typeof p.imageUrl === 'string' && p.imageUrl.trim().length > 0)
+      .map((p: any) => {
       const cats: string[] = Array.isArray(p.tags)
         ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
         : []
@@ -133,7 +135,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
 
 
    // BLOCK RENDER UNTIL READY
-    if (podcasts.length === 0) {
+    if (loading) {
       return (
         <div style={{
           display: "flex",
@@ -144,6 +146,28 @@ export default function Podcast({ onNavigate }: PodcastProps) {
           <Loader />
         </div>
       );
+    }
+
+    if (!loading && podcasts.length === 0) {
+      return (
+        <div className={`podcast-page ${darkMode ? 'dark' : ''}`}>
+          <Header onNavigate={onNavigate} />
+          <PodcastHero
+            title="Green Generation Podcast"
+            subtitle="Conversations that inspire sustainable action and conscious leadership"
+            imgStatus={true}
+            className="podcast-hero"
+            buttonStatus={false}
+            onHandleNavigate={() => undefined}
+          />
+          <div className="podcast-episodes-section">
+            <div className="podcast-container">
+              <NoData message="No podcasts found." onRetry={() => { refetch() }} />
+            </div>
+          </div>
+          <Footer onNavigate={onNavigate} />
+        </div>
+      )
     }
   
 

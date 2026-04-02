@@ -17,16 +17,16 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const { data: homeData } = useHomeData()
 
   // Map API videos → WorkSection items + modal items (fallback to static)
-  const liveTvItems = homeData?.videos.length
+  const liveTvItems = homeData
     ? homeData.videos.map((v, i) => ({
         id: i + 1,
         title: v.title,
         description: v.description,
-        image: v.thumbnailUrl || '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg',
+        image: v.thumbnailUrl,
       }))
     : liveTv
 
-  const videosForModal: Video[] = homeData?.videos.length
+  const videosForModal: Video[] = homeData
     ? homeData.videos.map((v, i) => ({
         id: String(i + 1),
         title: v.title,
@@ -40,16 +40,16 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : liveTVVideos
 
   // Map API podcasts → WorkSection items + modal items (fallback to static)
-  const podcastItems = homeData?.podcasts.length
+  const podcastItems = homeData
     ? homeData.podcasts.map((p, i) => ({
         id: i + 1,
         title: p.title,
         description: p.description,
-        image: p.imageUrl || '/assets/podcast/back-view-happy-young-man-looking-opportunity-door-wooden-background-success-future-abstraction-concept_670147-37595.jpg',
+        image: p.imageUrl || '',
       }))
     : podcast
 
-  const podcastsForModal: Podcast[] = homeData?.podcasts.length
+  const podcastsForModal: Podcast[] = homeData
     ? homeData.podcasts.map((p, i) => ({
         id: i + 1,
         title: p.title,
@@ -63,12 +63,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : podcastEpisodes
 
   // Map API articles → WorkSection items (fallback to static)
-  const articleItems = homeData?.articles.length
+  const articleItems = homeData
     ? homeData.articles.map((a, i) => ({
         id: i + 1,
         title: a.title,
         description: a.subtitle || '',
-        image: a.coverImage || '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png',
+        image: a.coverImage || '',
       }))
     : articlesData
 

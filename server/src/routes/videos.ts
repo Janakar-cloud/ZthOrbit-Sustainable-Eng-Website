@@ -6,6 +6,7 @@ import { signStreamUrl } from "../utils/s3.js";
 import { filterCanonicalMedia } from "../utils/mediaTitle.js";
 
 const router = Router();
+const HAS_THUMBNAIL = { $exists: true, $nin: ["", null] };
 
 // Deprecation warning middleware
 router.use((req, res, next) => {
@@ -23,6 +24,7 @@ router.get("/", async (req, res) => {
   const filter: any = {};
   if (tag) filter.tags = tag;
   if (status) filter.status = status;
+  filter.thumbnailUrl = HAS_THUMBNAIL;
   const [items, total] = await Promise.all([
     Video.find(filter)
       .sort({ seriesId: 1, partNumber: 1, createdAt: -1 })

@@ -6,6 +6,7 @@ import { Article } from "../models/Article.js";
 const router = Router();
 const LIMIT = 6;
 const COPY_SUFFIX_RE = /\s*\(\d+\)\s*$/;
+const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
 function dedupeCanonical<T extends { title: string }>(docs: T[]): T[] {
   const seen = new Set<string>();
@@ -25,15 +26,15 @@ function dedupeCanonical<T extends { title: string }>(docs: T[]): T[] {
 router.get("/", async (_req, res) => {
   try {
     const [videos, podcasts, articles] = await Promise.all([
-      Video.find({ status: "published" })
+      Video.find({ status: "published", thumbnailUrl: HAS_IMAGE })
         .sort({ publishDate: -1, createdAt: -1 })
         .limit(LIMIT * 3)
         .select("title description thumbnailUrl streamUrl isLive publishDate"),
-      Podcast.find({ status: "published" })
+      Podcast.find({ status: "published", imageUrl: HAS_IMAGE })
         .sort({ publishDate: -1, createdAt: -1 })
         .limit(LIMIT * 3)
         .select("title description imageUrl audioUrl duration publishDate"),
-      Article.find({ status: "published" })
+      Article.find({ status: "published", coverImage: HAS_IMAGE })
         .sort({ publishDate: -1, createdAt: -1 })
         .limit(LIMIT * 3)
         .select("title subtitle coverImage readTime publishDate"),

@@ -7,6 +7,7 @@ import { escapeRegex } from "../utils/regex.js";
 import { filterCanonicalMedia } from "../utils/mediaTitle.js";
 
 const router = Router();
+const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
 // Unified media list (combines videos and podcasts)
 router.get("/", async (req, res) => {
@@ -25,6 +26,7 @@ router.get("/", async (req, res) => {
   // Filter by menu (LiveTv = videos, Podcast = podcasts)
   if (menu === "LiveTv" || mediaType === "video") {
     const videoFilter = { ...filter };
+    videoFilter.thumbnailUrl = HAS_IMAGE;
     if (search) videoFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [videos, count] = await Promise.all([
@@ -50,6 +52,7 @@ router.get("/", async (req, res) => {
     total = count;
   } else if (menu === "Podcast" || mediaType === "audio") {
     const podcastFilter = { ...filter };
+    podcastFilter.imageUrl = HAS_IMAGE;
     if (search) podcastFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [podcasts, count] = await Promise.all([
@@ -77,6 +80,8 @@ router.get("/", async (req, res) => {
     // Return both if no menu filter
     const videoFilter = { ...filter };
     const podcastFilter = { ...filter };
+    videoFilter.thumbnailUrl = HAS_IMAGE;
+    podcastFilter.imageUrl = HAS_IMAGE;
     if (search) {
       videoFilter.title = new RegExp(escapeRegex(search as string), "i");
       podcastFilter.title = new RegExp(escapeRegex(search as string), "i");

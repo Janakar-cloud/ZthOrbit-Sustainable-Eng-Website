@@ -20,6 +20,10 @@ function dedupeByTitle<T extends { title: string }>(items: T[]): T[] {
   });
 }
 
+function hasValue(value?: string): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export const LiveVideo = () => {
   const [videocast, setVideocast] = useState<VideoLiveResponse>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,7 +33,7 @@ export const LiveVideo = () => {
     try {
       setLoading(true);
       const data: VideoLiveResponse = await getVideo();
-      if (data?.items) data.items = dedupeByTitle(data.items);
+      if (data?.items) data.items = dedupeByTitle(data.items.filter(item => hasValue(item.thumbnailUrl)));
       setVideocast(data);
     } catch (err: any) {
       setError(err.message || "Something went wrong");

@@ -12,6 +12,10 @@ function dedupeByTitle<T extends { title: string }>(items: T[]): T[] {
   });
 }
 
+function hasValue(value?: string): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export const useHomeData = () => {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,9 +24,9 @@ export const useHomeData = () => {
   useEffect(() => {
     getHomeData()
       .then((d: HomeData) => {
-        d.videos   = dedupeByTitle(d.videos);
-        d.podcasts = dedupeByTitle(d.podcasts);
-        d.articles = dedupeByTitle(d.articles);
+        d.videos = dedupeByTitle(d.videos.filter(item => hasValue(item.thumbnailUrl)));
+        d.podcasts = dedupeByTitle(d.podcasts.filter(item => hasValue(item.imageUrl)));
+        d.articles = dedupeByTitle(d.articles.filter(item => hasValue(item.coverImage)));
         setData(d);
       })
       .catch((err) => setError(err.message || "Failed to load content"))

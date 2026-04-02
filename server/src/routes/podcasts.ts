@@ -5,6 +5,7 @@ import { PodcastComment } from "../models/PodcastComment.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
+const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
 // Deprecation warning middleware
 router.use((req, res, next) => {
@@ -22,6 +23,7 @@ router.get("/", async (req, res) => {
   const filter: any = {};
   if (tag) filter.tags = tag;
   if (status) filter.status = status;
+  filter.imageUrl = HAS_IMAGE;
   const [items, total] = await Promise.all([
     Podcast.find(filter).populate("tags", "name kind").sort({ publishDate: -1, createdAt: -1 }).skip(skip).limit(pageSize),
     Podcast.countDocuments(filter),

@@ -5,6 +5,15 @@ export interface ITag {
   kind: "category" | "topic" | "role";
 }
 
+export function normalizeTagName(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/\s+/g, " ").trim();
+}
+
+export function normalizeTagKey(value: unknown): string {
+  return normalizeTagName(value).toLowerCase();
+}
+
 const tagSchema = new Schema<ITag>(
   {
     name: {
@@ -12,7 +21,7 @@ const tagSchema = new Schema<ITag>(
       required: true,
       unique: true,
       trim: true,
-      set: (value: string) => value.replace(/\s+/g, " ").trim(),
+      set: normalizeTagName,
     },
     kind: { type: String, enum: ["category", "topic", "role"], default: "category" },
   },

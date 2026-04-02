@@ -3,7 +3,7 @@ import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
 import { Post } from "../models/Post.js";
-import { Tag } from "../models/Tag.js";
+import { Tag, normalizeTagKey, normalizeTagName } from "../models/Tag.js";
 
 const router = Router();
 
@@ -11,18 +11,26 @@ const router = Router();
 router.get("/categories", async (req, res) => {
   const type = (req.query.type as string | undefined)?.toLowerCase();
   const tags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
+  const seen = new Set<string>();
 
-  const data = tags.map((tag) => ({
-    id: String(tag._id),
-    name: tag.name,
-    kind: tag.kind,
-    appliesTo:
-      type === "article"
-        ? ["articles"]
-        : type === "media"
-          ? ["videos", "podcasts", "articles"]
-          : ["videos", "podcasts", "articles"],
-  }));
+  const data = tags
+    .map((tag) => ({
+      id: String(tag._id),
+      name: normalizeTagName(tag.name),
+      kind: tag.kind,
+      appliesTo:
+        type === "article"
+          ? ["articles"]
+          : type === "media"
+            ? ["videos", "podcasts", "articles"]
+            : ["videos", "podcasts", "articles"],
+    }))
+    .filter((tag) => {
+      const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
   res.json({ data });
 });

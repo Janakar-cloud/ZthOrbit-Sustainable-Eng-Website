@@ -14,7 +14,7 @@ import { ArticlesHooks } from '../../hooks/articles'
 import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
 import NoData from '../../components/Nodatafound'
-import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
+import { canonicalizeCategoryNames, normalizeCategoryKey } from '../../utils/category'
 
 
 
@@ -32,12 +32,18 @@ export default function Articles({ onNavigate }: ArticlesProps) {
     const formatted = articlesCast.items
       .filter((p: any) => typeof p.coverImage === 'string' && p.coverImage.trim().length > 0)
       .map((p: any) => {
-      const cats: string[] = Array.isArray(p.tags)
-        ? p.tags
-            .filter((t: any) => t?.kind === 'category')
-            .map((t: any) => normalizeCategoryName(t.name))
-            .filter(Boolean)
-        : []
+      const cats = canonicalizeCategoryNames(
+        [
+          p.category,
+          ...(Array.isArray(p.categories) ? p.categories : []),
+          ...(Array.isArray(p.tags)
+            ? p.tags
+                .filter((t: any) => t?.kind === 'category')
+                .map((t: any) => t?.name)
+            : []),
+        ],
+        sharedCategories
+      )
       return {
         id: p._id,
         title: p.title,
@@ -60,7 +66,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       }
     })
     setArticles(formatted)
-  }, [articlesCast])
+  }, [articlesCast, sharedCategories])
 
   // Build categories dynamically from API data, fall back to static list
   const categories: Category[] = useMemo(() => {
@@ -70,15 +76,16 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
     const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
-    const sourceNames = sharedCategories.length > 0
-      ? sharedCategories.map((category) => normalizeCategoryName(category.name))
-      : articles.map((article) => normalizeCategoryName(article.category))
+    const sourceNames = canonicalizeCategoryNames(
+      sharedCategories.length > 0
+        ? sharedCategories.map((category) => category.name)
+        : articles.map((article) => article.category),
+      sharedCategories
+    )
 
-    const seen = new Set<string>()
     sourceNames.forEach((name) => {
       const key = normalizeCategoryKey(name)
-      if (!key || seen.has(key)) return
-      seen.add(key)
+      if (!key) return
       dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 

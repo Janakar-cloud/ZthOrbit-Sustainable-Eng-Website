@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
-import { Tag } from "../models/Tag.js";
+import { Tag, normalizeTagKey, normalizeTagName } from "../models/Tag.js";
 import { requireAuth } from "../middleware/auth.js";
 import { escapeRegex } from "../utils/regex.js";
 import { filterCanonicalMedia } from "../utils/mediaTitle.js";
@@ -11,10 +11,16 @@ const router = Router();
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
 function extractCategoryNames(tags: Array<{ name?: string; kind?: string }> = []): string[] {
+  const seen = new Set<string>();
   return tags
     .filter((tag) => tag?.kind === "category" && typeof tag?.name === "string")
-    .map((tag) => tag.name!.trim())
-    .filter(Boolean);
+    .map((tag) => normalizeTagName(tag.name))
+    .filter((name) => {
+      const key = normalizeTagKey(name);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 async function resolveCategoryIds(category: unknown): Promise<string[] | null> {
@@ -169,12 +175,20 @@ router.get("/", async (req, res) => {
 
 router.get("/categories", async (_req, res) => {
   const categoryTags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
+  const seen = new Set<string>();
   res.json({
-    data: categoryTags.map((tag) => ({
-      id: String(tag._id),
-      name: tag.name,
-      kind: tag.kind,
-    })),
+    data: categoryTags
+      .map((tag) => ({
+        id: String(tag._id),
+        name: normalizeTagName(tag.name),
+        kind: tag.kind,
+      }))
+      .filter((tag) => {
+        const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }),
   });
 });
 

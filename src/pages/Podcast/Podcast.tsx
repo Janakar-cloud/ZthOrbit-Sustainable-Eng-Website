@@ -14,7 +14,7 @@ import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
 import ErrorMessage from '../../components/ErroMessage'
 import NoData from '../../components/Nodatafound'
-import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
+import { canonicalizeCategoryNames, normalizeCategoryKey } from '../../utils/category'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -34,12 +34,18 @@ export default function Podcast({ onNavigate }: PodcastProps) {
     const formatted = podcastList.items
       .filter((p: any) => typeof p.imageUrl === 'string' && p.imageUrl.trim().length > 0)
       .map((p: any) => {
-      const cats: string[] = Array.isArray(p.tags)
-        ? p.tags
-            .filter((t: any) => t?.kind === 'category')
-            .map((t: any) => normalizeCategoryName(t.name))
-            .filter(Boolean)
-        : []
+      const cats = canonicalizeCategoryNames(
+        [
+          p.category,
+          ...(Array.isArray(p.categories) ? p.categories : []),
+          ...(Array.isArray(p.tags)
+            ? p.tags
+                .filter((t: any) => t?.kind === 'category')
+                .map((t: any) => t?.name)
+            : []),
+        ],
+        sharedCategories
+      )
       return {
         id: p._id,
         title: p.title,
@@ -59,7 +65,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       }
     })
     setPodcasts(formatted)
-  }, [podcastList])
+  }, [podcastList, sharedCategories])
 
   // Build categories dynamically from API data, fall back to static list
   const categories: Category[] = useMemo(() => {
@@ -69,15 +75,16 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
     const dynamic: Category[] = [{ id: 'all', name: 'All Episodes', icon: 'podcasts' }]
-    const sourceNames = sharedCategories.length > 0
-      ? sharedCategories.map((category) => normalizeCategoryName(category.name))
-      : podcasts.flatMap((podcast) => podcast.categories.map((category) => normalizeCategoryName(category)))
+    const sourceNames = canonicalizeCategoryNames(
+      sharedCategories.length > 0
+        ? sharedCategories.map((category) => category.name)
+        : podcasts.flatMap((podcast) => podcast.categories),
+      sharedCategories
+    )
 
-    const seen = new Set<string>()
     sourceNames.forEach((name) => {
       const key = normalizeCategoryKey(name)
-      if (!key || seen.has(key)) return
-      seen.add(key)
+      if (!key) return
       dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 

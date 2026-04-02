@@ -9,6 +9,15 @@ import {
   getPodcasts,
   getPresignedUpload,
 } from '../../utils/api'
+import { resolveCategoryName } from '../../utils/category'
+
+const VIDEO_CATEGORY_OPTIONS = [
+  'Sustainability',
+  'Leadership',
+  'Innovation',
+  'Environment',
+  'Technology',
+]
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void
@@ -87,7 +96,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [videoData, setVideoData] = useState<VideoUpload>({
     title: '',
     description: '',
-    category: 'sustainability',
+    category: 'Sustainability',
     file: null,
     thumbnail: null
   })
@@ -176,7 +185,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             id: i + 1,
             _apiId: v._id,
             title: v.title,
-            category: (v.tags?.[0] || 'General'),
+            category: resolveCategoryName(
+              typeof v.tags?.[0] === 'string' ? v.tags[0] : v.tags?.[0]?.name || 'General',
+              VIDEO_CATEGORY_OPTIONS.map((name) => ({ name }))
+            ),
             views: 0,
             duration: v.duration || '',
             uploadDate: v.publishDate?.split('T')[0] || '',
@@ -323,7 +335,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setVideoData({
       title: video.title,
       description: video.description || '',
-      category: video.category.toLowerCase(),
+      category: resolveCategoryName(video.category, VIDEO_CATEGORY_OPTIONS.map((name) => ({ name }))),
       file: null,
       thumbnail: null
     })
@@ -350,7 +362,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               ...v, 
               title: videoData.title,
               description: videoData.description,
-              category: videoData.category.charAt(0).toUpperCase() + videoData.category.slice(1)
+              category: resolveCategoryName(videoData.category, VIDEO_CATEGORY_OPTIONS.map((name) => ({ name })))
             } 
           : v
       ))
@@ -360,7 +372,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setVideoData({
         title: '',
         description: '',
-        category: 'sustainability',
+        category: 'Sustainability',
         file: null,
         thumbnail: null
       })
@@ -485,14 +497,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         description: videoData.description,
         streamUrl: videoPresign.fileUrl,
         thumbnailUrl: thumbPresign.fileUrl,
-        tags: [videoData.category],
+        tags: [resolveCategoryName(videoData.category, VIDEO_CATEGORY_OPTIONS.map((name) => ({ name })))],
       })
       setUploadProgress(100)
 
       setTimeout(() => {
         setIsUploading(false)
         setUploadProgress(0)
-        setVideoData({ title: '', description: '', category: 'sustainability', file: null, thumbnail: null })
+        setVideoData({ title: '', description: '', category: 'Sustainability', file: null, thumbnail: null })
         alert('Video uploaded successfully!')
       }, 500)
     } catch (err: unknown) {
@@ -816,11 +828,9 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           onChange={(e) => setVideoData({ ...videoData, category: e.target.value })}
                           required
                         >
-                          <option value="sustainability">Sustainability</option>
-                          <option value="leadership">Leadership</option>
-                          <option value="innovation">Innovation</option>
-                          <option value="environment">Environment</option>
-                          <option value="technology">Technology</option>
+                          {VIDEO_CATEGORY_OPTIONS.map((categoryName) => (
+                            <option key={categoryName} value={categoryName}>{categoryName}</option>
+                          ))}
                         </select>
                       </div>
 
@@ -1383,11 +1393,9 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     value={videoData.category}
                     onChange={(e) => setVideoData({ ...videoData, category: e.target.value })}
                   >
-                    <option value="sustainability">Sustainability</option>
-                    <option value="leadership">Leadership</option>
-                    <option value="innovation">Innovation</option>
-                    <option value="environment">Environment</option>
-                    <option value="technology">Technology</option>
+                    {VIDEO_CATEGORY_OPTIONS.map((categoryName) => (
+                      <option key={categoryName} value={categoryName}>{categoryName}</option>
+                    ))}
                   </select>
                 </div>
               </div>

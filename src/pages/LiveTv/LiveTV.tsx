@@ -27,7 +27,7 @@ import { useSharedCategories } from '../../hooks/categories'
 import NoData from '../../components/Nodatafound'
 import ErrorMessage from '../../components/ErroMessage'
 import Loader from '../../components/Loader'
-import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
+import { canonicalizeCategoryNames, normalizeCategoryKey } from '../../utils/category'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -54,21 +54,36 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     if (!Array.isArray(videocast?.items)) return;
     const allVideos: Video[] = videocast.items
       .filter((item: any) => typeof item.thumbnailUrl === 'string' && item.thumbnailUrl.trim().length > 0)
-      .map((item: any) => ({
-      id: item._id,
-      title: item.title,
-      description: item.description || "",
-      videoId: item.videoId || "",
-      streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
-      category: normalizeCategoryName(item.category || item.tags?.[0]?.name || ""),
-      isLive: item.isLive ?? false,
-      publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      thumbnail: item.thumbnailUrl,
-    }));
+      .map((item: any) => {
+        const categoryNames = canonicalizeCategoryNames(
+          [
+            item.category,
+            ...(Array.isArray(item.categories) ? item.categories : []),
+            ...(Array.isArray(item.tags)
+              ? item.tags
+                  .filter((tag: any) => tag?.kind === 'category')
+                  .map((tag: any) => tag?.name)
+              : []),
+          ],
+          sharedCategories
+        )
+
+        return {
+          id: item._id,
+          title: item.title,
+          description: item.description || "",
+          videoId: item.videoId || "",
+          streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
+          category: categoryNames[0] || "",
+          isLive: item.isLive ?? false,
+          publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          thumbnail: item.thumbnailUrl,
+        }
+      });
 
 
     setVideos(allVideos);
@@ -76,7 +91,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     const categoryList = buildCategoryList(sharedCategories, allVideos);
     setVideoCategories(categoryList);
 
-  }, [videocast]);
+  }, [sharedCategories, videocast]);
 
   useEffect(() => {
     setVideoCategories(buildCategoryList(sharedCategories, videos));
@@ -85,17 +100,12 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
 
   const buildCategoryList = (shared: Array<{ name: string }>, videos: Video[]) => {
-    const sourceNames = shared.length > 0
-      ? shared.map((category) => normalizeCategoryName(category.name))
-      : videos.map((video) => normalizeCategoryName(video.category));
-
-    const seen = new Set<string>();
-    const names = sourceNames.filter((name) => {
-      const key = normalizeCategoryKey(name);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const names = canonicalizeCategoryNames(
+      shared.length > 0
+        ? shared.map((category) => category.name)
+        : videos.map((video) => video.category),
+      shared
+    );
 
     return [
       { key: 'all', label: 'All Videos', icon: 'apps' },

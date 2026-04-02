@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import '../../style/Header.css'
 import { useAppContext } from '../../context/AppContext'
 import { logout as apiLogout } from '../../utils/api'
-import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram, FaInfoCircle, FaUsers, FaSun, FaMoon } from 'react-icons/fa'; // install react-icons if not added
+import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram, FaInfoCircle, FaSun, FaMoon } from 'react-icons/fa'; // install react-icons if not added
 
 
 export default function Header({ onNavigate }: { onNavigate: (page: string) => void }) {

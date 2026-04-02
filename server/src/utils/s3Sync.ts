@@ -6,6 +6,18 @@ import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
 import { isCopyVariantTitle, normalizeMediaTitle, stripCopySuffix } from "./mediaTitle.js";
 
+type MongoIdLike = { toString(): string } | string;
+
+type CleanupModelLike = {
+  find: (...args: any[]) => { lean: () => Promise<any[]> };
+  deleteMany: (filter: object) => Promise<unknown>;
+};
+
+type BackfillModelLike = {
+  find: (...args: any[]) => { lean: () => Promise<any[]> };
+  bulkWrite: (...args: any[]) => Promise<unknown>;
+};
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function s3Url(key: string): string {
@@ -117,7 +129,7 @@ function scoreDoc(doc: CleanupDoc): number {
 
 async function cleanupDuplicateTitles(): Promise<void> {
   const cleanupModel = async (
-    model: { find: (filter?: object, projection?: string) => any; deleteMany: (filter: object) => Promise<unknown> }
+    model: CleanupModelLike
   ) => {
     const docs = (await model.find({}, "title status publishDate createdAt updatedAt").lean()) as CleanupDoc[];
     const groups = new Map<string, CleanupDoc[]>();
@@ -158,9 +170,9 @@ async function cleanupDuplicateTitles(): Promise<void> {
 
 async function backfillNormalizedTitles(): Promise<void> {
   const backfillModel = async (
-    model: { find: (filter?: object, projection?: string) => any; bulkWrite: (ops: object[]) => Promise<unknown> }
+    model: BackfillModelLike
   ) => {
-    const docs = (await model.find({}, "title").lean()) as Array<{ _id: string; title: string }>;
+    const docs = (await model.find({}, "title").lean()) as Array<{ _id: MongoIdLike; title: string }>;
     const ops = docs
       .map((doc) => {
         const normalizedTitle = normalizeMediaTitle(doc.title ?? "");
@@ -211,21 +223,21 @@ async function deleteMissingS3BackedRecords(
     Article.find({}, "bodyMd").lean(),
   ]);
 
-  const videoIdsToDelete = (videos as Array<{ _id: string; streamUrl?: string }>)
+  const videoIdsToDelete = (videos as Array<{ _id: MongoIdLike; streamUrl?: string }>)
     .filter((doc) => {
       const key = doc.streamUrl ? extractS3KeyFromPublicUrl(doc.streamUrl, "LiveTV/") : null;
       return key ? !videoKeys.has(key) : false;
     })
     .map((doc) => doc._id);
 
-  const podcastIdsToDelete = (podcasts as Array<{ _id: string; audioUrl?: string }>)
+  const podcastIdsToDelete = (podcasts as Array<{ _id: MongoIdLike; audioUrl?: string }>)
     .filter((doc) => {
       const key = doc.audioUrl ? extractS3KeyFromPublicUrl(doc.audioUrl, "podcast/") : null;
       return key ? !podcastKeys.has(key) : false;
     })
     .map((doc) => doc._id);
 
-  const articleIdsToDelete = (articles as Array<{ _id: string; bodyMd?: string }>)
+  const articleIdsToDelete = (articles as Array<{ _id: MongoIdLike; bodyMd?: string }>)
     .filter((doc) => {
       const key = doc.bodyMd ? extractArticleFileKey(doc.bodyMd) : null;
       return key ? !articleKeys.has(key) : false;

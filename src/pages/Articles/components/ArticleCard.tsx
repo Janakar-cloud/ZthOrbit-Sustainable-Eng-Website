@@ -1,11 +1,12 @@
 import { ArticleCardProps } from "../type/type"
+import { normalizeCategoryKey } from '../../../utils/category'
 
 export default function ArticleCard({
   article,
   categories,
   onSelect,
 }: ArticleCardProps) {
-  const category = categories.find(c => c.id === article.category)
+  const category = categories.find(c => c.id === normalizeCategoryKey(article.category))
 
   return (
     <div

@@ -27,6 +27,7 @@ import { useSharedCategories } from '../../hooks/categories'
 import NoData from '../../components/Nodatafound'
 import ErrorMessage from '../../components/ErroMessage'
 import Loader from '../../components/Loader'
+import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -59,7 +60,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       description: item.description || "",
       videoId: item.videoId || "",
       streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
-      category: item.category || item.tags?.[0]?.name || "",
+      category: normalizeCategoryName(item.category || item.tags?.[0]?.name || ""),
       isLive: item.isLive ?? false,
       publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
         month: "short",
@@ -84,17 +85,24 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
 
   const buildCategoryList = (shared: Array<{ name: string }>, videos: Video[]) => {
-    const names = shared.length > 0
-      ? shared.map((category) => category.name.toLowerCase())
-      : Array.from(new Set(videos.map(v => v.category.toLowerCase()).filter(Boolean)));
+    const sourceNames = shared.length > 0
+      ? shared.map((category) => normalizeCategoryName(category.name))
+      : videos.map((video) => normalizeCategoryName(video.category));
+
+    const seen = new Set<string>();
+    const names = sourceNames.filter((name) => {
+      const key = normalizeCategoryKey(name);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     return [
       { key: 'all', label: 'All Videos', icon: 'apps' },
-      ...Array.from(new Set(names))
-        .filter(Boolean)
-        .map(cat => ({
-          key: cat,
-          label: cat.charAt(0).toUpperCase() + cat.slice(1),
+      ...names
+        .map(name => ({
+          key: normalizeCategoryKey(name),
+          label: name,
           icon: 'video_library'
         }))
     ];
@@ -167,7 +175,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const filteredVideos =
     selectedCategory === 'all'
       ? videos
-      : videos.filter((video) => video.category === selectedCategory)
+      : videos.filter((video) => normalizeCategoryKey(video.category) === selectedCategory)
 
   const handlePlayVideo = (video: Video) => {
     setSelectedVideo(video)

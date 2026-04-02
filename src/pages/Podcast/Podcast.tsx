@@ -14,6 +14,7 @@ import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
 import ErrorMessage from '../../components/ErroMessage'
 import NoData from '../../components/Nodatafound'
+import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -34,14 +35,17 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       .filter((p: any) => typeof p.imageUrl === 'string' && p.imageUrl.trim().length > 0)
       .map((p: any) => {
       const cats: string[] = Array.isArray(p.tags)
-        ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
+        ? p.tags
+            .filter((t: any) => t?.kind === 'category')
+            .map((t: any) => normalizeCategoryName(t.name))
+            .filter(Boolean)
         : []
       return {
         id: p._id,
         title: p.title,
         audioFile: p.audioUrl,
         image: p.imageUrl,
-        category: cats[0] || 'general',
+        category: cats[0] || 'General',
         categories: cats,
         comments: p.comments || [],
         commentsEnabled: p.commentsEnabled ?? true,
@@ -65,12 +69,16 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
     const dynamic: Category[] = [{ id: 'all', name: 'All Episodes', icon: 'podcasts' }]
-    const names = sharedCategories.length > 0
-      ? sharedCategories.map((category) => category.name.toLowerCase())
-      : Array.from(new Set(podcasts.flatMap((podcast) => podcast.categories)))
+    const sourceNames = sharedCategories.length > 0
+      ? sharedCategories.map((category) => normalizeCategoryName(category.name))
+      : podcasts.flatMap((podcast) => podcast.categories.map((category) => normalizeCategoryName(category)))
 
-    names.forEach((name) => {
-      dynamic.push({ id: name, name: name.charAt(0).toUpperCase() + name.slice(1), icon: iconMap[name] || 'label' })
+    const seen = new Set<string>()
+    sourceNames.forEach((name) => {
+      const key = normalizeCategoryKey(name)
+      if (!key || seen.has(key)) return
+      seen.add(key)
+      dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 
     return dynamic.length > 1 ? dynamic : staticCategories
@@ -80,7 +88,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
   const filteredPodcasts =
     selectedCategory === 'all'
       ? podcasts
-      : podcasts.filter((p) => p.categories.includes(selectedCategory))
+      : podcasts.filter((p) => p.categories.some((category) => normalizeCategoryKey(category) === selectedCategory))
 
   //Play
   const handlePlayPodcast = (podcast: PodcastEpisode) => {

@@ -13,6 +13,8 @@ import ArticleDetails from './components/ArticleDetails'
 import { ArticlesHooks } from '../../hooks/articles'
 import { useSharedCategories } from '../../hooks/categories'
 import Loader from '../../components/Loader'
+import NoData from '../../components/Nodatafound'
+import { normalizeCategoryKey, normalizeCategoryName } from '../../utils/category'
 
 
 
@@ -31,14 +33,16 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       .filter((p: any) => typeof p.coverImage === 'string' && p.coverImage.trim().length > 0)
       .map((p: any) => {
       const cats: string[] = Array.isArray(p.tags)
-        ? p.tags.filter((t: any) => t?.kind === 'category').map((t: any) => t.name.toLowerCase())
+        ? p.tags
+            .filter((t: any) => t?.kind === 'category')
+            .map((t: any) => normalizeCategoryName(t.name))
+            .filter(Boolean)
         : []
       return {
         id: p._id,
         title: p.title,
         subtitle: p.subtitle || '',
-        category: cats[0] || 'general',
-        categories: cats,
+        category: cats[0] || 'General',
         readTime: p.readTime || '',
         content: (() => {
           const docUrl = typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || '') : ''
@@ -66,12 +70,16 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
     const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
-    const names = sharedCategories.length > 0
-      ? sharedCategories.map((category) => category.name.toLowerCase())
-      : Array.from(new Set(articles.map((article) => article.category).filter(Boolean)))
+    const sourceNames = sharedCategories.length > 0
+      ? sharedCategories.map((category) => normalizeCategoryName(category.name))
+      : articles.map((article) => normalizeCategoryName(article.category))
 
-    names.forEach((name) => {
-      dynamic.push({ id: name, name: name.charAt(0).toUpperCase() + name.slice(1), icon: iconMap[name] || 'label' })
+    const seen = new Set<string>()
+    sourceNames.forEach((name) => {
+      const key = normalizeCategoryKey(name)
+      if (!key || seen.has(key)) return
+      seen.add(key)
+      dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 
     return dynamic.length > 1 ? dynamic : staticCategories
@@ -79,7 +87,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
 
   const filteredArticles = selectedCategory === 'all'
     ? articles
-    : articles.filter(article => article.category === selectedCategory)
+    : articles.filter(article => normalizeCategoryKey(article.category) === selectedCategory)
 
   // BLOCK RENDER UNTIL READY
   if (loading) {

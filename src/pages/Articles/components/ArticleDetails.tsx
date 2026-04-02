@@ -1,10 +1,11 @@
 import { ArticleDetailsProps } from "../type/type"
+import { normalizeCategoryKey } from '../../../utils/category'
 
 export default function ArticleDetails({
   article,
   categories,
 }: ArticleDetailsProps) {
-  const category = categories.find(c => c.id === article.category)
+  const category = categories.find(c => c.id === normalizeCategoryKey(article.category))
   const docEmbed = article.docUrl && article.docUrl.endsWith('.docx')
     ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(article.docUrl)}`
     : null

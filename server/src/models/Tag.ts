@@ -7,7 +7,13 @@ export interface ITag {
 
 const tagSchema = new Schema<ITag>(
   {
-    name: { type: String, required: true, unique: true },
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      set: (value: string) => value.replace(/\s+/g, " ").trim(),
+    },
     kind: { type: String, enum: ["category", "topic", "role"], default: "category" },
   },
   { timestamps: false }

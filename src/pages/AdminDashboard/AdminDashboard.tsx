@@ -186,7 +186,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             _apiId: v._id,
             title: v.title,
             category: resolveCategoryName(
-              v.tags?.[0]?.name || 'General',
+              v.tags?.[0] || 'General',
               VIDEO_CATEGORY_OPTIONS.map((name) => ({ name }))
             ),
             views: 0,

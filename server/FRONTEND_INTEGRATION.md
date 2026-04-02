@@ -177,6 +177,10 @@ async function login(email: string, password: string) {
   localStorage.setItem('accessToken', data.accessToken);
   localStorage.setItem('refreshToken', data.refreshToken);
   setAuthToken(data.accessToken);
+
+  // Optional role-aware redirect metadata
+  // data.user.role -> 'viewer' | 'editor' | 'admin' | 'superadmin'
+  // data.app.preferredUrl -> which frontend should own this session
   
   return data;
 }
@@ -201,6 +205,32 @@ async function refreshAccessToken() {
   
   return data.accessToken;
 }
+
+### 5. Current User / App Target
+```typescript
+async function getCurrentUser() {
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+    },
+  });
+
+  return response.json();
+}
+```
+
+### 6. Dashboard-Aware Password Reset
+```typescript
+async function requestReset(email: string, app: 'public' | 'dashboard') {
+  const response = await fetch(`${API_BASE_URL}/auth/request-reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, app }),
+  });
+
+  return response.json();
+}
+```
 ```
 
 ---

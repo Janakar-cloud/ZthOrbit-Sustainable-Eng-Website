@@ -104,6 +104,10 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('accessToken');
       expect(response.body).toHaveProperty('refreshToken');
+      expect(response.body).toHaveProperty('user');
+      expect(response.body).toHaveProperty('app');
+      expect(response.body.user.role).toBe('admin');
+      expect(response.body.app.shouldUseDashboard).toBe(true);
       expect(typeof response.body.accessToken).toBe('string');
       expect(typeof response.body.refreshToken).toBe('string');
     });
@@ -252,6 +256,26 @@ describe('Auth Routes', () => {
       expect(response.body.success).toBe(true);
     });
 
+    it('should accept dashboard-targeted reset requests', async () => {
+      await User.create({
+        email: 'admin-reset@example.com',
+        passwordHash: await bcrypt.hash('OldPassword123!', 10),
+        role: 'admin',
+        emailVerified: true,
+        name: 'Admin Reset User',
+      });
+
+      const response = await request(app)
+        .post('/auth/request-reset')
+        .send({
+          email: 'admin-reset@example.com',
+          app: 'dashboard',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+    });
+
     it('should return success even for non-existent email (security)', async () => {
       const response = await request(app)
         .post('/auth/request-reset')
@@ -283,6 +307,35 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.error).toContain('Missing refreshToken');
+    });
+  });
+
+  describe('GET /auth/me', () => {
+    it('should return the authenticated user and app metadata', async () => {
+      const password = 'Password123!';
+      await User.create({
+        email: 'me@example.com',
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'admin',
+        name: 'Admin Me',
+        emailVerified: true,
+      });
+
+      const loginResponse = await request(app)
+        .post('/auth/login')
+        .send({
+          email: 'me@example.com',
+          password,
+        });
+
+      const response = await request(app)
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${loginResponse.body.accessToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.email).toBe('me@example.com');
+      expect(response.body.user.role).toBe('admin');
+      expect(response.body.app.shouldUseDashboard).toBe(true);
     });
   });
 

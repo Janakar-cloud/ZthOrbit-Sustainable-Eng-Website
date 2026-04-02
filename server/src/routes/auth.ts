@@ -9,10 +9,57 @@ import { EmailVerification } from "../models/EmailVerification.js";
 import { signAccess } from "../utils/jwt.js";
 import { sendMail } from "../utils/mailer.js";
 import { env } from "../config/env.js";
-import { AuthUser } from "../middleware/auth.js";
+import { AuthUser, requireAuth } from "../middleware/auth.js";
 import { randomInt } from "crypto";
 
 const router = Router();
+
+const dashboardRoles: AuthUser["role"][] = ["superadmin", "admin", "editor"];
+
+function stripTrailingSlash(url: string) {
+  return url.replace(/\/+$/, "");
+}
+
+function shouldUseDashboard(role: AuthUser["role"]) {
+  return dashboardRoles.includes(role);
+}
+
+function getPreferredAppUrl(role: AuthUser["role"], requestedApp?: "public" | "dashboard") {
+  if (requestedApp === "dashboard") return stripTrailingSlash(env.dashboardUrl);
+  if (requestedApp === "public") return stripTrailingSlash(env.appUrl);
+  return shouldUseDashboard(role) ? stripTrailingSlash(env.dashboardUrl) : stripTrailingSlash(env.appUrl);
+}
+
+function buildAppTargets(role: AuthUser["role"], requestedApp?: "public" | "dashboard") {
+  const publicUrl = stripTrailingSlash(env.appUrl);
+  const dashboardUrl = stripTrailingSlash(env.dashboardUrl);
+  const preferredUrl = getPreferredAppUrl(role, requestedApp);
+
+  return {
+    publicUrl,
+    dashboardUrl,
+    preferredUrl,
+    shouldUseDashboard: preferredUrl === dashboardUrl,
+    dashboardLoginUrl: `${dashboardUrl}/login`,
+    publicLoginUrl: `${publicUrl}/login`,
+  };
+}
+
+function buildAuthResponse(user: { id: string; email: string; role: AuthUser["role"]; name?: string | null }, refreshToken?: string) {
+  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
+
+  return {
+    accessToken: signAccess(payload),
+    ...(refreshToken ? { refreshToken } : {}),
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name || null,
+    },
+    app: buildAppTargets(user.role),
+  };
+}
 
 const registerSchema = z.object({
   email: z.string().email().max(320),
@@ -54,7 +101,7 @@ router.post("/login", async (req, res) => {
 
   const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
   const refreshToken = await issueRefresh(user.id, payload);
-  res.json({ accessToken: signAccess(payload), refreshToken });
+  res.json(buildAuthResponse(user, refreshToken));
 });
 
 router.post("/refresh", async (req, res) => {
@@ -67,11 +114,26 @@ router.post("/refresh", async (req, res) => {
     }
     const user = await User.findById(stored.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-    const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
-    res.json({ accessToken: signAccess(payload) });
+    res.json(buildAuthResponse(user));
   } catch (err) {
     res.status(401).json({ error: "Invalid refresh token" });
   }
+});
+
+router.get("/me", requireAuth(), async (req, res) => {
+  const user = await User.findById(req.user?.id).select("email name role emailVerified");
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  res.json({
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name || null,
+      role: user.role,
+      emailVerified: user.emailVerified,
+    },
+    app: buildAppTargets(user.role),
+  });
 });
 
 router.post("/logout", async (req, res) => {
@@ -81,7 +143,10 @@ router.post("/logout", async (req, res) => {
   res.json({ success: true });
 });
 
-const resetRequestSchema = z.object({ email: z.string().email().max(320) });
+const resetRequestSchema = z.object({
+  email: z.string().email().max(320),
+  app: z.enum(["public", "dashboard"]).optional(),
+});
 
 router.post("/request-reset", async (req, res) => {
   const parsed = resetRequestSchema.safeParse(req.body);
@@ -95,7 +160,8 @@ router.post("/request-reset", async (req, res) => {
       expiresAt: new Date(Date.now() + 1000 * 60 * 30),
       used: false,
     });
-    const resetLink = `${env.appUrl}/reset?token=${token}`;
+    const appBaseUrl = getPreferredAppUrl(user.role, parsed.data.app);
+    const resetLink = `${appBaseUrl}/reset?token=${token}`;
     try {
       await sendMail(
         user.email,
@@ -148,7 +214,7 @@ router.post("/verify-email", async (req, res) => {
 
   const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
   const refreshToken = await issueRefresh(user.id, payload);
-  res.json({ accessToken: signAccess(payload), refreshToken });
+  res.json(buildAuthResponse(user, refreshToken));
 });
 
 router.post("/resend-verification", async (req, res) => {

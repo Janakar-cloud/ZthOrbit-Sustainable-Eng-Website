@@ -37,6 +37,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || "changeme",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "changeme-refresh",
   appUrl: process.env.APP_URL || "http://localhost:3000",
+  dashboardUrl: process.env.DASHBOARD_URL || process.env.APP_URL || "http://localhost:3000",
   corsOrigins: (process.env.CORS_ORIGINS || "*")
     .split(",")
     .map((o) => o.trim())

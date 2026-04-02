@@ -148,7 +148,21 @@ Verify email with 6-digit code sent during registration.
 ```json
 {
   "accessToken": "jwt_access_token",
-  "refreshToken": "refresh_token_string"
+  "refreshToken": "refresh_token_string",
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "role": "admin",
+    "name": "Admin User"
+  },
+  "app": {
+    "publicUrl": "https://www.thegreentv.com",
+    "dashboardUrl": "https://dashboard.thegreentv.com",
+    "preferredUrl": "https://dashboard.thegreentv.com",
+    "shouldUseDashboard": true,
+    "dashboardLoginUrl": "https://dashboard.thegreentv.com/login",
+    "publicLoginUrl": "https://www.thegreentv.com/login"
+  }
 }
 ```
 
@@ -197,7 +211,21 @@ Login with email and password. Email must be verified first.
 ```json
 {
   "accessToken": "jwt_access_token",
-  "refreshToken": "refresh_token_string"
+  "refreshToken": "refresh_token_string",
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "role": "viewer",
+    "name": "User"
+  },
+  "app": {
+    "publicUrl": "https://www.thegreentv.com",
+    "dashboardUrl": "https://dashboard.thegreentv.com",
+    "preferredUrl": "https://www.thegreentv.com",
+    "shouldUseDashboard": false,
+    "dashboardLoginUrl": "https://dashboard.thegreentv.com/login",
+    "publicLoginUrl": "https://www.thegreentv.com/login"
+  }
 }
 ```
 
@@ -221,13 +249,58 @@ Refresh access token using refresh token.
 **Response:** `200 OK`
 ```json
 {
-  "accessToken": "new_jwt_access_token"
+  "accessToken": "new_jwt_access_token",
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "role": "admin",
+    "name": "Admin User"
+  },
+  "app": {
+    "publicUrl": "https://www.thegreentv.com",
+    "dashboardUrl": "https://dashboard.thegreentv.com",
+    "preferredUrl": "https://dashboard.thegreentv.com",
+    "shouldUseDashboard": true,
+    "dashboardLoginUrl": "https://dashboard.thegreentv.com/login",
+    "publicLoginUrl": "https://www.thegreentv.com/login"
+  }
 }
 ```
 
 **Error Codes:**
 - `400` - Missing refreshToken
 - `401` - Invalid or expired refresh token
+
+---
+
+### GET `/auth/me`
+Get the authenticated user's profile and app-target metadata.
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Response:** `200 OK`
+```json
+{
+  "user": {
+    "id": "user_id",
+    "email": "user@example.com",
+    "name": "Admin User",
+    "role": "admin",
+    "emailVerified": true
+  },
+  "app": {
+    "publicUrl": "https://www.thegreentv.com",
+    "dashboardUrl": "https://dashboard.thegreentv.com",
+    "preferredUrl": "https://dashboard.thegreentv.com",
+    "shouldUseDashboard": true,
+    "dashboardLoginUrl": "https://dashboard.thegreentv.com/login",
+    "publicLoginUrl": "https://www.thegreentv.com/login"
+  }
+}
+```
 - `404` - User not found
 
 ---

@@ -53,19 +53,6 @@ async function main() {
   await Video.deleteMany({});
   await Video.insertMany([
     {
-      title: "Sustainability in Sanatana Dharma Part 1",
-      description: "Part 1 of the Sanatana Dharma sustainability series.",
-      streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+DharmaPART+1+(1).mp4",
-      thumbnailUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/videos/Sustainability+in+sanatana+Dharma+PART+1.jpg",
-      publishDate: new Date("2026-03-01"),
-      status: "published",
-      isLive: false,
-      tags: [tagMap.Aether],
-      seriesId: "sanatana-dharma",
-      partNumber: 1,
-      partTitle: "Part 1",
-    },
-    {
       title: "Sustainability in Sanatana Dharma Part 2",
       description: "Part 2 of the Sanatana Dharma sustainability series.",
       streamUrl: "https://greentv-s3.s3.ap-south-1.amazonaws.com/LiveTV/Sustainability+in+sanatana+Dharma+PART+2.mp4",

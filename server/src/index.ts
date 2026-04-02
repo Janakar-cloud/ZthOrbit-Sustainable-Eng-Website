@@ -7,17 +7,18 @@ import { connectDb } from "./config/db.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
-import { syncS3ToDb } from "./utils/s3Sync.js";
+import { ensureMediaUniqueIndexes, syncS3ToDb } from "./utils/s3Sync.js";
 
 async function main() {
   await connectDb();
+  await ensureMediaUniqueIndexes();
 
   // Non-blocking S3 → DB sync on every startup
   const runSync = (label: string) =>
     syncS3ToDb()
       .then((r) =>
         console.log(
-          `[S3 Sync] ${label} done in ${r.durationMs}ms — videos +${r.videos.added}/~${r.videos.updated} | podcasts +${r.podcasts.added}/~${r.podcasts.updated} | articles +${r.articles.added}/~${r.articles.updated}`
+          `[S3 Sync] ${label} done in ${r.durationMs}ms — videos +${r.videos.added}/~${r.videos.updated}/-${r.removed.videos} | podcasts +${r.podcasts.added}/~${r.podcasts.updated}/-${r.removed.podcasts} | articles +${r.articles.added}/~${r.articles.updated}/-${r.removed.articles}`
         )
       )
       .catch((err) => console.error(`[S3 Sync] ${label} failed:`, err.message));

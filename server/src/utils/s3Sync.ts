@@ -4,6 +4,7 @@ import { env } from "../config/env.js";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
+import { isCopyVariantTitle, normalizeMediaTitle, stripCopySuffix } from "./mediaTitle.js";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -25,12 +26,26 @@ function baseName(name: string): string {
 /** Derive a human-readable title from the decoded filename (no extension, no path) */
 function titleFromKey(key: string): string {
   const fileName = key.split("/").pop() ?? key;
-  return baseName(fileName);
+  return stripCopySuffix(baseName(fileName));
 }
 
 /** Escape special regex characters so a title can be used inside RegExp */
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractS3KeyFromPublicUrl(storedUrl: string, prefix: string): string | null {
+  const bucketHost = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/`;
+  if (!storedUrl.startsWith(bucketHost)) return null;
+  const key = decodeURIComponent(storedUrl.slice(bucketHost.length));
+  return key.startsWith(prefix) ? key : null;
+}
+
+function extractArticleFileKey(bodyMd: string): string | null {
+  const bucketHost = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/`;
+  const urlMatch = bodyMd.match(/https?:\/\/[^\s)]+/);
+  if (!urlMatch) return null;
+  return extractS3KeyFromPublicUrl(urlMatch[0], "articels/");
 }
 
 /** List every object (handles >1000 via continuation token) */
@@ -81,17 +96,163 @@ function matchThumbnail(mediaFileName: string, thumbMap: Map<string, string>): s
   return thumbMap.get(key) ?? "";
 }
 
+type CleanupDoc = {
+  _id: string;
+  title: string;
+  status?: string;
+  publishDate?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+function scoreDoc(doc: CleanupDoc): number {
+  return [
+    isCopyVariantTitle(doc.title) ? 0 : 1,
+    doc.status === "published" ? 1 : 0,
+    doc.publishDate ? new Date(doc.publishDate).getTime() : 0,
+    doc.createdAt ? new Date(doc.createdAt).getTime() : 0,
+    doc.updatedAt ? new Date(doc.updatedAt).getTime() : 0,
+  ].reduce((sum, part, index) => sum + part * Math.pow(10, 12 - index * 3), 0);
+}
+
+async function cleanupDuplicateTitles(): Promise<void> {
+  const cleanupModel = async (
+    model: { find: (filter?: object, projection?: string) => any; deleteMany: (filter: object) => Promise<unknown> }
+  ) => {
+    const docs = (await model.find({}, "title status publishDate createdAt updatedAt").lean()) as CleanupDoc[];
+    const groups = new Map<string, CleanupDoc[]>();
+
+    for (const doc of docs) {
+      const title = doc.title?.trim();
+      if (!title) continue;
+      const normalized = normalizeMediaTitle(title);
+      if (!normalized) continue;
+      const bucket = groups.get(normalized) ?? [];
+      bucket.push(doc);
+      groups.set(normalized, bucket);
+    }
+
+    const idsToDelete: string[] = [];
+
+    for (const group of groups.values()) {
+      if (group.length === 1) {
+        if (isCopyVariantTitle(group[0].title)) idsToDelete.push(group[0]._id);
+        continue;
+      }
+
+      const sorted = [...group].sort((left, right) => scoreDoc(right) - scoreDoc(left));
+      idsToDelete.push(...sorted.slice(1).map((doc) => doc._id));
+    }
+
+    if (idsToDelete.length > 0) {
+      await model.deleteMany({ _id: { $in: idsToDelete } });
+    }
+  };
+
+  await Promise.all([
+    cleanupModel(Video),
+    cleanupModel(Podcast),
+    cleanupModel(Article),
+  ]);
+}
+
+async function backfillNormalizedTitles(): Promise<void> {
+  const backfillModel = async (
+    model: { find: (filter?: object, projection?: string) => any; bulkWrite: (ops: object[]) => Promise<unknown> }
+  ) => {
+    const docs = (await model.find({}, "title").lean()) as Array<{ _id: string; title: string }>;
+    const ops = docs
+      .map((doc) => {
+        const normalizedTitle = normalizeMediaTitle(doc.title ?? "");
+        if (!normalizedTitle) return null;
+        return {
+          updateOne: {
+            filter: { _id: doc._id },
+            update: { $set: { normalizedTitle } },
+          },
+        };
+      })
+      .filter(Boolean) as object[];
+
+    if (ops.length > 0) {
+      await model.bulkWrite(ops);
+    }
+  };
+
+  await Promise.all([
+    backfillModel(Video),
+    backfillModel(Podcast),
+    backfillModel(Article),
+  ]);
+}
+
+export async function ensureMediaUniqueIndexes(): Promise<void> {
+  await cleanupDuplicateTitles();
+  await backfillNormalizedTitles();
+  await Promise.all([
+    Video.createIndexes(),
+    Podcast.createIndexes(),
+    Article.createIndexes(),
+  ]);
+}
+
+async function deleteMissingS3BackedRecords(
+  videoFiles: { key: string }[],
+  podcastFiles: { key: string }[],
+  articleFiles: { key: string }[]
+): Promise<{ videos: number; podcasts: number; articles: number }> {
+  const videoKeys = new Set(videoFiles.map(({ key }) => key));
+  const podcastKeys = new Set(podcastFiles.map(({ key }) => key));
+  const articleKeys = new Set(articleFiles.map(({ key }) => key));
+
+  const [videos, podcasts, articles] = await Promise.all([
+    Video.find({}, "streamUrl").lean(),
+    Podcast.find({}, "audioUrl").lean(),
+    Article.find({}, "bodyMd").lean(),
+  ]);
+
+  const videoIdsToDelete = (videos as Array<{ _id: string; streamUrl?: string }>)
+    .filter((doc) => {
+      const key = doc.streamUrl ? extractS3KeyFromPublicUrl(doc.streamUrl, "LiveTV/") : null;
+      return key ? !videoKeys.has(key) : false;
+    })
+    .map((doc) => doc._id);
+
+  const podcastIdsToDelete = (podcasts as Array<{ _id: string; audioUrl?: string }>)
+    .filter((doc) => {
+      const key = doc.audioUrl ? extractS3KeyFromPublicUrl(doc.audioUrl, "podcast/") : null;
+      return key ? !podcastKeys.has(key) : false;
+    })
+    .map((doc) => doc._id);
+
+  const articleIdsToDelete = (articles as Array<{ _id: string; bodyMd?: string }>)
+    .filter((doc) => {
+      const key = doc.bodyMd ? extractArticleFileKey(doc.bodyMd) : null;
+      return key ? !articleKeys.has(key) : false;
+    })
+    .map((doc) => doc._id);
+
+  await Promise.all([
+    videoIdsToDelete.length ? Video.deleteMany({ _id: { $in: videoIdsToDelete } }) : Promise.resolve(),
+    podcastIdsToDelete.length ? Podcast.deleteMany({ _id: { $in: podcastIdsToDelete } }) : Promise.resolve(),
+    articleIdsToDelete.length ? Article.deleteMany({ _id: { $in: articleIdsToDelete } }) : Promise.resolve(),
+  ]);
+
+  return {
+    videos: videoIdsToDelete.length,
+    podcasts: podcastIdsToDelete.length,
+    articles: articleIdsToDelete.length,
+  };
+}
+
 // ─── per-type sync functions ─────────────────────────────────────────────────
 
-async function syncVideos(thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
-  const VIDEO_EXTS = [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".ts"];
-  const items = await listAllKeys("LiveTV");
-  const files = items.filter(({ key }) => VIDEO_EXTS.some(ext => key.toLowerCase().endsWith(ext)));
-
+async function syncVideos(files: { key: string; lastModified: Date }[], thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
   let added = 0, updated = 0;
   for (const { key, lastModified } of files) {
     const streamUrl = s3Url(key);
     const fileName  = key.split("/").pop() ?? key;
+    if (isCopyVariantTitle(baseName(fileName))) continue;
     const thumbnail = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
@@ -128,15 +289,12 @@ async function syncVideos(thumbMap: Map<string, string>): Promise<{ added: numbe
   return { added, updated };
 }
 
-async function syncPodcasts(thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
-  const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
-  const items = await listAllKeys("podcast");
-  const files = items.filter(({ key }) => AUDIO_EXTS.some(ext => key.toLowerCase().endsWith(ext)));
-
+async function syncPodcasts(files: { key: string; lastModified: Date }[], thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
   let added = 0, updated = 0;
   for (const { key, lastModified } of files) {
     const audioUrl  = s3Url(key);
     const fileName  = key.split("/").pop() ?? key;
+    if (isCopyVariantTitle(baseName(fileName))) continue;
     const imageUrl  = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
@@ -171,16 +329,13 @@ async function syncPodcasts(thumbMap: Map<string, string>): Promise<{ added: num
   return { added, updated };
 }
 
-async function syncArticles(thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
-  const ARTICLE_EXTS = [".docx", ".doc", ".pdf"];
-  const items = await listAllKeys("articels");
-  const files = items.filter(({ key }) => ARTICLE_EXTS.some(ext => key.toLowerCase().endsWith(ext)));
-
+async function syncArticles(files: { key: string; lastModified: Date }[], thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
   let added = 0, updated = 0;
   for (const { key, lastModified } of files) {
     const fileUrl   = s3Url(key);
     const bodyMd    = `Full article hosted in S3: ${fileUrl}`;
     const fileName  = key.split("/").pop() ?? key;
+    if (isCopyVariantTitle(baseName(fileName))) continue;
     const coverImage = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
@@ -222,25 +377,39 @@ export interface SyncResult {
   videos:   { added: number; updated: number };
   podcasts: { added: number; updated: number };
   articles: { added: number; updated: number };
+  removed: { videos: number; podcasts: number; articles: number };
   durationMs: number;
 }
 
 export async function syncS3ToDb(): Promise<SyncResult> {
   const start = Date.now();
 
-  // Build thumbnail maps in parallel
-  const [videoThumbs, podcastThumbs, articleThumbs] = await Promise.all([
+  const VIDEO_EXTS = [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".ts"];
+  const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
+  const ARTICLE_EXTS = [".docx", ".doc", ".pdf"];
+
+  const [videoItems, podcastItems, articleItems, videoThumbs, podcastThumbs, articleThumbs] = await Promise.all([
+    listAllKeys("LiveTV"),
+    listAllKeys("podcast"),
+    listAllKeys("articels"),
     buildThumbnailMap("Thumbnail/videos"),
     buildThumbnailMap("Thumbnail/podcast"),
     buildThumbnailMap("Thumbnail/articels"),
   ]);
 
+  const videoFiles = videoItems.filter(({ key }) => VIDEO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
+  const podcastFiles = podcastItems.filter(({ key }) => AUDIO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
+  const articleFiles = articleItems.filter(({ key }) => ARTICLE_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
+
+  const removed = await deleteMissingS3BackedRecords(videoFiles, podcastFiles, articleFiles);
+  await cleanupDuplicateTitles();
+
   // Sync each collection in parallel
   const [videos, podcasts, articles] = await Promise.all([
-    syncVideos(videoThumbs),
-    syncPodcasts(podcastThumbs),
-    syncArticles(articleThumbs),
+    syncVideos(videoFiles, videoThumbs),
+    syncPodcasts(podcastFiles, podcastThumbs),
+    syncArticles(articleFiles, articleThumbs),
   ]);
 
-  return { videos, podcasts, articles, durationMs: Date.now() - start };
+  return { videos, podcasts, articles, removed, durationMs: Date.now() - start };
 }

@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { getVideo } from "../services/videolive";
 import { VideoLiveResponse } from "../types/videolive";
 
+const COPY_SUFFIX_RE = /\s*\(\d+\)\s*$/;
+
+function normalizeTitle(title: string): string {
+  return title.replace(COPY_SUFFIX_RE, "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
 function dedupeByTitle<T extends { title: string }>(items: T[]): T[] {
   const seen = new Set<string>();
   return items.filter(item => {
-    const key = item.title.trim().toLowerCase();
+    const rawTitle = item.title?.trim() ?? "";
+    if (!rawTitle || COPY_SUFFIX_RE.test(rawTitle)) return false;
+    const key = normalizeTitle(rawTitle);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

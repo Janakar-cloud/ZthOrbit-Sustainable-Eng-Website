@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Video } from "../models/Video.js";
 import { requireAuth } from "../middleware/auth.js";
 import { signStreamUrl } from "../utils/s3.js";
+import { filterCanonicalMedia } from "../utils/mediaTitle.js";
 
 const router = Router();
 
@@ -31,9 +32,11 @@ router.get("/", async (req, res) => {
     Video.countDocuments(filter),
   ]);
 
+  const canonicalItems = filterCanonicalMedia(items as any[]);
+
   // Sign every streamUrl so private S3 objects are accessible
   const signedItems = await Promise.all(
-    items.map(async (v) => {
+    canonicalItems.map(async (v) => {
       const obj = v.toObject() as any;
       obj.streamUrl = await signStreamUrl(obj.streamUrl || "");
       obj.thumbnailUrl = obj.thumbnailUrl ? await signStreamUrl(obj.thumbnailUrl) : "";
@@ -41,7 +44,7 @@ router.get("/", async (req, res) => {
     })
   );
 
-  res.json({ items: signedItems, total, page, pageSize });
+  res.json({ items: signedItems, total: canonicalItems.length, page, pageSize });
 });
 
 const videoSchema = z.object({
@@ -69,7 +72,7 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
 router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = videoSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const video = await Video.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
+  const video = await Video.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
   if (!video) return res.status(404).json({ error: "Not found" });
   res.json(video);
 });

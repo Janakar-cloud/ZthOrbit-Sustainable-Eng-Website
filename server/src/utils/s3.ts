@@ -3,12 +3,15 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env.js";
 import { randomUUID } from "crypto";
 
+// Real AWS access key IDs always start with AKIA or ASIA.
+// Ignore placeholder values like "your-access-key-id".
+const isRealKey = (k: string) => /^(AKIA|ASIA)[A-Z0-9]{16}$/.test(k);
+
 export const s3 = new S3Client({
   region: env.s3.region,
-  // Only use explicit credentials if both keys are present.
-  // If omitted, the SDK uses the default credential chain
-  // (IAM instance role on EC2, env vars, ~/.aws/credentials, etc.)
-  ...(env.s3.accessKeyId && env.s3.secretAccessKey
+  // Only inject explicit credentials when both look like real AWS keys.
+  // Otherwise the SDK uses the default chain (IAM role, ~/.aws/credentials, etc.)
+  ...(isRealKey(env.s3.accessKeyId) && env.s3.secretAccessKey && !env.s3.secretAccessKey.startsWith('your-')
     ? { credentials: { accessKeyId: env.s3.accessKeyId, secretAccessKey: env.s3.secretAccessKey } }
     : {}),
 });

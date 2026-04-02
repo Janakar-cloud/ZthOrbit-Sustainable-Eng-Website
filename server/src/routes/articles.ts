@@ -58,7 +58,7 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
 router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   const parsed = articleSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const updated = await Article.findByIdAndUpdate(req.params.id, parsed.data, { new: true });
+  const updated = await Article.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
   if (!updated) return res.status(404).json({ error: "Not found" });
   res.json(updated);
 });

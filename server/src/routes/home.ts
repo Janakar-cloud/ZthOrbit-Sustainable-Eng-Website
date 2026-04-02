@@ -5,6 +5,22 @@ import { Article } from "../models/Article.js";
 
 const router = Router();
 const LIMIT = 6;
+const COPY_SUFFIX_RE = /\s*\(\d+\)\s*$/;
+
+function dedupeCanonical<T extends { title: string }>(docs: T[]): T[] {
+  const seen = new Set<string>();
+
+  return docs.filter((doc) => {
+    const title = doc.title?.trim() ?? "";
+    if (!title || COPY_SUFFIX_RE.test(title)) return false;
+
+    const normalized = title.replace(COPY_SUFFIX_RE, "").replace(/\s+/g, " ").trim().toLowerCase();
+    if (!normalized || seen.has(normalized)) return false;
+
+    seen.add(normalized);
+    return true;
+  }).slice(0, LIMIT);
+}
 
 router.get("/", async (_req, res) => {
   try {
@@ -24,20 +40,10 @@ router.get("/", async (_req, res) => {
     ]);
 
     // Deduplicate by normalised title (case-insensitive) — keeps the first (most recent)
-    const dedupe = <T extends { title: string }>(docs: T[]): T[] => {
-      const seen = new Set<string>();
-      return docs.filter(d => {
-        const key = d.title.trim().toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).slice(0, LIMIT);
-    };
-
     res.json({
-      videos:   dedupe(videos),
-      podcasts: dedupe(podcasts),
-      articles: dedupe(articles),
+      videos: dedupeCanonical(videos),
+      podcasts: dedupeCanonical(podcasts),
+      articles: dedupeCanonical(articles),
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch home data" });

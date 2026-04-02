@@ -4,6 +4,7 @@ import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { requireAuth } from "../middleware/auth.js";
 import { escapeRegex } from "../utils/regex.js";
+import { filterCanonicalMedia } from "../utils/mediaTitle.js";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.get("/", async (req, res) => {
       Video.countDocuments(videoFilter),
     ]);
     
-    items = videos.map((v) => ({
+    items = filterCanonicalMedia(videos as any[]).map((v) => ({
       id: v.id,
       title: v.title,
       description: v.description,
@@ -56,7 +57,7 @@ router.get("/", async (req, res) => {
       Podcast.countDocuments(podcastFilter),
     ]);
     
-    items = podcasts.map((p) => ({
+    items = filterCanonicalMedia(podcasts as any[]).map((p) => ({
       id: p.id,
       title: p.title,
       description: p.description,
@@ -88,7 +89,7 @@ router.get("/", async (req, res) => {
       Podcast.countDocuments(podcastFilter),
     ]);
     
-    const videoItems = videos.map((v) => ({
+    const videoItems = filterCanonicalMedia(videos as any[]).map((v) => ({
       id: v.id,
       title: v.title,
       description: v.description,
@@ -104,7 +105,7 @@ router.get("/", async (req, res) => {
       updatedAt: v.updatedAt,
     }));
     
-    const podcastItems = podcasts.map((p) => ({
+    const podcastItems = filterCanonicalMedia(podcasts as any[]).map((p) => ({
       id: p.id,
       title: p.title,
       description: p.description,

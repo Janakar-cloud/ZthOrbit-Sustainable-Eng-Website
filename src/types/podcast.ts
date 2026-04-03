@@ -1,3 +1,9 @@
+export interface PodcastTag {
+  _id?: string;
+  name: string;
+  kind?: "category" | "tag";
+}
+
 export interface PodcastEpisode {
   _id: string;
   title: string;
@@ -7,7 +13,9 @@ export interface PodcastEpisode {
   duration: string; // format "mm:ss" or "hh:mm:ss"
   publishDate: string; // ISO date string
   status: "draft" | "published" | "archived"; // extend if needed
-  tags: string[];
+  tags: PodcastTag[];
+  category?: string;
+  categories?: string[];
   __v: number;
   createdAt: string; // ISO date
   updatedAt: string; // ISO date

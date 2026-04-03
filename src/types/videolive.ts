@@ -16,6 +16,8 @@ export interface VideoLive {
   status: Status;
   isLive: boolean;
   tags: Tag[];
+  category?: string;
+  categories?: string[];
   __v: number;
   createdAt: string;
   updatedAt: string;

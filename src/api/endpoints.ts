@@ -1,8 +1,8 @@
 export const API_ENDPOINTS = {
   HOME: "/home",
-  CATEGORIES: "/api/categories?type=media",
-  PODCAST: "/podcasts",
-  VIDEO:"/videos?status=published",
+  CATEGORIES: "/categories?type=media",
+  PODCAST: "/media?menu=Podcast&mediaType=audio&status=published",
+  VIDEO: "/media?menu=LiveTv&mediaType=video&status=published",
   ARTICLE:"/articles?"
 
 };

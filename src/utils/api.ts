@@ -199,11 +199,68 @@ export interface PodcastItem {
   tags: string[];
 }
 
+interface MediaTagItem {
+  name: string;
+  kind?: "category" | "tag";
+}
+
+interface MediaApiItem {
+  id: string;
+  title: string;
+  description: string;
+  fileUrl: string;
+  thumbnailUrl?: string;
+  duration?: number;
+  createdAt?: string;
+  status: "processing" | "ready" | "failed";
+  tags?: MediaTagItem[];
+}
+
+interface MediaApiResponse {
+  data: MediaApiItem[];
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
+}
+
+function mapMediaStatus(status: MediaApiItem["status"]): string {
+  return status === "ready" ? "published" : "draft";
+}
+
+function formatMediaDuration(seconds?: number): string | undefined {
+  if (!seconds || Number.isNaN(seconds)) return undefined;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  const parts = hours > 0 ? [hours, minutes, remainingSeconds] : [minutes, remainingSeconds];
+  return parts.map((value) => String(value).padStart(2, "0")).join(":");
+}
+
 export function getPodcasts(params?: { tag?: string; page?: number }) {
   const qs = new URLSearchParams();
-  if (params?.tag) qs.set("tag", params.tag);
+  if (params?.tag) qs.set("category", params.tag);
   if (params?.page) qs.set("page", String(params.page));
-  return request<PaginatedResponse<PodcastItem>>(`/podcasts?${qs}`);
+  qs.set("menu", "Podcast");
+  qs.set("mediaType", "audio");
+  qs.set("status", "published");
+  return request<MediaApiResponse>(`/media?${qs}`).then((res) => ({
+    items: (res.data ?? []).map((item) => ({
+      _id: item.id,
+      title: item.title,
+      description: item.description,
+      audioUrl: item.fileUrl,
+      imageUrl: item.thumbnailUrl,
+      duration: formatMediaDuration(item.duration),
+      publishDate: item.createdAt,
+      status: mapMediaStatus(item.status),
+      tags: (item.tags ?? []).map((tag) => tag.name),
+    })),
+    total: res.meta?.total ?? 0,
+    page: res.meta?.page ?? 1,
+    pageSize: res.meta?.limit ?? 20,
+  }));
 }
 
 export function createPodcast(data: { title: string; description: string; audioUrl: string; imageUrl?: string; duration?: string; tags?: string[] }) {
@@ -285,9 +342,28 @@ export interface PodcastComment {
 
 export function getVideos(params?: { tag?: string; page?: number }) {
   const qs = new URLSearchParams();
-  if (params?.tag) qs.set("tag", params.tag);
+  if (params?.tag) qs.set("category", params.tag);
   if (params?.page) qs.set("page", String(params.page));
-  return request<PaginatedResponse<VideoItem>>(`/videos?${qs}`);
+  qs.set("menu", "LiveTv");
+  qs.set("mediaType", "video");
+  qs.set("status", "published");
+  return request<MediaApiResponse>(`/media?${qs}`).then((res) => ({
+    items: (res.data ?? []).map((item) => ({
+      _id: item.id,
+      title: item.title,
+      description: item.description,
+      streamUrl: item.fileUrl,
+      thumbnailUrl: item.thumbnailUrl || "",
+      duration: formatMediaDuration(item.duration),
+      publishDate: item.createdAt,
+      status: mapMediaStatus(item.status),
+      isLive: false,
+      tags: (item.tags ?? []).map((tag) => tag.name),
+    })),
+    total: res.meta?.total ?? 0,
+    page: res.meta?.page ?? 1,
+    pageSize: res.meta?.limit ?? 20,
+  }));
 }
 
 export function createVideo(data: { title: string; description: string; streamUrl: string; thumbnailUrl: string; duration?: string; tags?: string[] }) {

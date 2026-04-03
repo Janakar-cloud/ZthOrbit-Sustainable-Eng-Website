@@ -45,19 +45,32 @@ function buildAppTargets(role: AuthUser["role"], requestedApp?: "public" | "dash
   };
 }
 
-function buildAuthResponse(user: { id: string; email: string; role: AuthUser["role"]; name?: string | null }, refreshToken?: string) {
-  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
+function toAuthUser(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null }) {
+  const id = user.id ?? user._id?.toString();
+  if (!id) throw new Error("User id is missing");
+
+  return {
+    id,
+    email: user.email,
+    role: user.role,
+    name: user.name || null,
+  };
+}
+
+function buildAuthResponse(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null }, refreshToken?: string) {
+  const authUser = toAuthUser(user);
+  const payload: AuthUser = { id: authUser.id, role: authUser.role, email: authUser.email };
 
   return {
     accessToken: signAccess(payload),
     ...(refreshToken ? { refreshToken } : {}),
     user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      name: user.name || null,
+      id: authUser.id,
+      email: authUser.email,
+      role: authUser.role,
+      name: authUser.name,
     },
-    app: buildAppTargets(user.role),
+    app: buildAppTargets(authUser.role),
   };
 }
 

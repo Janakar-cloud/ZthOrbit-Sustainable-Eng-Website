@@ -3,9 +3,9 @@ import { API_ENDPOINTS } from "../api/endpoints";
 import { VideoLiveResponse } from "../types/videolive";
 
 type MediaTag = {
-  _id?: string;
+  _id: string;
   name: string;
-  kind?: "category" | "tag";
+  kind: "category" | "tag";
 };
 
 type MediaItem = {
@@ -31,6 +31,16 @@ type MediaListResponse = {
   };
 };
 
+function normalizeMediaTags(tags?: Array<Partial<MediaTag>>): MediaTag[] {
+  return (tags ?? [])
+    .filter((tag): tag is Partial<MediaTag> & { name: string } => typeof tag?.name === "string" && tag.name.trim().length > 0)
+    .map((tag, index) => ({
+      _id: tag._id ?? `${tag.name.trim().toLowerCase()}-${index}`,
+      name: tag.name.trim(),
+      kind: tag.kind === "category" ? "category" : "tag",
+    }));
+}
+
 export const getVideo = async (): Promise<VideoLiveResponse> => {
   const res = await axiosClient.get<MediaListResponse>(API_ENDPOINTS.VIDEO);
   return {
@@ -43,7 +53,7 @@ export const getVideo = async (): Promise<VideoLiveResponse> => {
       publishDate: item.createdAt,
       status: item.status === "ready" ? "published" : "draft",
       isLive: false,
-      tags: item.tags ?? [],
+      tags: normalizeMediaTags(item.tags),
       category: item.category,
       categories: item.categories ?? [],
       __v: 0,

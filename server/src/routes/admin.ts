@@ -42,12 +42,12 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
   // Trending podcast categories (via tag $lookup to resolve names)
   const podcastTagsRaw = await Podcast.aggregate([
     { $match: { createdAt: { $gte: from, $lte: to } } },
-    { $unwind: { path: "$tags", preserveNullAndEmpty: false } },
+    { $unwind: { path: "$tags", preserveNullAndEmptyArrays: false } },
     { $group: { _id: "$tags", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 5 },
     { $lookup: { from: "tags", localField: "_id", foreignField: "_id", as: "tagDoc" } },
-    { $unwind: { path: "$tagDoc", preserveNullAndEmpty: true } },
+    { $unwind: { path: "$tagDoc", preserveNullAndEmptyArrays: true } },
   ]);
 
   const trendingPodcastCategory =
@@ -61,12 +61,12 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
   // Trending article categories (via tag $lookup to resolve names)
   const articleTagsRaw = await Article.aggregate([
     { $match: { createdAt: { $gte: from, $lte: to } } },
-    { $unwind: { path: "$tags", preserveNullAndEmpty: false } },
+    { $unwind: { path: "$tags", preserveNullAndEmptyArrays: false } },
     { $group: { _id: "$tags", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 5 },
     { $lookup: { from: "tags", localField: "_id", foreignField: "_id", as: "tagDoc" } },
-    { $unwind: { path: "$tagDoc", preserveNullAndEmpty: true } },
+    { $unwind: { path: "$tagDoc", preserveNullAndEmptyArrays: true } },
   ]);
 
   const trendingArticleCategory =

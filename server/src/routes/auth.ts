@@ -80,41 +80,49 @@ const registerSchema = z.object({
   name: z.string().max(100).optional(),
 });
 
-router.post("/register", async (req, res) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+router.post("/register", async (req, res, next) => {
+  try {
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const { email, password, name } = parsed.data;
-  const existing = await User.findOne({ email });
-  if (existing) return res.status(400).json({ error: "Email already registered" });
+    const { email, password, name } = parsed.data;
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ error: "Email already registered" });
 
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ email, passwordHash, name, role: "viewer" });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, passwordHash, name, role: "viewer" });
 
-  await issueVerificationCode(user.email, user.id);
+    await issueVerificationCode(user.email, user.id);
 
-  res.status(202).json({ message: "Verification code sent to email. Please verify before logging in." });
+    res.status(202).json({ message: "Verification code sent to email. Please verify before logging in." });
+  } catch (err) {
+    next(err);
+  }
 });
 
 const loginSchema = z.object({ email: z.string().email(), password: z.string() });
 
-router.post("/login", async (req, res) => {
-  const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const { email, password } = parsed.data;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+router.post("/login", async (req, res, next) => {
+  try {
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    const { email, password } = parsed.data;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-  if (!user.emailVerified) {
-    return res.status(403).json({ error: "Email not verified. Please complete verification." });
+    if (!user.emailVerified) {
+      return res.status(403).json({ error: "Email not verified. Please complete verification." });
+    }
+
+    const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
+    const refreshToken = await issueRefresh(user.id, payload);
+    res.json(buildAuthResponse(user, refreshToken));
+  } catch (err) {
+    next(err);
   }
-
-  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
-  const refreshToken = await issueRefresh(user.id, payload);
-  res.json(buildAuthResponse(user, refreshToken));
 });
 
 router.post("/refresh", async (req, res) => {
@@ -133,27 +141,35 @@ router.post("/refresh", async (req, res) => {
   }
 });
 
-router.get("/me", requireAuth(), async (req, res) => {
-  const user = await User.findById(req.user?.id).select("email name role emailVerified");
-  if (!user) return res.status(404).json({ error: "User not found" });
+router.get("/me", requireAuth(), async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user?.id).select("email name role emailVerified");
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-  res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name || null,
-      role: user.role,
-      emailVerified: user.emailVerified,
-    },
-    app: buildAppTargets(user.role),
-  });
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name || null,
+        role: user.role,
+        emailVerified: user.emailVerified,
+      },
+      app: buildAppTargets(user.role),
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.post("/logout", async (req, res) => {
-  const token = req.body.refreshToken as string | undefined;
-  if (!token) return res.status(400).json({ error: "Missing refreshToken" });
-  await RefreshToken.findOneAndUpdate({ token }, { revoked: true });
-  res.json({ success: true });
+router.post("/logout", async (req, res, next) => {
+  try {
+    const token = req.body.refreshToken as string | undefined;
+    if (!token) return res.status(400).json({ error: "Missing refreshToken" });
+    await RefreshToken.findOneAndUpdate({ token }, { revoked: true });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 const resetRequestSchema = z.object({
@@ -161,84 +177,100 @@ const resetRequestSchema = z.object({
   app: z.enum(["public", "dashboard"]).optional(),
 });
 
-router.post("/request-reset", async (req, res) => {
-  const parsed = resetRequestSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const user = await User.findOne({ email: parsed.data.email });
-  if (user) {
-    const token = randomBytes(32).toString("hex");
-    await PasswordReset.create({
-      userId: user._id,
-      token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 30),
-      used: false,
-    });
-    const appBaseUrl = getPreferredAppUrl(user.role, parsed.data.app);
-    const resetLink = `${appBaseUrl}/reset?token=${token}`;
-    try {
-      await sendMail(
-        user.email,
-        "Reset your password",
-        `<p>Hi ${user.name || "there"},</p><p>Click the link below to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p><p>This link expires in 30 minutes.</p>`
-      );
-    } catch (mailErr) {
-      console.warn("[mailer] failed to send reset email", mailErr);
+router.post("/request-reset", async (req, res, next) => {
+  try {
+    const parsed = resetRequestSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    const user = await User.findOne({ email: parsed.data.email });
+    if (user) {
+      const token = randomBytes(32).toString("hex");
+      await PasswordReset.create({
+        userId: user._id,
+        token,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 30),
+        used: false,
+      });
+      const appBaseUrl = getPreferredAppUrl(user.role, parsed.data.app);
+      const resetLink = `${appBaseUrl}/reset?token=${token}`;
+      try {
+        await sendMail(
+          user.email,
+          "Reset your password",
+          `<p>Hi ${user.name || "there"},</p><p>Click the link below to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p><p>This link expires in 30 minutes.</p>`
+        );
+      } catch (mailErr) {
+        console.warn("[mailer] failed to send reset email", mailErr);
+      }
+      return res.json({ success: true });
     }
-    return res.json({ success: true });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
   }
-  res.json({ success: true });
 });
 
 const resetSchema = z.object({ token: z.string(), password: z.string().min(8) });
 
-router.post("/reset", async (req, res) => {
-  const parsed = resetSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const entry = await PasswordReset.findOne({ token: parsed.data.token, used: false });
-  if (!entry || entry.expiresAt < new Date()) return res.status(400).json({ error: "Invalid or expired token" });
-  const user = await User.findById(entry.userId);
-  if (!user) return res.status(404).json({ error: "User not found" });
-  user.passwordHash = await bcrypt.hash(parsed.data.password, 10);
-  await user.save();
-  entry.used = true;
-  await entry.save();
-  res.json({ success: true });
+router.post("/reset", async (req, res, next) => {
+  try {
+    const parsed = resetSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    const entry = await PasswordReset.findOne({ token: parsed.data.token, used: false });
+    if (!entry || entry.expiresAt < new Date()) return res.status(400).json({ error: "Invalid or expired token" });
+    const user = await User.findById(entry.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    user.passwordHash = await bcrypt.hash(parsed.data.password, 10);
+    await user.save();
+    entry.used = true;
+    await entry.save();
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 const verificationSchema = z.object({ email: z.string().email(), code: z.string().length(6) });
 
-router.post("/verify-email", async (req, res) => {
-  const parsed = verificationSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const { email, code } = parsed.data;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ error: "User not found" });
-  if (user.emailVerified) return res.json({ message: "Email already verified" });
+router.post("/verify-email", async (req, res, next) => {
+  try {
+    const parsed = verificationSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    const { email, code } = parsed.data;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.emailVerified) return res.json({ message: "Email already verified" });
 
-  const record = await EmailVerification.findOne({ userId: user._id, code, used: false }).sort({ createdAt: -1 });
-  if (!record || record.expiresAt < new Date()) {
-    return res.status(400).json({ error: "Invalid or expired code" });
+    const record = await EmailVerification.findOne({ userId: user._id, code, used: false }).sort({ createdAt: -1 });
+    if (!record || record.expiresAt < new Date()) {
+      return res.status(400).json({ error: "Invalid or expired code" });
+    }
+
+    user.emailVerified = true;
+    await user.save();
+    record.used = true;
+    await record.save();
+
+    const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
+    const refreshToken = await issueRefresh(user.id, payload);
+    res.json(buildAuthResponse(user, refreshToken));
+  } catch (err) {
+    next(err);
   }
-
-  user.emailVerified = true;
-  await user.save();
-  record.used = true;
-  await record.save();
-
-  const payload: AuthUser = { id: user.id, role: user.role, email: user.email };
-  const refreshToken = await issueRefresh(user.id, payload);
-  res.json(buildAuthResponse(user, refreshToken));
 });
 
-router.post("/resend-verification", async (req, res) => {
-  const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const user = await User.findOne({ email: parsed.data.email });
-  if (!user) return res.status(404).json({ error: "User not found" });
-  if (user.emailVerified) return res.json({ message: "Email already verified" });
+router.post("/resend-verification", async (req, res, next) => {
+  try {
+    const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    const user = await User.findOne({ email: parsed.data.email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.emailVerified) return res.json({ message: "Email already verified" });
 
-  await issueVerificationCode(user.email, user.id);
-  res.json({ message: "Verification code resent" });
+    await issueVerificationCode(user.email, user.id);
+    res.json({ message: "Verification code resent" });
+  } catch (err) {
+    next(err);
+  }
 });
 
 async function issueRefresh(userId: string, payload: AuthUser) {

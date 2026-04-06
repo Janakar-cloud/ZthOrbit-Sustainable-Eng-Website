@@ -229,7 +229,163 @@ pm2 restart all
 sudo systemctl reload nginx
 ```
 
-- ## Optional: self-hosted live (HLS) quick start
+## PM2 runbook (Backend + Main Frontend + Dashboard Frontend)
+
+Use this section when you want all 3 apps running in PM2 for debugging or coordinated deployment:
+- API backend on `:4000`
+- Main website frontend on `:5173`
+- Dashboard frontend on `:3039`
+
+### 0) Required folder layout
+
+Keep source code and deployed static files separate.
+
+Recommended:
+- Main app source: `/var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website`
+- Dashboard source: `/home/ubuntu/dashboard/GreenTvDashboard`
+- Dashboard static deploy path (for Nginx static hosting): `/var/www/dashboard/GreenTvDashboard`
+
+If `git pull` fails with `not a git repository`, you are in a static deploy folder, not a source repo folder.
+
+### 1) Clean stop (reset all running processes)
+
+```bash
+pm2 stop all || true
+pm2 delete all || true
+
+pkill -f "vite" || true
+pkill -f "tsx watch" || true
+pkill -f "npm run dev" || true
+
+sudo lsof -ti:4000,5173,3039 | xargs -r kill -9
+sudo lsof -iTCP -sTCP:LISTEN -P -n | grep -E ":4000|:5173|:3039" || echo "all clean"
+```
+
+### 2) Install dependencies once
+
+```bash
+# Main frontend
+cd /var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website
+npm install
+
+# Backend
+cd /var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website/server
+npm install
+
+# Dashboard frontend source repo
+cd /home/ubuntu/dashboard/GreenTvDashboard
+npm install
+```
+
+### 3) Start backend in PM2 (port 4000)
+
+```bash
+pm2 start "npm --prefix /var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website/server run dev" --name thegreentv-api
+```
+
+Health check:
+```bash
+curl -i http://127.0.0.1:4000/healthz
+```
+
+### 4) Start main website frontend in PM2 (port 5173)
+
+```bash
+pm2 start "npm --prefix /var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website run dev -- --host 0.0.0.0 --port 5173" --name thegreentv-web
+```
+
+Check:
+```bash
+curl -i http://127.0.0.1:5173
+```
+
+### 5) Start dashboard frontend in PM2 (port 3039)
+
+```bash
+pm2 start "npm --prefix /home/ubuntu/dashboard/GreenTvDashboard run dev -- --host 0.0.0.0 --port 3039" --name thegreentv-dashboard
+```
+
+Check:
+```bash
+curl -i http://127.0.0.1:3039
+```
+
+### 6) Verify all 3 are online
+
+```bash
+pm2 list
+sudo lsof -iTCP -sTCP:LISTEN -P -n | grep -E ":4000|:5173|:3039"
+```
+
+You should see:
+- `thegreentv-api` online
+- `thegreentv-web` online
+- `thegreentv-dashboard` online
+
+### 7) Save PM2 for reboot
+
+```bash
+pm2 save
+sudo pm2 startup systemd -u ubuntu --hp /home/ubuntu
+pm2 save
+```
+
+### 8) Live logs for debugging
+
+```bash
+pm2 logs thegreentv-api --lines 100
+pm2 logs thegreentv-web --lines 100
+pm2 logs thegreentv-dashboard --lines 100
+```
+
+### 9) Common failures and fixes
+
+#### A) Backend fails with Mongo authentication
+- Symptom: `MongoServerError: Authentication failed`
+- Fix: verify `server/.env` and `MONGODB_URI` credentials and `authSource`
+
+#### B) Frontend shows blank page, browser requests `/src/main.tsx`
+- Cause: Nginx serving source `index.html` (repo root) instead of built `dist/index.html`
+- Fix: point Nginx `root` to build output (`.../dist`) for that site
+
+#### C) `npm ci` fails with lockfile error
+- Cause: no `package-lock.json`
+- Fix: use `npm install`
+
+#### D) `git pull` fails with `not a git repository`
+- Cause: current folder contains deployed static files only
+- Fix: run git commands in source repo folder, not static deploy folder
+
+### 10) Update/deploy sequence (team SOP)
+
+For the main app:
+```bash
+cd /var/www/zthorbit/ZthOrbit-Sustainable-Eng-Website
+git pull origin PreDeployment
+npm install
+npm run build
+pm2 restart thegreentv-web
+pm2 restart thegreentv-api
+```
+
+For dashboard source + static publish:
+```bash
+cd /home/ubuntu/dashboard/GreenTvDashboard
+git pull origin Backend
+npm install
+npm run build
+rsync -av --delete dist/ /var/www/dashboard/GreenTvDashboard/
+pm2 restart thegreentv-dashboard
+sudo systemctl reload nginx
+```
+
+### 11) URLs during PM2 debug mode
+
+- Main frontend: `http://13.205.72.30:5173`
+- Dashboard frontend: `http://13.205.72.30:3039`
+- Backend API health: `http://13.205.72.30:4000/healthz`
+
+## Optional: self-hosted live (HLS) quick start
 - Install ffmpeg and nginx-rtmp:
   ```bash
   sudo apt-get update -y

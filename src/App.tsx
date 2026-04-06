@@ -34,13 +34,20 @@ function pageFromPath(pathname: string): string {
 }
 
 function App() {
-  const { activePage, setActivePage, isAdmin } = useAppContext()
+  const { activePage, setActivePage, isAdmin, logout } = useAppContext()
 
   // Set initial page from URL on mount
   useEffect(() => {
+    // If redirected here from dashboard logout, clear tokens and go home
+    if (window.location.search.includes('loggedOut=1')) {
+      logout();
+      window.history.replaceState(null, '', '/');
+      setActivePage('home');
+      return;
+    }
     const initial = pageFromPath(window.location.pathname)
     setActivePage(initial)
-  }, [setActivePage])
+  }, [setActivePage, logout])
 
   // Listen for browser back/forward
   useEffect(() => {

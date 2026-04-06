@@ -56,9 +56,9 @@ export default function Signup({ onNavigate, onComplete }: SignupProps) {
           password: formData.password.trim(),
           name: formData.fullName.trim(),
         });
-        // Registration successful, navigate to login for email verification
+        // Store email so Login page can auto-enter verify mode
+        localStorage.setItem('pendingVerificationEmail', formData.email.trim());
         onNavigate('login');
-        onComplete();
       } catch (err: unknown) {
         setSignupError((err as Error)?.message || 'Registration failed. Please try again.');
       } finally {

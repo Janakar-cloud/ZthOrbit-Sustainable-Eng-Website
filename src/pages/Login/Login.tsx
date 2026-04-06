@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Login.css';
 import { login, register, resendVerification, verifyEmail } from '../../utils/api';
 import { useAppContext } from '../../context/AppContext';
@@ -26,6 +26,17 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
   const { loginWithTokens } = useAppContext();
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  // If coming from Signup, auto-enter verify mode with pre-filled email
+  useEffect(() => {
+    const pendingEmail = localStorage.getItem('pendingVerificationEmail');
+    if (pendingEmail) {
+      setEmail(pendingEmail);
+      setMode('verify');
+      setStatus({ message: 'Registration successful! Enter the 6-digit code sent to your email.', variant: 'success' });
+      localStorage.removeItem('pendingVerificationEmail');
+    }
+  }, []);
 
   const storeTokens = (accessToken: string, refreshToken: string) => {
     loginWithTokens(accessToken, refreshToken);

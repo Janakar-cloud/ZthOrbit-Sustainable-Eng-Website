@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE || "/api/v1",
   timeout: 10000,
   withCredentials: true,
 });
@@ -51,7 +51,7 @@ axiosClient.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        const res = await axios.post("/api/v1/auth/refresh", {
+        const res = await axios.post(`${import.meta.env.VITE_API_BASE || "/api/v1"}/auth/refresh`, {
           refreshToken: refreshTk,
         });
         const newAccessToken: string = res.data.accessToken;

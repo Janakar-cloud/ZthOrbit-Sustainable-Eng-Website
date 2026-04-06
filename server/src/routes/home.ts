@@ -47,6 +47,7 @@ router.get("/", async (_req, res) => {
       articles: dedupeCanonical(articles),
     });
   } catch (err) {
+    console.error("[home] GET / failed:", err);
     res.status(500).json({ error: "Failed to fetch home data" });
   }
 });

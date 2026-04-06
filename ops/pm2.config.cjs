@@ -4,7 +4,8 @@ module.exports = {
   apps: [
     {
       name: "thegreentv-api",
-      script: "dist/index.js",
+      script: "npm",
+      args: "run dev",
       cwd: `${appRoot}/server`,
       instances: 1,
       exec_mode: "fork",
@@ -15,7 +16,7 @@ module.exports = {
       error_file: `${appRoot}/logs/thegreentv-api-error.log`,
       out_file: `${appRoot}/logs/thegreentv-api-out.log`,
       env: {
-        NODE_ENV: "production"
+        NODE_ENV: "development"
       }
     }
   ]

@@ -64,6 +64,10 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
         const tokens = await verifyEmail({ email: email.trim(), code: code.trim() });
         storeTokens(tokens.accessToken, tokens.refreshToken);
         setStatus({ message: 'Verified! Logging you in...', variant: 'success' });
+        if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
+          window.location.href = tokens.app.preferredUrl;
+          return;
+        }
         onLogin();
         return;
       }
@@ -77,6 +81,10 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
       const tokens = await login({ email: email.trim(), password: password.trim() });
       storeTokens(tokens.accessToken, tokens.refreshToken);
       setStatus({ message: 'Welcome back! Redirecting...', variant: 'success' });
+      if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
+        window.location.href = tokens.app.preferredUrl;
+        return;
+      }
       onLogin();
     } catch (err: any) {
       const msg = (err as Error)?.message || 'Request failed';

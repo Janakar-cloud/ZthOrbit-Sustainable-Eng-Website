@@ -32,7 +32,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ─── Auth ────────────────────────────────────────────────────────
 
-export type AuthTokens = { accessToken: string; refreshToken: string };
+export type AppTargets = {
+  publicUrl: string;
+  dashboardUrl: string;
+  preferredUrl: string;
+  shouldUseDashboard: boolean;
+  dashboardLoginUrl: string;
+  publicLoginUrl: string;
+};
+
+export type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+  app?: AppTargets;
+};
 
 export function register(data: { email: string; password: string; name?: string }) {
   return request<{ message: string }>("/auth/register", {
@@ -42,7 +55,7 @@ export function register(data: { email: string; password: string; name?: string 
 }
 
 export function verifyEmail(data: { email: string; code: string }) {
-  return request<AuthTokens>("/auth/verify-email", {
+  return request<AuthTokens & { app?: AppTargets }>("/auth/verify-email", {
     method: "POST",
     body: JSON.stringify(data),
   });

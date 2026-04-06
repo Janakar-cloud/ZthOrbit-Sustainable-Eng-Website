@@ -6,8 +6,6 @@ import { LiveConfig } from "./models/LiveConfig.js";
 import { Video } from "./models/Video.js";
 import { Podcast } from "./models/Podcast.js";
 import { Article } from "./models/Article.js";
-import { CaseStory } from "./models/CaseStory.js";
-import { AboutBlock } from "./models/AboutBlock.js";
 
 async function main() {
   await connectDb();
@@ -146,45 +144,6 @@ async function main() {
       featured: false,
       tags: [tagMap.technology, tagMap.sustainability],
     },
-  ]);
-
-  await CaseStory.deleteMany({});
-  await CaseStory.insertMany([
-    {
-      title: "Transforming Urban Waste Management",
-      impact: "Reduced landfill waste by 85% and created 200+ green jobs",
-      duration: "18 months",
-      heroImage: "/assets/images/seetharaman/Seetharaman1.jpg",
-      metrics: [
-        { label: "CO2 Reduced", value: "50K tons" },
-        { label: "Recycling Rate", value: "85%" },
-      ],
-      bodyMd: "Implemented comprehensive waste reduction across metros, hitting zero-waste certification for 15 facilities.",
-      tags: [tagMap.sustainability],
-    },
-    {
-      title: "AI-Powered Environmental Monitoring",
-      impact: "Real-time monitoring of 1000+ environmental data points",
-      duration: "12 months",
-      heroImage: "/assets/images/seetharaman/Seetharaman2.jpg",
-      metrics: [
-        { label: "Accuracy", value: "97%" },
-        { label: "Alerts", value: "24/7" },
-      ],
-      bodyMd: "Built ML platform to monitor and predict environmental impact across industrial ops.",
-      tags: [tagMap.technology],
-    },
-  ]);
-
-  await AboutBlock.deleteMany({});
-  await AboutBlock.insertMany([
-    { kind: "gallery", title: "Dr. Seetharaman - Leadership Excellence", mediaUrl: "/assets/images/seetharaman/Seetharaman1.jpg", order: 1 },
-    { kind: "gallery", title: "Dr. Seetharaman - Leadership Excellence", mediaUrl: "/assets/images/seetharaman/Seetharaman2.jpg", order: 2 },
-    { kind: "gallery", title: "Dr. Seetharaman - Leadership Excellence", mediaUrl: "/assets/images/seetharaman/Seetharaman3.jpg", order: 3 },
-    { kind: "theme", title: "Conscious Living", body: "Cruelty-free practices and mindful choices", order: 10 },
-    { kind: "theme", title: "Ethical Governance", body: "Responsible leadership frameworks", order: 11 },
-    { kind: "theme", title: "Financial Clarity", body: "Sustainable economic decision-making", order: 12 },
-    { kind: "cta", title: "Join the community", body: "Empowering sustainability through conscious leadership.", order: 20 },
   ]);
 
   console.log("Seed complete. Test users (password =", defaultPassword, "):");

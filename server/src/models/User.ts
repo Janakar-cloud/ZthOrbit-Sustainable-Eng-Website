@@ -9,6 +9,7 @@ export interface IUser {
   socials?: Record<string, string>;
   status: "active" | "inactive";
   emailVerified?: boolean;
+  lastActiveAt?: Date;
   createdAt: Date;
 }
 
@@ -22,6 +23,7 @@ const userSchema = new Schema<IUser>(
     socials: { type: Schema.Types.Mixed },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     emailVerified: { type: Boolean, default: false },
+    lastActiveAt: { type: Date },
     createdAt: { type: Date, default: () => new Date() },
   },
   { timestamps: false }

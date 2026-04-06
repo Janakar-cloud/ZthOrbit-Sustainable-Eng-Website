@@ -2,7 +2,6 @@ import { Router } from "express";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
-import { Post } from "../models/Post.js";
 import { Tag, normalizeTagKey, normalizeTagName } from "../models/Tag.js";
 
 const router = Router();

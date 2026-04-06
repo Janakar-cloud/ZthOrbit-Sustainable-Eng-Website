@@ -4,8 +4,6 @@ import { User } from "../models/User.js";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
-import { CaseStory } from "../models/CaseStory.js";
-import { Post } from "../models/Post.js";
 import { sendMail } from "../utils/mailer.js";
 import { env } from "../config/env.js";
 
@@ -17,12 +15,13 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
   const to = req.query.to ? new Date(req.query.to as string) : new Date();
 
   // Basic metrics
-  const [users, videos, podcasts, articles, stories] = await Promise.all([
+  const onlineThreshold = new Date(Date.now() - 5 * 60 * 1000); // active in last 5 min
+  const [users, videos, podcasts, articles, onlineUsers] = await Promise.all([
     User.countDocuments(),
     Video.countDocuments(),
     Podcast.countDocuments(),
     Article.countDocuments(),
-    CaseStory.countDocuments(),
+    User.countDocuments({ lastActiveAt: { $gte: onlineThreshold } }),
   ]);
 
   // User status breakdown
@@ -78,20 +77,16 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
     ],
   };
 
-  // Recent activity (last 10 posts)
-  const recentActivity = await Post.find().sort({ postedAt: -1 }).limit(10);
-
   res.json({
     metrics: {
       numberOfVideo: videos,
       totalUsers: users,
-      onlineUsers: 0, // Would need real-time tracking
+      onlineUsers,
       totalPodcasts: podcasts,
     },
     trendingPodcastCategory,
     trendingArticleCategory,
     usersStatus,
-    recentActivity,
   });
 });
 

@@ -2,15 +2,13 @@ import { Router } from "express";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
-import { CaseStory } from "../models/CaseStory.js";
-import { Post } from "../models/Post.js";
 import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 
 /**
  * Global search across all content types
- * GET /search?q=query&type=all|media|articles|posts|caseStories&limit=20
+ * GET /search?q=query&type=all|media|articles&limit=20
  */
 router.get("/", async (req, res) => {
   const { q, type = "all", limit = "20" } = req.query;
@@ -28,8 +26,6 @@ router.get("/", async (req, res) => {
       results: {
         media: [],
         articles: [],
-        posts: [],
-        caseStories: [],
       },
       totalResults: 0,
     };
@@ -118,64 +114,10 @@ router.get("/", async (req, res) => {
       }));
     }
 
-    // Search Posts
-    if (type === "all" || type === "posts") {
-      const posts = await Post.find({
-        $or: [
-          { title: searchRegex },
-          { description: searchRegex },
-        ],
-      })
-        .limit(searchLimit)
-        .select("title description coverUrl totalViews totalComments postedAt author")
-        .sort({ postedAt: -1 })
-        .lean();
-
-      results.results.posts = posts.map((p: any) => ({
-        id: p._id,
-        type: "post",
-        title: p.title,
-        description: p.description,
-        coverUrl: p.coverUrl,
-        totalViews: p.totalViews,
-        totalComments: p.totalComments,
-        postedAt: p.postedAt,
-        author: p.author,
-      }));
-    }
-
-    // Search Case Stories
-    if (type === "all" || type === "caseStories") {
-      const caseStories = await CaseStory.find({
-        $or: [
-          { title: searchRegex },
-          { impact: searchRegex },
-          { bodyMd: searchRegex },
-          { tags: searchRegex },
-        ],
-      })
-        .limit(searchLimit)
-        .select("title impact heroImage duration tags")
-        .sort({ createdAt: -1 })
-        .lean();
-
-      results.results.caseStories = caseStories.map((cs: any) => ({
-        id: cs._id,
-        type: "caseStory",
-        title: cs.title,
-        impact: cs.impact,
-        heroImage: cs.heroImage,
-        duration: cs.duration,
-        tags: cs.tags,
-      }));
-    }
-
     // Calculate total results
     results.totalResults =
       results.results.media.length +
-      results.results.articles.length +
-      results.results.posts.length +
-      results.results.caseStories.length;
+      results.results.articles.length;
 
     res.json(results);
   } catch (error) {

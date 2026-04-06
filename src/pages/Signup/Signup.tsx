@@ -4,10 +4,10 @@ import { register } from '../../utils/api';
 
 interface SignupProps {
   onNavigate: (page: string) => void;
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-export default function Signup({ onNavigate, onComplete }: SignupProps) {
+export default function Signup({ onNavigate }: SignupProps) {
   const [step, setStep] = useState(1);
   const [signupError, setSignupError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

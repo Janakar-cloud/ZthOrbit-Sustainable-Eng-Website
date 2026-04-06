@@ -12,6 +12,9 @@ export interface IArticle {
   status: "draft" | "published";
   featured: boolean;
   tags: Types.ObjectId[];
+  views: number;
+  likes: number;
+  commentsCount: number;
 }
 
 function applyNormalizedTitleToUpdate(update: any) {
@@ -34,6 +37,9 @@ const articleSchema = new Schema<IArticle>(
     status: { type: String, enum: ["draft", "published"], default: "published" },
     featured: { type: Boolean, default: false },
     tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

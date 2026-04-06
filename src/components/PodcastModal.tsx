@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Podcast } from '../pages/HomePage/type/type'
+import { recordView } from '../api/engage'
 
 export default function PodcastModal({
   podcast,
@@ -7,6 +9,15 @@ export default function PodcastModal({
   podcast: Podcast
   onClose: () => void
 }) {
+  const viewTracked = useRef(false)
+
+  const handlePlay = () => {
+    if (!viewTracked.current && podcast.id) {
+      viewTracked.current = true
+      recordView('podcast', String(podcast.id))
+    }
+  }
+
   return (
     <div className="video-modal" onClick={onClose}>
       <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -15,7 +26,7 @@ export default function PodcastModal({
         </button>
         <div className="modal-video-wrapper">
           <img src={podcast.image} alt={podcast.title} style={{ width: '100%', borderRadius: '8px', marginBottom: '20px' }} />
-          <audio controls style={{ width: '100%' }} autoPlay>
+          <audio controls style={{ width: '100%' }} autoPlay onPlay={handlePlay}>
             <source src={podcast.audioFile} type="audio/mp4" />
             Your browser does not support the audio element.
           </audio>

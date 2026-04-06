@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Video } from '../pages/HomePage/type/type'
+import { recordView } from '../api/engage'
 
 function getMimeType(url: string): string {
   const ext = url.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
@@ -21,6 +23,15 @@ export default function VideoModal({
   video: Video
   onClose: () => void
 }) {
+  const viewTracked = useRef(false)
+
+  const handlePlay = () => {
+    if (!viewTracked.current && video.id) {
+      viewTracked.current = true
+      recordView('video', String(video.id))
+    }
+  }
+
   return (
     <div className="video-modal" onClick={onClose}>
       <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -34,6 +45,7 @@ export default function VideoModal({
             autoPlay
             playsInline
             preload="auto"
+            onPlay={handlePlay}
           >
             <source
               src={video.streamUrl || ''}

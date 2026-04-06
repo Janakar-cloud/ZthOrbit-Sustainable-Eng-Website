@@ -16,6 +16,9 @@ export interface IVideo {
   partNumber?: number;
   partTitle?: string;
   metadata?: Record<string, any>;
+  views: number;
+  likes: number;
+  commentsCount: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -44,6 +47,9 @@ const videoSchema = new Schema<IVideo>(
     partNumber: { type: Number },
     partTitle: { type: String },
     metadata: { type: Schema.Types.Mixed },
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

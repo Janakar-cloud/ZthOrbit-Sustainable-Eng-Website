@@ -14,6 +14,8 @@ import reference from "./reference.js";
 import search from "./search.js";
 import home from "./home.js";
 import sync from "./sync.js";
+import engage from "./engage.js";
+import logs from "./logs.js";
 
 const router = Router();
 
@@ -35,5 +37,9 @@ router.use("/notifications", notifications);
 router.use("/api", reference); // /api/categories, /api/menus directly
 // Global search
 router.use("/search", search);
+// Engagement: views, likes, trending, latest
+router.use("/engage", engage);
+// DB-backed logs (admin only)
+router.use("/logs", logs);
 
 export default router;

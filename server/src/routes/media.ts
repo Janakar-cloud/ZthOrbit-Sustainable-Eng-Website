@@ -80,6 +80,9 @@ router.get("/", async (req, res) => {
       fileUrl: v.streamUrl,
       thumbnailUrl: v.thumbnailUrl || "",
       status: v.status === "published" ? "ready" : "processing",
+      views: v.views ?? 0,
+      likes: v.likes ?? 0,
+      commentsCount: v.commentsCount ?? 0,
       createdAt: v.createdAt,
       updatedAt: v.updatedAt,
     }));
@@ -107,6 +110,9 @@ router.get("/", async (req, res) => {
       fileUrl: p.audioUrl,
       thumbnailUrl: p.imageUrl || "",
       status: p.status === "published" ? "ready" : "processing",
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
+      commentsCount: p.commentsCount ?? 0,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
     }));
@@ -142,6 +148,9 @@ router.get("/", async (req, res) => {
       fileUrl: v.streamUrl,
       thumbnailUrl: v.thumbnailUrl || "",
       status: v.status === "published" ? "ready" : "processing",
+      views: v.views ?? 0,
+      likes: v.likes ?? 0,
+      commentsCount: v.commentsCount ?? 0,
       createdAt: v.createdAt,
       updatedAt: v.updatedAt,
     }));
@@ -159,6 +168,9 @@ router.get("/", async (req, res) => {
       fileUrl: p.audioUrl,
       thumbnailUrl: p.imageUrl || "",
       status: p.status === "published" ? "ready" : "processing",
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
+      commentsCount: p.commentsCount ?? 0,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
     }));
@@ -209,6 +221,9 @@ router.get("/:id", async (req, res) => {
       fileUrl: video.streamUrl,
       thumbnailUrl: video.thumbnailUrl || "",
       status: video.status === "published" ? "ready" : "processing",
+      views: (video as any).views ?? 0,
+      likes: (video as any).likes ?? 0,
+      commentsCount: (video as any).commentsCount ?? 0,
       createdAt: video.createdAt,
       updatedAt: video.updatedAt,
     });
@@ -229,6 +244,9 @@ router.get("/:id", async (req, res) => {
       fileUrl: podcast.audioUrl,
       thumbnailUrl: podcast.imageUrl || "",
       status: podcast.status === "published" ? "ready" : "processing",
+      views: (podcast as any).views ?? 0,
+      likes: (podcast as any).likes ?? 0,
+      commentsCount: (podcast as any).commentsCount ?? 0,
       createdAt: podcast.createdAt,
       updatedAt: podcast.updatedAt,
     });

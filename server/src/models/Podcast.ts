@@ -11,6 +11,9 @@ export interface IPodcast {
   publishDate?: Date;
   status: "draft" | "published";
   tags: Types.ObjectId[];
+  views: number;
+  likes: number;
+  commentsCount: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -34,6 +37,9 @@ const podcastSchema = new Schema<IPodcast>(
     publishDate: { type: Date },
     status: { type: String, enum: ["draft", "published"], default: "published" },
     tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
+    views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
+    commentsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

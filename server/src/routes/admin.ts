@@ -83,6 +83,7 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
       totalUsers: users,
       onlineUsers,
       totalPodcasts: podcasts,
+      totalArticles: articles,
     },
     trendingPodcastCategory,
     trendingArticleCategory,

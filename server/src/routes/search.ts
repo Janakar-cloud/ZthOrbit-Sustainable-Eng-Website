@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
+import { Tag } from "../models/Tag.js";
 import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
@@ -20,6 +21,10 @@ router.get("/", async (req, res) => {
   const searchLimit = Math.min(Number(limit), 50); // Max 50 results per type
   const searchRegex = new RegExp(escapeRegex(q), "i");
 
+  // Resolve tag ObjectIds whose name matches the query — used to search by tag name
+  const matchingTags = await Tag.find({ name: searchRegex }).select("_id").lean();
+  const matchingTagIds = matchingTags.map((t) => t._id);
+
   try {
     const results: any = {
       query: q,
@@ -37,7 +42,7 @@ router.get("/", async (req, res) => {
           $or: [
             { title: searchRegex },
             { description: searchRegex },
-            { tags: searchRegex },
+            ...(matchingTagIds.length ? [{ tags: { $in: matchingTagIds } }] : []),
           ],
         })
           .limit(searchLimit)
@@ -47,7 +52,7 @@ router.get("/", async (req, res) => {
           $or: [
             { title: searchRegex },
             { description: searchRegex },
-            { tags: searchRegex },
+            ...(matchingTagIds.length ? [{ tags: { $in: matchingTagIds } }] : []),
           ],
         })
           .limit(searchLimit)
@@ -92,9 +97,9 @@ router.get("/", async (req, res) => {
           { title: searchRegex },
           { subtitle: searchRegex },
           { bodyMd: searchRegex },
-          { tags: searchRegex },
+          ...(matchingTagIds.length ? [{ tags: { $in: matchingTagIds } }] : []),
         ],
-        status: "published", // Only published articles
+        status: "published",
       })
         .limit(searchLimit)
         .select("title subtitle coverImage publishDate readTime tags featured")

@@ -39,43 +39,76 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
     { label: "Inactive", value: userStatusAgg.find((s) => s._id === "inactive")?.count || 0 },
   ];
 
-  // Trending podcast categories (sample data - would need actual view tracking)
-  const podcastTags = await Podcast.aggregate([
+  // Trending podcast categories (via tag $lookup to resolve names)
+  const podcastTagsRaw = await Podcast.aggregate([
     { $match: { createdAt: { $gte: from, $lte: to } } },
-    { $unwind: "$tags" },
+    { $unwind: { path: "$tags", preserveNullAndEmpty: false } },
     { $group: { _id: "$tags", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 5 },
+    { $lookup: { from: "tags", localField: "_id", foreignField: "_id", as: "tagDoc" } },
+    { $unwind: { path: "$tagDoc", preserveNullAndEmpty: true } },
   ]);
 
-  const trendingPodcastCategory = {
-    categories: podcastTags.map((t) => t._id),
-    series: [
-      {
-        name: "Podcasts",
-        data: podcastTags.map((t) => t.count),
-      },
-    ],
-  };
+  const trendingPodcastCategory =
+    podcastTagsRaw.length > 0
+      ? {
+          categories: podcastTagsRaw.map((t: any) => t.tagDoc?.name ?? "Unknown"),
+          series: [{ name: "Podcasts", data: podcastTagsRaw.map((t: any) => t.count) }],
+        }
+      : { categories: ["No data"], series: [{ name: "Podcasts", data: [0] }] };
 
-  // Trending article categories
-  const articleTags = await Article.aggregate([
+  // Trending article categories (via tag $lookup to resolve names)
+  const articleTagsRaw = await Article.aggregate([
     { $match: { createdAt: { $gte: from, $lte: to } } },
-    { $unwind: "$tags" },
+    { $unwind: { path: "$tags", preserveNullAndEmpty: false } },
     { $group: { _id: "$tags", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $limit: 5 },
+    { $lookup: { from: "tags", localField: "_id", foreignField: "_id", as: "tagDoc" } },
+    { $unwind: { path: "$tagDoc", preserveNullAndEmpty: true } },
   ]);
 
-  const trendingArticleCategory = {
-    categories: articleTags.map((t) => t._id),
-    series: [
-      {
-        name: "Articles",
-        data: articleTags.map((t) => t.count),
-      },
-    ],
-  };
+  const trendingArticleCategory =
+    articleTagsRaw.length > 0
+      ? {
+          categories: articleTagsRaw.map((t: any) => t.tagDoc?.name ?? "Unknown"),
+          series: [{ name: "Articles", data: articleTagsRaw.map((t: any) => t.count) }],
+        }
+      : { categories: ["No data"], series: [{ name: "Articles", data: [0] }] };
+
+  // Recent activity: latest published videos, podcasts, articles
+  const [recentVideos, recentPodcasts, recentArticles] = await Promise.all([
+    Video.find({ status: "published" }).sort({ createdAt: -1 }).limit(5).lean(),
+    Podcast.find({ status: "published" }).sort({ createdAt: -1 }).limit(5).lean(),
+    Article.find({ status: "published" }).sort({ createdAt: -1 }).limit(5).lean(),
+  ]);
+
+  const recentActivity = [
+    ...recentVideos.map((v: any) => ({
+      id: String(v._id),
+      title: v.title,
+      description: v.description || "Video",
+      coverUrl: v.thumbnailUrl || "",
+      postedAt: v.createdAt?.toISOString() ?? "",
+    })),
+    ...recentPodcasts.map((p: any) => ({
+      id: String(p._id),
+      title: p.title,
+      description: p.description || "Podcast",
+      coverUrl: p.imageUrl || "",
+      postedAt: p.createdAt?.toISOString() ?? "",
+    })),
+    ...recentArticles.map((a: any) => ({
+      id: String(a._id),
+      title: a.title,
+      description: a.subtitle || a.bodyMd?.slice(0, 80) || "Article",
+      coverUrl: a.coverImage || "",
+      postedAt: a.createdAt?.toISOString() ?? "",
+    })),
+  ]
+    .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
+    .slice(0, 8);
 
   res.json({
     metrics: {
@@ -88,6 +121,7 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
     trendingPodcastCategory,
     trendingArticleCategory,
     usersStatus,
+    recentActivity,
   });
 });
 

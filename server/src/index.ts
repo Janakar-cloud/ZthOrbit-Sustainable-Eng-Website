@@ -57,6 +57,11 @@ async function main() {
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
     "http://127.0.0.1:5175",
+    // EC2-hosted dev/dashboard origins
+    "http://13.205.72.30:5173",
+    "https://13.205.72.30:5173",
+    "http://13.205.72.30:3039",
+    "https://13.205.72.30:3039",
   ];
   const allowedOrigins = new Set([...env.corsOrigins, ...devOrigins]);
 

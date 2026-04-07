@@ -4,7 +4,7 @@ export interface PodcastProps {
 }
 
 export interface Comment {
-  id: number
+  id: number | string
   author: string
   content: string
   timestamp: string
@@ -12,7 +12,7 @@ export interface Comment {
 }
 
 export interface PodcastEpisode {
-  id: number
+  id: string
   title: string
   description: string
   audioFile: string
@@ -54,7 +54,7 @@ export interface EpisodeCardProps {
   isPlaying: boolean
   isAdmin: boolean
   onPlay: (podcast: PodcastEpisode) => void
-  onToggleComments: (id: number) => void
+  onToggleComments: (id: string) => void
 }
 
 
@@ -98,5 +98,5 @@ export interface PodcastCommentsProps {
   onChangeComment: (value: string) => void
   onAddComment: () => void
 
-  onToggleComments: (podcastId: number) => void
+  onToggleComments: (podcastId: string) => void
 }

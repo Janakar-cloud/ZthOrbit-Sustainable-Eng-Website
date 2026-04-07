@@ -63,6 +63,20 @@ router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => 
   res.status(204).send();
 });
 
+// Toggle commentsEnabled for a podcast
+router.patch("/:id/settings", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+  const settingsSchema = z.object({ commentsEnabled: z.boolean() });
+  const parsed = settingsSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const updated = await Podcast.findByIdAndUpdate(
+    req.params.id,
+    { commentsEnabled: parsed.data.commentsEnabled },
+    { new: true, select: "commentsEnabled" }
+  );
+  if (!updated) return res.status(404).json({ error: "Podcast not found" });
+  res.json({ commentsEnabled: updated.commentsEnabled });
+});
+
 const commentSchema = z.object({
   author: z.string().min(1),
   message: z.string().min(1),
@@ -74,6 +88,7 @@ router.post("/:id/comments", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const exists = await Podcast.findById(req.params.id);
   if (!exists) return res.status(404).json({ error: "Podcast not found" });
+  if (exists.commentsEnabled === false) return res.status(403).json({ error: "Comments are disabled for this podcast" });
 
   if (parsed.data.parentCommentId) {
     const parent = await PodcastComment.findOne({ _id: parsed.data.parentCommentId, podcastId: req.params.id });
@@ -81,12 +96,15 @@ router.post("/:id/comments", async (req, res) => {
   }
 
   const comment = await PodcastComment.create({ podcastId: exists._id, ...parsed.data, createdAt: new Date(), status: "visible" });
+  await Podcast.findByIdAndUpdate(req.params.id, { $inc: { commentsCount: 1 } });
   res.status(201).json(comment);
 });
 
 router.get("/:id/comments", async (req, res) => {
+  const podcast = await Podcast.findById(req.params.id).select("commentsEnabled");
+  if (!podcast) return res.status(404).json({ error: "Podcast not found" });
   const comments = await PodcastComment.find({ podcastId: req.params.id, status: "visible" }).sort({ createdAt: 1 });
-  res.json(comments);
+  res.json({ commentsEnabled: podcast.commentsEnabled ?? true, comments });
 });
 
 // Admin: Get all comments (including hidden)
@@ -119,7 +137,4 @@ router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "adm
   });
   
   if (!comment) return res.status(404).json({ error: "Comment not found" });
-  res.status(204).send();
-});
-
-export default router;
+  await Podcast.findByIdAndUpdate(req.params.podcastId, { $inc: { commentsCount: -1 } });

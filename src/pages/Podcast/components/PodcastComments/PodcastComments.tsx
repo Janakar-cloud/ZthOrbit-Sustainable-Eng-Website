@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react'
 import { PodcastCommentsProps } from '../../type/type'
+import { recordLike, getEngageStats } from '../../../../api/engage'
 import './PodcastComments.css'
 
 export default function PodcastComments({
@@ -9,6 +11,29 @@ export default function PodcastComments({
   onAddComment,
   onToggleComments
 }: PodcastCommentsProps) {
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+
+  useEffect(() => {
+    if (!podcast.id) return
+    getEngageStats('podcast', String(podcast.id))
+      .then((stats) => setLikeCount(stats.likes))
+      .catch(() => {})
+  }, [podcast.id])
+
+  const handleLike = async () => {
+    const action = liked ? 'unlike' : 'like'
+    setLiked(!liked)
+    setLikeCount((c) => liked ? c - 1 : c + 1)
+    try {
+      const updated = await recordLike('podcast', String(podcast.id), action)
+      setLikeCount(updated)
+    } catch {
+      setLiked(liked)
+      setLikeCount((c) => liked ? c + 1 : c - 1)
+    }
+  }
+
   return (
     <>
       {/* Header */}
@@ -33,6 +58,26 @@ export default function PodcastComments({
         <audio controls autoPlay className="audio-element">
           <source src={podcast.audioFile} type="audio/mp4" />
         </audio>
+      </div>
+
+      {/* Like button */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '12px 0' }}>
+        <button
+          onClick={handleLike}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            background: liked ? '#e8f5e9' : '#f3f4f6',
+            color: liked ? '#2e7d32' : '#6b7280',
+            border: liked ? '1px solid #a5d6a7' : '1px solid #e5e7eb',
+            borderRadius: '20px', padding: '6px 16px', cursor: 'pointer',
+            fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s',
+          }}
+        >
+          <span className="material-icons" style={{ fontSize: '18px' }}>
+            {liked ? 'thumb_up' : 'thumb_up_off_alt'}
+          </span>
+          {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
+        </button>
       </div>
 
       {/* Comments */}

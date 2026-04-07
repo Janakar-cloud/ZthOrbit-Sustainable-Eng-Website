@@ -1,6 +1,6 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Video } from '../pages/HomePage/type/type'
-import { recordView } from '../api/engage'
+import { recordView, recordLike, getEngageStats } from '../api/engage'
 
 function getMimeType(url: string): string {
   const ext = url.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
@@ -24,6 +24,28 @@ export default function VideoModal({
   onClose: () => void
 }) {
   const viewTracked = useRef(false)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+
+  useEffect(() => {
+    if (!video.id) return
+    getEngageStats('video', String(video.id))
+      .then((stats) => setLikeCount(stats.likes))
+      .catch(() => {})
+  }, [video.id])
+
+  const handleLike = async () => {
+    const action = liked ? 'unlike' : 'like'
+    setLiked(!liked)
+    setLikeCount((c) => liked ? c - 1 : c + 1)
+    try {
+      const updated = await recordLike('video', String(video.id), action)
+      setLikeCount(updated)
+    } catch {
+      setLiked(liked)
+      setLikeCount((c) => liked ? c + 1 : c - 1)
+    }
+  }
 
   const handlePlay = () => {
     if (!viewTracked.current && video.id) {
@@ -58,6 +80,24 @@ export default function VideoModal({
           <h3>{video.title}</h3>
           <p className="modal-date">{video.publishDate}</p>
           <p className="modal-description">{video.description}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+            <button
+              onClick={handleLike}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                background: liked ? '#e8f5e9' : '#f3f4f6',
+                color: liked ? '#2e7d32' : '#6b7280',
+                border: liked ? '1px solid #a5d6a7' : '1px solid #e5e7eb',
+                borderRadius: '20px', padding: '6px 16px', cursor: 'pointer',
+                fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s',
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '18px' }}>
+                {liked ? 'thumb_up' : 'thumb_up_off_alt'}
+              </span>
+              {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

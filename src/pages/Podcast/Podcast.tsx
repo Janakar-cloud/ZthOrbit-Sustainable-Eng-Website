@@ -15,11 +15,12 @@ import Loader from '../../components/Loader'
 import ErrorMessage from '../../components/ErroMessage'
 import NoData from '../../components/Nodatafound'
 import { canonicalizeCategoryNames, normalizeCategoryKey } from '../../utils/category'
+import { getPodcastComments, addPodcastComment, togglePodcastComments } from '../../utils/api'
 
 export default function Podcast({ onNavigate }: PodcastProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedPodcast, setSelectedPodcast] = useState<PodcastEpisode | null>(null)
-  const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null)
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null)
   const [newComment, setNewComment] = useState('')
   const { darkMode, isAdmin } = useAppContext()
 
@@ -97,30 +98,50 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       ? podcasts
       : podcasts.filter((p) => p.categories.some((category) => normalizeCategoryKey(category) === selectedCategory))
 
-  //Play
-  const handlePlayPodcast = (podcast: PodcastEpisode) => {
+  //Play — load real comments from DB when modal opens
+  const handlePlayPodcast = async (podcast: PodcastEpisode) => {
     setSelectedPodcast(podcast)
     setCurrentlyPlaying(podcast.id)
+    try {
+      const res = await getPodcastComments(String(podcast.id))
+      const mapped: Comment[] = res.comments.map((c) => ({
+        id: c._id,
+        author: c.author,
+        content: c.message,
+        timestamp: new Date(c.createdAt).toLocaleString(),
+        avatar: 'account_circle',
+      }))
+      const enabled = res.commentsEnabled ?? true
+      setSelectedPodcast((prev) => prev ? { ...prev, comments: mapped, commentsEnabled: enabled } : prev)
+      setPodcasts((prev) => prev.map((p) => p.id === podcast.id ? { ...p, comments: mapped, commentsEnabled: enabled } : p))
+    } catch {
+      // non-critical — show modal without comments
+    }
   }
 
-  // Toggle comments
-  const handleToggleComments = (podcastId: number) => {
+  // Toggle comments — persists to DB
+  const handleToggleComments = async (podcastId: string) => {
     if (!isAdmin) return
-
-    setPodcasts((prev) =>
-      prev.map((p) =>
-        p.id === podcastId
-          ? { ...p, commentsEnabled: !p.commentsEnabled }
-          : p
-      )
-    )
+    const podcast = podcasts.find((p) => p.id === podcastId)
+    if (!podcast) return
+    const nextEnabled = !podcast.commentsEnabled
+    // Optimistic update
+    setPodcasts((prev) => prev.map((p) => p.id === podcastId ? { ...p, commentsEnabled: nextEnabled } : p))
+    setSelectedPodcast((prev) => prev && prev.id === podcastId ? { ...prev, commentsEnabled: nextEnabled } : prev)
+    try {
+      await togglePodcastComments(String(podcastId), nextEnabled)
+    } catch {
+      // Revert on failure
+      setPodcasts((prev) => prev.map((p) => p.id === podcastId ? { ...p, commentsEnabled: !nextEnabled } : p))
+      setSelectedPodcast((prev) => prev && prev.id === podcastId ? { ...prev, commentsEnabled: !nextEnabled } : prev)
+    }
   }
 
-  // Add comment
-  const handleAddComment = () => {
+  // Add comment — saves to DB
+  const handleAddComment = async () => {
     if (!selectedPodcast || !newComment.trim()) return
 
-    const comment: Comment = {
+    const optimistic: Comment = {
       id: Date.now(),
       author: 'Guest User',
       content: newComment,
@@ -128,21 +149,47 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       avatar: 'account_circle',
     }
 
-    setPodcasts((prev) =>
-      prev.map((p) =>
-        p.id === selectedPodcast.id
-          ? { ...p, comments: [...p.comments, comment] }
-          : p
-      )
-    )
-
-    setSelectedPodcast((prev) =>
-      prev
-        ? { ...prev, comments: [...prev.comments, comment] }
-        : prev
-    )
-
+    // Optimistic update
+    setSelectedPodcast((prev) => prev ? { ...prev, comments: [...prev.comments, optimistic] } : prev)
+    setPodcasts((prev) => prev.map((p) => p.id === selectedPodcast.id ? { ...p, comments: [...p.comments, optimistic] } : p))
     setNewComment('')
+
+    try {
+      const saved = await addPodcastComment(String(selectedPodcast.id), {
+        author: 'Guest User',
+        message: newComment.trim(),
+      })
+      const real: Comment = {
+        id: saved._id,
+        author: saved.author,
+        content: saved.message,
+        timestamp: new Date(saved.createdAt).toLocaleString(),
+        avatar: 'account_circle',
+      }
+      // Replace optimistic with real saved comment
+      setSelectedPodcast((prev) =>
+        prev ? { ...prev, comments: prev.comments.map((c) => c.id === optimistic.id ? real : c) } : prev
+      )
+      setPodcasts((prev) =>
+        prev.map((p) =>
+          p.id === selectedPodcast.id
+            ? { ...p, comments: p.comments.map((c) => c.id === optimistic.id ? real : c) }
+            : p
+        )
+      )
+    } catch {
+      // Revert optimistic comment on failure
+      setSelectedPodcast((prev) =>
+        prev ? { ...prev, comments: prev.comments.filter((c) => c.id !== optimistic.id) } : prev
+      )
+      setPodcasts((prev) =>
+        prev.map((p) =>
+          p.id === selectedPodcast.id
+            ? { ...p, comments: p.comments.filter((c) => c.id !== optimistic.id) }
+            : p
+        )
+      )
+    }
   }
 
   //  Close modal

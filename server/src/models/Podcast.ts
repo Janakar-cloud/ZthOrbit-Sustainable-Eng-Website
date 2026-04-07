@@ -14,6 +14,7 @@ export interface IPodcast {
   views: number;
   likes: number;
   commentsCount: number;
+  commentsEnabled: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -40,6 +41,7 @@ const podcastSchema = new Schema<IPodcast>(
     views: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     commentsCount: { type: Number, default: 0 },
+    commentsEnabled: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

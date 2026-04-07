@@ -392,8 +392,13 @@ export function deleteVideo(id: string) {
 }
 
 // Podcast comments
+export interface PodcastCommentsResponse {
+  commentsEnabled: boolean;
+  comments: PodcastComment[];
+}
+
 export function getPodcastComments(podcastId: string) {
-  return request<PodcastComment[]>(`/podcasts/${encodeURIComponent(podcastId)}/comments`);
+  return request<PodcastCommentsResponse>(`/podcasts/${encodeURIComponent(podcastId)}/comments`);
 }
 
 export function addPodcastComment(podcastId: string, data: { author: string; message: string; parentCommentId?: string }) {
@@ -413,6 +418,13 @@ export function updatePodcastCommentStatus(podcastId: string, commentId: string,
 export function deletePodcastComment(podcastId: string, commentId: string) {
   return request<void>(`/podcasts/${encodeURIComponent(podcastId)}/comments/${encodeURIComponent(commentId)}`, {
     method: "DELETE",
+  });
+}
+
+export function togglePodcastComments(podcastId: string, commentsEnabled: boolean) {
+  return request<{ commentsEnabled: boolean }>(`/podcasts/${encodeURIComponent(podcastId)}/settings`, {
+    method: "PATCH",
+    body: JSON.stringify({ commentsEnabled }),
   });
 }
 

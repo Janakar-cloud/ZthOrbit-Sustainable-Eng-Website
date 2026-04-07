@@ -138,3 +138,7 @@ router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "adm
   
   if (!comment) return res.status(404).json({ error: "Comment not found" });
   await Podcast.findByIdAndUpdate(req.params.podcastId, { $inc: { commentsCount: -1 } });
+  res.status(204).send();
+});
+
+export default router;

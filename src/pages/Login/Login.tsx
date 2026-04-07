@@ -76,7 +76,10 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
         storeTokens(tokens.accessToken, tokens.refreshToken);
         setStatus({ message: 'Verified! Logging you in...', variant: 'success' });
         if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
-          window.location.href = tokens.app.preferredUrl;
+          const url = new URL(tokens.app.preferredUrl);
+          url.searchParams.set('access_token', tokens.accessToken);
+          if (tokens.refreshToken) url.searchParams.set('refresh_token', tokens.refreshToken);
+          window.location.href = url.toString();
           return;
         }
         onLogin();
@@ -93,7 +96,10 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
       storeTokens(tokens.accessToken, tokens.refreshToken);
       setStatus({ message: 'Welcome back! Redirecting...', variant: 'success' });
       if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
-        window.location.href = tokens.app.preferredUrl;
+        const url = new URL(tokens.app.preferredUrl);
+        url.searchParams.set('access_token', tokens.accessToken);
+        if (tokens.refreshToken) url.searchParams.set('refresh_token', tokens.refreshToken);
+        window.location.href = url.toString();
         return;
       }
       onLogin();

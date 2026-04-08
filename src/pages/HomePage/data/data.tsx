@@ -120,6 +120,7 @@ export const liveTv: LiveTvItem[] = [
       streamUrl: '',
       isLive: false,
       category: 'technology',
+      categories: ['technology'],
       publishDate: 'Jan 20, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (6).jpg'
     },
@@ -131,6 +132,7 @@ export const liveTv: LiveTvItem[] = [
       streamUrl: '',
       isLive: false,
       category: 'sustainability',
+      categories: ['sustainability'],
       publishDate: 'Jan 18, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (20).jpg'
     },
@@ -142,6 +144,7 @@ export const liveTv: LiveTvItem[] = [
       streamUrl: '',
       isLive: false,
       category: 'finance',
+      categories: ['finance'],
       publishDate: 'Jan 15, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (10).jpg'
     },
@@ -153,6 +156,7 @@ export const liveTv: LiveTvItem[] = [
       streamUrl: '',
       isLive: false,
       category: 'technology',
+      categories: ['technology'],
       publishDate: 'Jan 12, 2026',
       thumbnail: '/assets/livetv/Green Yellow and Black Modern Business Podcast YouTube Thumbnail (18).jpg'
     }

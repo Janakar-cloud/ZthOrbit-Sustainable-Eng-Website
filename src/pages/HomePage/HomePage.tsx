@@ -35,6 +35,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         thumbnail: v.thumbnailUrl || '',
         isLive: v.isLive,
         category: '',
+        categories: [],
         publishDate: v.publishDate || '',
       }))
     : liveTVVideos

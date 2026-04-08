@@ -10,6 +10,7 @@ export interface Video {
   videoId?: string;
   streamUrl: string;
   category: string;
+  categories: string[];
   isLive: boolean;
   publishDate: string;   // formatted date
   thumbnail: string;

@@ -75,6 +75,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           videoId: item.videoId || "",
           streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
           category: categoryNames[0] || "",
+          categories: categoryNames,
           isLive: item.isLive ?? false,
           publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
             month: "short",
@@ -185,7 +186,9 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const filteredVideos =
     selectedCategory === 'all'
       ? videos
-      : videos.filter((video) => normalizeCategoryKey(video.category) === selectedCategory)
+      : videos.filter((video) =>
+          video.categories.some((cat) => normalizeCategoryKey(cat) === selectedCategory)
+        )
 
   const handlePlayVideo = (video: Video) => {
     setSelectedVideo(video)

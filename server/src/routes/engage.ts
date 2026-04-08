@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import mongoose from "mongoose";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
@@ -25,40 +26,52 @@ const typeSchema = z.enum(["video", "podcast", "article"]);
 router.post("/:type/:id/view", async (req, res) => {
   const parsed = typeSchema.safeParse(req.params.type);
   if (!parsed.success) return res.status(400).json({ error: "type must be video | podcast | article" });
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid id" });
 
-  const Model = getModel(parsed.data);
-  const doc = await (Model as any).findByIdAndUpdate(
-    req.params.id,
-    { $inc: { views: 1 } },
-    { new: true, select: "views likes commentsCount title" }
-  );
-  if (!doc) return res.status(404).json({ error: "Not found" });
+  try {
+    const Model = getModel(parsed.data);
+    const doc = await (Model as any).findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true, select: "views likes commentsCount title" }
+    );
+    if (!doc) return res.status(404).json({ error: "Not found" });
 
-  logger.info(`view recorded`, {
-    source: "engage",
-    meta: { type: parsed.data, id: req.params.id },
-    req,
-  });
+    logger.info(`view recorded`, {
+      source: "engage",
+      meta: { type: parsed.data, id: req.params.id },
+      req,
+    });
 
-  res.json({ views: doc.views });
+    res.json({ views: doc.views });
+  } catch (err) {
+    logger.error("engage view error", { source: "engage", meta: { err }, req });
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // ─── POST /:type/:id/like  (toggle: like → unlike on second call) ─────────────
 router.post("/:type/:id/like", async (req, res) => {
   const parsed = typeSchema.safeParse(req.params.type);
   if (!parsed.success) return res.status(400).json({ error: "type must be video | podcast | article" });
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid id" });
 
-  const { action } = z.object({ action: z.enum(["like", "unlike"]).default("like") }).parse(req.body ?? {});
+  try {
+    const { action } = z.object({ action: z.enum(["like", "unlike"]).default("like") }).parse(req.body ?? {});
 
-  const Model = getModel(parsed.data);
-  const doc = await (Model as any).findByIdAndUpdate(
-    req.params.id,
-    { $inc: { likes: action === "like" ? 1 : -1 } },
-    { new: true, select: "views likes commentsCount title" }
-  );
-  if (!doc) return res.status(404).json({ error: "Not found" });
+    const Model = getModel(parsed.data);
+    const doc = await (Model as any).findByIdAndUpdate(
+      req.params.id,
+      { $inc: { likes: action === "like" ? 1 : -1 } },
+      { new: true, select: "views likes commentsCount title" }
+    );
+    if (!doc) return res.status(404).json({ error: "Not found" });
 
-  res.json({ likes: Math.max(0, doc.likes) });
+    res.json({ likes: Math.max(0, doc.likes) });
+  } catch (err) {
+    logger.error("engage like error", { source: "engage", meta: { err }, req });
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // ─── GET /stats/:type/:id ─────────────────────────────────────────────────────
@@ -66,21 +79,27 @@ router.post("/:type/:id/like", async (req, res) => {
 router.get("/stats/:type/:id", async (req, res) => {
   const parsed = typeSchema.safeParse(req.params.type);
   if (!parsed.success) return res.status(400).json({ error: "type must be video | podcast | article" });
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid id" });
 
-  const Model = getModel(parsed.data);
-  const doc = await (Model as any)
-    .findById(req.params.id)
-    .select("views likes commentsCount title");
+  try {
+    const Model = getModel(parsed.data);
+    const doc = await (Model as any)
+      .findById(req.params.id)
+      .select("views likes commentsCount title");
 
-  if (!doc) return res.status(404).json({ error: "Not found" });
+    if (!doc) return res.status(404).json({ error: "Not found" });
 
-  // Live comment count from PodcastComment collection for podcasts
-  let commentsCount = doc.commentsCount ?? 0;
-  if (parsed.data === "podcast") {
-    commentsCount = await PodcastComment.countDocuments({ podcastId: req.params.id });
+    // Live comment count from PodcastComment collection for podcasts
+    let commentsCount = doc.commentsCount ?? 0;
+    if (parsed.data === "podcast") {
+      commentsCount = await PodcastComment.countDocuments({ podcastId: req.params.id });
+    }
+
+    res.json({ views: doc.views ?? 0, likes: doc.likes ?? 0, commentsCount });
+  } catch (err) {
+    logger.error("engage stats error", { source: "engage", meta: { err }, req });
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  res.json({ views: doc.views ?? 0, likes: doc.likes ?? 0, commentsCount });
 });
 
 // ─── GET /trending ──────────────────────────────────────────────────────────

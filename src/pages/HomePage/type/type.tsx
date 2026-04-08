@@ -15,7 +15,7 @@ export interface Video {
   thumbnail: string;
 }
 export interface Podcast {
-  id: number
+  id: string
   title: string
   description: string
   audioFile: string

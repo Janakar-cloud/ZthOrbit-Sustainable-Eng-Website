@@ -27,8 +27,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : liveTv
 
   const videosForModal: Video[] = homeData
-    ? homeData.videos.slice(0, 4).map((v, i) => ({
-        id: String(i + 1),
+    ? homeData.videos.slice(0, 4).map((v) => ({
+        id: v._id,
         title: v.title,
         description: v.description,
         streamUrl: v.streamUrl,
@@ -50,8 +50,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     : podcast
 
   const podcastsForModal: Podcast[] = homeData
-    ? homeData.podcasts.slice(0, 4).map((p, i) => ({
-        id: i + 1,
+    ? homeData.podcasts.slice(0, 4).map((p) => ({
+        id: p._id,
         title: p.title,
         description: p.description,
         audioFile: p.audioUrl,

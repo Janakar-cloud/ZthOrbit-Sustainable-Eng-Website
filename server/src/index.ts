@@ -62,6 +62,12 @@ async function main() {
     "https://13.205.72.30:5173",
     "http://13.205.72.30:3039",
     "https://13.205.72.30:3039",
+    // Production dashboard subdomain — always allowed regardless of CORS_ORIGINS env var
+    "https://dashboard.thegreentv.com",
+    "http://dashboard.thegreentv.com",
+    // Main public site
+    "https://www.thegreentv.com",
+    "http://www.thegreentv.com",
   ];
   const allowedOrigins = new Set([...env.corsOrigins, ...devOrigins]);
 

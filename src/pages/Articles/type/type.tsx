@@ -14,6 +14,7 @@ export interface Article {
   featured: boolean
   image: string
   docUrl?: string
+  bodyHtml?: string
 }
 
 

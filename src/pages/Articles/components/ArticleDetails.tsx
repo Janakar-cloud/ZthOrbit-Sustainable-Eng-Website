@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { ArticleDetailsProps } from "../type/type"
 import { normalizeCategoryKey } from '../../../utils/category'
 
@@ -5,8 +6,19 @@ export default function ArticleDetails({
   article,
   categories,
 }: ArticleDetailsProps) {
+  const [htmlContent, setHtmlContent] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!article.bodyHtml) return
+    setHtmlContent(null)
+    fetch(article.bodyHtml)
+      .then(r => r.text())
+      .then(setHtmlContent)
+      .catch(() => setHtmlContent(null))
+  }, [article.bodyHtml])
+
   const category = categories.find(c => c.id === normalizeCategoryKey(article.category))
-  const docEmbed = article.docUrl && article.docUrl.endsWith('.docx')
+  const docEmbed = !article.bodyHtml && article.docUrl && article.docUrl.endsWith('.docx')
     ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(article.docUrl)}`
     : null
 
@@ -53,7 +65,12 @@ export default function ArticleDetails({
 
         {/* Body */}
         <div className="article-body">
-          {docEmbed && (
+          {htmlContent ? (
+            <div
+              className="article-html-content"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+          ) : docEmbed ? (
             <div className="article-doc-embed">
               <iframe
                 title="article-document"
@@ -63,16 +80,16 @@ export default function ArticleDetails({
                 style={{ border: 'none' }}
               />
             </div>
+          ) : (
+            article.content.map((paragraph, index) => (
+              <p
+                key={index}
+                className="article-paragraph"
+              >
+                {paragraph}
+              </p>
+            ))
           )}
-
-          {article.content.map((paragraph, index) => (
-            <p
-              key={index}
-              className="article-paragraph"
-            >
-              {paragraph}
-            </p>
-          ))}
         </div>
 
         {/* Footer */}

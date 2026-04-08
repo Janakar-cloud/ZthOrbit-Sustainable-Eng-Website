@@ -6,6 +6,7 @@ export interface IArticle {
   normalizedTitle?: string;
   subtitle?: string;
   bodyMd: string;
+  bodyHtml?: string;
   readTime?: string;
   coverImage?: string;
   publishDate?: Date;
@@ -31,6 +32,7 @@ const articleSchema = new Schema<IArticle>(
     normalizedTitle: { type: String, required: true, trim: true },
     subtitle: { type: String },
     bodyMd: { type: String, default: "" },
+    bodyHtml: { type: String },
     readTime: { type: String },
     coverImage: { type: String },
     publishDate: { type: Date },

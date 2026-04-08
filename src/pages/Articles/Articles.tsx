@@ -58,6 +58,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
         featured: p.featured,
         image: p.coverImage || '',
         docUrl: typeof p.bodyMd === 'string' ? (p.bodyMd.match(/https?:\/\/\S+/)?.[0] || undefined) : undefined,
+        bodyHtml: p.bodyHtml || undefined,
         date: new Date(p.publishDate).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",

@@ -11,6 +11,7 @@ export interface Article {
   title: string;
   subtitle: string;
   bodyMd: string;
+  bodyHtml?: string;
   coverImage: string;
   publishDate: string; // ISO date string
   status: 'draft' | 'published' | 'archived'; // you can extend if needed

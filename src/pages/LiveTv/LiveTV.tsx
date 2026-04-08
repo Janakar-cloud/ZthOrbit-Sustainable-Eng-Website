@@ -52,44 +52,50 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
   useEffect(() => {
     if (!Array.isArray(videocast?.items)) return;
-    const allVideos: Video[] = videocast.items
-      .filter((item: any) => typeof item.thumbnailUrl === 'string' && item.thumbnailUrl.trim().length > 0)
-      .map((item: any) => {
-        const categoryNames = canonicalizeCategoryNames(
-          [
-            item.category,
-            ...(Array.isArray(item.categories) ? item.categories : []),
-            ...(Array.isArray(item.tags)
-              ? item.tags
-                  .filter((tag: any) => tag?.kind === 'category')
-                  .map((tag: any) => tag?.name)
-              : []),
-          ],
-          sharedCategories
-        )
 
-        return {
-          id: item._id,
-          title: item.title,
-          description: item.description || "",
-          videoId: item.videoId || "",
-          streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url,
-          category: categoryNames[0] || "",
-          categories: categoryNames,
-          isLive: item.isLive ?? false,
-          publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
-          thumbnail: item.thumbnailUrl,
-        }
-      });
+    const mapVideo = (item: any): Video => {
+      const categoryNames = canonicalizeCategoryNames(
+        [
+          item.category,
+          ...(Array.isArray(item.categories) ? item.categories : []),
+          ...(Array.isArray(item.tags)
+            ? item.tags
+                .filter((tag: any) => tag?.kind === 'category')
+                .map((tag: any) => tag?.name)
+            : []),
+        ],
+        sharedCategories
+      )
+      return {
+        id: item._id,
+        title: item.title,
+        description: item.description || "",
+        videoId: item.videoId || "",
+        streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url || "",
+        category: categoryNames[0] || "",
+        categories: categoryNames,
+        isLive: item.isLive ?? false,
+        publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        thumbnail: item.thumbnailUrl || "",
+      }
+    };
 
+    // Hero player: all videos that have a playable stream URL
+    const heroVideos: Video[] = videocast.items
+      .filter((item: any) => !!(item.streamUrl || item.fileUrl || item.hlsUrl || item.url))
+      .map(mapVideo);
 
-    setVideos(allVideos);
-    setLiveVideos(allVideos);
-    const categoryList = buildCategoryList(sharedCategories, allVideos);
+    // Grid: only videos that also have a thumbnail (for card display)
+    const gridVideos: Video[] = heroVideos
+      .filter((v) => typeof v.thumbnail === 'string' && v.thumbnail.trim().length > 0);
+
+    setLiveVideos(heroVideos);
+    setVideos(gridVideos);
+    const categoryList = buildCategoryList(sharedCategories, gridVideos);
     setVideoCategories(categoryList);
 
   }, [sharedCategories, videocast]);
@@ -146,10 +152,10 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
 
   // Clamp hero index to valid range whenever videos change
   useEffect(() => {
-    if (videos.length > 0) {
-      setCurrentHeroVideoIndex(prev => Math.min(prev, videos.length - 1))
+    if (liveVideos.length > 0) {
+      setCurrentHeroVideoIndex(prev => Math.min(prev, liveVideos.length - 1))
     }
-  }, [videos])
+  }, [liveVideos])
 
   // Save playback time
   const handleTimeUpdate = () => {
@@ -164,7 +170,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   // Auto next video + save index
   const handleVideoEnd = () => {
     setCurrentHeroVideoIndex((prev) => {
-      const nextIndex = videos.length ? (prev + 1) % videos.length : 0
+      const nextIndex = liveVideos.length ? (prev + 1) % liveVideos.length : 0
       localStorage.setItem("currentVideoIndex", nextIndex.toString())
       localStorage.setItem("videoTime", "0")
       return nextIndex

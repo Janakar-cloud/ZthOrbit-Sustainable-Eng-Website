@@ -47,6 +47,7 @@ router.get("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res)
       isVerified: Boolean(obj.emailVerified),
       avatarUrl: obj.avatarUrl || null,
       createdAt: obj.createdAt,
+      updatedAt: obj.updatedAt,
     };
   });
 

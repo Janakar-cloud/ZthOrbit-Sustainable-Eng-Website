@@ -11,6 +11,7 @@ export interface IUser {
   emailVerified?: boolean;
   lastActiveAt?: Date;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -24,9 +25,8 @@ const userSchema = new Schema<IUser>(
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     emailVerified: { type: Boolean, default: false },
     lastActiveAt: { type: Date },
-    createdAt: { type: Date, default: () => new Date() },
   },
-  { timestamps: false }
+  { timestamps: true }
 );
 
 export const User = model<IUser>("User", userSchema);

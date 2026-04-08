@@ -102,7 +102,7 @@ router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (re
     ...recentArticles.map((a: any) => ({
       id: String(a._id),
       title: a.title,
-      description: a.subtitle || a.bodyMd?.slice(0, 80) || "Article",
+      description: a.subtitle || "Article",
       coverUrl: a.coverImage || "",
       postedAt: a.createdAt?.toISOString() ?? "",
     })),

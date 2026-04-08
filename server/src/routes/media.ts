@@ -261,6 +261,7 @@ const mediaSchema = z.object({
   mediaType: z.enum(["video", "audio"]),
   menu: z.enum(["LiveTv", "Podcast"]),
   category: z.string().optional(),
+  categories: z.array(z.string()).min(2, "At least 2 categories are required").optional(),
   tags: z.array(z.string()).optional().default([]),
   duration: z.number().optional(),
   fileUrl: z.string().url().optional(),
@@ -274,6 +275,13 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const data = parsed.data;
+
+  // Require at least 2 categories
+  if (!data.categories || data.categories.length < 2) {
+    return res.status(400).json({ error: "At least 2 categories are required" });
+  }
+
+  const tagIds = data.categories;
   const durationStr = data.duration ? formatDuration(data.duration) : undefined;
 
   if (data.mediaType === "video" || data.menu === "LiveTv") {
@@ -284,7 +292,7 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
       thumbnailUrl: data.thumbnailUrl || "",
       duration: durationStr,
       status: data.status === "ready" ? "published" : "draft",
-      tags: data.tags.length > 0 ? data.tags : [data.category || "uncategorized"],
+      tags: tagIds,
       isLive: false,
     });
     return res.status(201).json({
@@ -297,8 +305,8 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
       thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       status: video.status === "published" ? "ready" : "processing",
-      category: data.category,
-      tags: data.tags,
+      categories: data.categories,
+      tags: tagIds,
     });
   } else {
     const podcast = await Podcast.create({
@@ -308,7 +316,7 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
       imageUrl: data.thumbnailUrl || "",
       duration: durationStr,
       status: data.status === "ready" ? "published" : "draft",
-      tags: data.tags.length > 0 ? data.tags : [data.category || "uncategorized"],
+      tags: tagIds,
     });
     return res.status(201).json({
       id: podcast.id,
@@ -320,8 +328,8 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
       thumbnailUrl: podcast.imageUrl,
       duration: podcast.duration,
       status: podcast.status === "published" ? "ready" : "processing",
-      category: data.category,
-      tags: data.tags,
+      categories: data.categories,
+      tags: tagIds,
     });
   }
 });
@@ -333,6 +341,11 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
 
   const data = parsed.data;
 
+  // Enforce min 2 when categories are being updated
+  if (data.categories !== undefined && data.categories.length < 2) {
+    return res.status(400).json({ error: "At least 2 categories are required" });
+  }
+
   // Try video first
   const video = await Video.findById(req.params.id);
   if (video) {
@@ -342,7 +355,8 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
     if (data.thumbnailUrl) video.thumbnailUrl = data.thumbnailUrl;
     if (data.duration) video.duration = formatDuration(data.duration);
     if (data.status) video.status = data.status === "ready" ? "published" : "draft";
-    if (data.tags) video.tags = data.tags as any;
+    if (data.categories?.length) video.tags = data.categories as any;
+    else if (data.tags?.length) video.tags = data.tags as any;
     await video.save();
     return res.json({
       id: video.id,
@@ -365,7 +379,8 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
     if (data.thumbnailUrl) podcast.imageUrl = data.thumbnailUrl;
     if (data.duration) podcast.duration = formatDuration(data.duration);
     if (data.status) podcast.status = data.status === "ready" ? "published" : "draft";
-    if (data.tags) podcast.tags = data.tags as any;
+    if (data.categories?.length) podcast.tags = data.categories as any;
+    else if (data.tags?.length) podcast.tags = data.tags as any;
     await podcast.save();
     return res.json({
       id: podcast.id,

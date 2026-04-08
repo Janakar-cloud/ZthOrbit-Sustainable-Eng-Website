@@ -75,13 +75,14 @@ async function main() {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true); // allow tools like curl / Postman
 
-      // Allow any dev port between 3000-5200. In development mode this applies to
-      // any host (e.g. EC2 public IP running Vite). In production, only localhost/127.x.
+      // Allow any dev port between 3000-5200 for localhost, 127.0.0.1, the EC2 IP,
+      // or any host when NODE_ENV=development (covers future IP changes).
       try {
         const url = new URL(origin);
-        const isLocalHost = ["localhost", "127.0.0.1"].includes(url.hostname);
-        const port = Number(url.port || 80);
-        if (port >= 3000 && port <= 5200 && (isLocalHost || env.nodeEnv === "development")) {
+        const knownHosts = ["localhost", "127.0.0.1", "13.205.72.30"];
+        const isKnownHost = knownHosts.includes(url.hostname);
+        const port = Number(url.port || (url.protocol === "https:" ? 443 : 80));
+        if (port >= 3000 && port <= 5200 && (isKnownHost || env.nodeEnv === "development")) {
           return callback(null, origin);
         }
       } catch (_) {

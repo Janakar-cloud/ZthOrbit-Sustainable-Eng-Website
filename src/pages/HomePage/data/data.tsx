@@ -106,6 +106,7 @@ export const liveTv: LiveTvItem[] = [
     streamUrl: '',
     isLive: false,
     category: 'sustainability',
+    categories: ['sustainability'],
     publishDate: 'Jan 20, 2026',
     thumbnail: '/assets/images/Sustainable development goals as a strategic framework for global stability (2).png'
   }

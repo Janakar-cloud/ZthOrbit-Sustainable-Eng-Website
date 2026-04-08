@@ -161,7 +161,7 @@ export const liveTv: LiveTvItem[] = [
   // Podcast episodes
   export const podcastEpisodes: Podcast[] = [
     {
-      id: 2,
+      id: '2',
       title: 'Artificial Intelligence: A Great Enabler Towards Sustainable Development',
       description: 'How AI is revolutionizing sustainability efforts across industries.',
       audioFile: '/assets/podcast/ARTIFICIAL INTELLIGENCE IS A GREAT ENABLER TOWARDS SUSTAINABLE DEVELOPMENT.m4a',
@@ -171,7 +171,7 @@ export const liveTv: LiveTvItem[] = [
       publishDate: 'Jan 12, 2026'
     },
     {
-      id: 11,
+      id: '11',
       title: 'From Waste to Value: Opportunities Unveiled',
       description: 'Transforming waste streams into valuable resources.',
       audioFile: '/assets/podcast/OPPORTUNITIES FROM WASTE TO VALUES.m4a',
@@ -181,7 +181,7 @@ export const liveTv: LiveTvItem[] = [
       publishDate: 'Dec 18, 2025'
     },
     {
-      id: 5,
+      id: '5',
       title: 'Finance is Not Just Profit: It is Responsibility',
       description: 'Understanding financial responsibility beyond profit.',
       audioFile: '/assets/podcast/FINANCE IS NOT JUST PROFIT. IT IS RESPONSIBILITY.m4a',
@@ -191,7 +191,7 @@ export const liveTv: LiveTvItem[] = [
       publishDate: 'Jan 5, 2026'
     },
     {
-      id: 9,
+      id: '9',
       title: 'Governance & Risk Management are Integral',
       description: 'Building resilient, sustainable organizations.',
       audioFile: '/assets/podcast/GOVERNANCE & RISK MANAGEMENT ARE INTEGRAL.m4a',

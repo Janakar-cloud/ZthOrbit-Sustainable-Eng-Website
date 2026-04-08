@@ -75,7 +75,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       leadership: 'groups', ethics: 'balance', finance: 'account_balance',
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
-    const dynamic: Category[] = [{ id: 'all', name: 'All Episodes', icon: 'podcasts' }]
+    const dynamic: Category[] = [{ id: 'all', name: 'ALL EPISODES', icon: 'podcasts' }]
     const sourceNames = canonicalizeCategoryNames(
       sharedCategories.length > 0
         ? sharedCategories.map((category) => category.name)

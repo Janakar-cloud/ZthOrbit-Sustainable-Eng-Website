@@ -43,7 +43,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [videos, setVideos] = useState<Video[]>([])
   const [videoCategories, setVideoCategories] = useState<VideoCategory[]>([{
     key: 'all',
-    label: 'All Videos',
+    label: 'ALL VIDEOS',
     icon: 'apps'
   }])
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -108,7 +108,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     );
 
     return [
-      { key: 'all', label: 'All Videos', icon: 'apps' },
+      { key: 'all', label: 'ALL VIDEOS', icon: 'apps' },
       ...names
         .map(name => ({
           key: normalizeCategoryKey(name),

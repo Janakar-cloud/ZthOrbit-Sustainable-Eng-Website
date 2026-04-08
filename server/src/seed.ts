@@ -10,7 +10,7 @@ import { Article } from "./models/Article.js";
 async function main() {
   await connectDb();
 
-  const categoryNames = ["Aether", "Materia", "Aqua", "Terra", "Civitas"];
+  const categoryNames = ["AETHER", "MATERIA", "AQUA", "TERRA", "CIVITAS"];
   const tagDocs = await Promise.all(
     categoryNames.map((name) => Tag.findOneAndUpdate({ name }, { name, kind: "category" }, { upsert: true, new: true }))
   );

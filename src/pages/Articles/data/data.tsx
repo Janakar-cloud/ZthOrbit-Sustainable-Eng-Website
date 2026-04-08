@@ -1,12 +1,12 @@
 import { Article } from "../type/type"
 
 export const categories = [
-    { id: 'all', name: 'All Articles', icon: 'article' },
-    { id: 'economy', name: 'Economy', icon: 'trending_up' },
-    { id: 'technology', name: 'Technology', icon: 'computer' },
-    { id: 'sustainability', name: 'Sustainability', icon: 'eco' },
-    { id: 'leadership', name: 'Leadership', icon: 'groups' },
-    { id: 'ethics', name: 'Ethics', icon: 'balance' }
+    { id: 'all', name: 'ALL ARTICLES', icon: 'article' },
+    { id: 'economy', name: 'ECONOMY', icon: 'trending_up' },
+    { id: 'technology', name: 'TECHNOLOGY', icon: 'computer' },
+    { id: 'sustainability', name: 'SUSTAINABILITY', icon: 'eco' },
+    { id: 'leadership', name: 'LEADERSHIP', icon: 'groups' },
+    { id: 'ethics', name: 'ETHICS', icon: 'balance' }
 ]
 
 export const articles: Article[] = [

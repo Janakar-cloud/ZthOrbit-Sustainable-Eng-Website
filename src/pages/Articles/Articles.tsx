@@ -76,7 +76,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       leadership: 'groups', ethics: 'balance', finance: 'account_balance',
       innovation: 'lightbulb', health: 'favorite', education: 'school',
     }
-    const dynamic: Category[] = [{ id: 'all', name: 'All Articles', icon: 'article' }]
+    const dynamic: Category[] = [{ id: 'all', name: 'ALL ARTICLES', icon: 'article' }]
     const sourceNames = canonicalizeCategoryNames(
       sharedCategories.length > 0
         ? sharedCategories.map((category) => category.name)

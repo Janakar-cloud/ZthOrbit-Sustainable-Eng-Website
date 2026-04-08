@@ -1,9 +1,9 @@
 
  export const categories = [
-    { id: 'all', name: 'All Episodes', icon: 'podcasts' },
-    { id: 'sustainability', name: 'Sustainability', icon: 'eco' },
-    { id: 'technology', name: 'Technology', icon: 'computer' },
-    { id: 'economy', name: 'Economy', icon: 'trending_up' },
-    { id: 'leadership', name: 'Leadership', icon: 'groups' }
+    { id: 'all', name: 'ALL EPISODES', icon: 'podcasts' },
+    { id: 'sustainability', name: 'SUSTAINABILITY', icon: 'eco' },
+    { id: 'technology', name: 'TECHNOLOGY', icon: 'computer' },
+    { id: 'economy', name: 'ECONOMY', icon: 'trending_up' },
+    { id: 'leadership', name: 'LEADERSHIP', icon: 'groups' }
   ]
 

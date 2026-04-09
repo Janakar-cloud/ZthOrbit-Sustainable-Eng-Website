@@ -18,6 +18,8 @@ type Mode = 'login' | 'register' | 'verify';
 export default function Login({ onNavigate, onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [mode, setMode] = useState<Mode>('login');
   const [rememberMe, setRememberMe] = useState(true);
@@ -60,7 +62,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
           setIsLoading(false);
           return;
         }
-        await register({ email: email.trim(), password: password.trim() });
+        await register({ email: email.trim(), password: password.trim(), name: name.trim() || undefined, phone: phone.trim() || undefined });
         setMode('verify');
         setStatus({ message: 'Code sent. Check your email.', variant: 'success' });
         return;
@@ -233,6 +235,38 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
               </div>
 
 
+
+              {mode === 'register' && (
+                <div className="login-form-group">
+                  <label htmlFor="name">Name <span className="optional-label">(Optional)</span></label>
+                  <div className="input-wrapper">
+                    <span className="material-icons">person</span>
+                    <input
+                      type="text"
+                      id="name"
+                      placeholder="Enter your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {mode === 'register' && (
+                <div className="login-form-group">
+                  <label htmlFor="phone">Phone Number <span className="optional-label">(Optional)</span></label>
+                  <div className="input-wrapper">
+                    <span className="material-icons">phone</span>
+                    <input
+                      type="tel"
+                      id="phone"
+                      placeholder="Enter your phone number"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
 
               {mode !== 'verify' && (
                 <div className="login-form-group">

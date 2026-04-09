@@ -9,6 +9,9 @@ const isRealKey = (k: string) => /^(AKIA|ASIA)[A-Z0-9]{16}$/.test(k);
 
 export const s3 = new S3Client({
   region: env.s3.region,
+  // Disable automatic checksum calculation so pre-signed PUT URLs work
+  // from the browser without needing to send x-amz-checksum-* headers.
+  requestChecksumCalculation: "WHEN_REQUIRED",
   // Only inject explicit credentials when both look like real AWS keys.
   // Otherwise the SDK uses the default chain (IAM role, ~/.aws/credentials, etc.)
   ...(isRealKey(env.s3.accessKeyId) && env.s3.secretAccessKey && !env.s3.secretAccessKey.startsWith('your-')
@@ -39,8 +42,12 @@ export async function createPresignedUpload(keyPrefix: string, contentType: stri
     Bucket: env.s3.bucket,
     Key: key,
     ContentType: contentType,
+    ChecksumAlgorithm: undefined,
   });
-  const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+  const uploadUrl = await getSignedUrl(s3, command, {
+    expiresIn: 300,
+    unhoistableHeaders: new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]),
+  });
   const fileUrl = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/${key}`;
   
   return { 

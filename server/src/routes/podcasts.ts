@@ -15,7 +15,8 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
+  try {
   const { tag, status } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
@@ -29,6 +30,7 @@ router.get("/", async (req, res) => {
     Podcast.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });
+  } catch (err) { next(err); }
 });
 
 const podcastSchema = z.object({
@@ -42,29 +44,36 @@ const podcastSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = podcastSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const created = await Podcast.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(created);
+  } catch (err) { next(err); }
 });
 
-router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = podcastSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const updated = await Podcast.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
   if (!updated) return res.status(404).json({ error: "Not found" });
   res.json(updated);
+  } catch (err) { next(err); }
 });
 
-router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
+  try {
   const deleted = await Podcast.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
+  } catch (err) { next(err); }
 });
 
 // Toggle commentsEnabled for a podcast
-router.patch("/:id/settings", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.patch("/:id/settings", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const settingsSchema = z.object({ commentsEnabled: z.boolean() });
   const parsed = settingsSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -75,6 +84,7 @@ router.patch("/:id/settings", requireAuth(["superadmin", "admin", "editor"]), as
   );
   if (!updated) return res.status(404).json({ error: "Podcast not found" });
   res.json({ commentsEnabled: updated.commentsEnabled });
+  } catch (err) { next(err); }
 });
 
 const commentSchema = z.object({
@@ -83,7 +93,8 @@ const commentSchema = z.object({
   parentCommentId: z.string().optional(),
 });
 
-router.post("/:id/comments", async (req, res) => {
+router.post("/:id/comments", async (req, res, next) => {
+  try {
   const parsed = commentSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const exists = await Podcast.findById(req.params.id);
@@ -98,23 +109,29 @@ router.post("/:id/comments", async (req, res) => {
   const comment = await PodcastComment.create({ podcastId: exists._id, ...parsed.data, createdAt: new Date(), status: "visible" });
   await Podcast.findByIdAndUpdate(req.params.id, { $inc: { commentsCount: 1 } });
   res.status(201).json(comment);
+  } catch (err) { next(err); }
 });
 
-router.get("/:id/comments", async (req, res) => {
+router.get("/:id/comments", async (req, res, next) => {
+  try {
   const podcast = await Podcast.findById(req.params.id).select("commentsEnabled");
   if (!podcast) return res.status(404).json({ error: "Podcast not found" });
   const comments = await PodcastComment.find({ podcastId: req.params.id, status: "visible" }).sort({ createdAt: 1 });
   res.json({ commentsEnabled: podcast.commentsEnabled ?? true, comments });
+  } catch (err) { next(err); }
 });
 
 // Admin: Get all comments (including hidden)
-router.get("/:id/comments/all", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.get("/:id/comments/all", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const comments = await PodcastComment.find({ podcastId: req.params.id }).sort({ createdAt: -1 });
   res.json(comments);
+  } catch (err) { next(err); }
 });
 
 // Moderate comment (hide/show)
-router.patch("/:podcastId/comments/:commentId/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.patch("/:podcastId/comments/:commentId/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const statusSchema = z.object({ status: z.enum(["visible", "hidden"]) });
   const parsed = statusSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
@@ -127,10 +144,12 @@ router.patch("/:podcastId/comments/:commentId/status", requireAuth(["superadmin"
   
   if (!comment) return res.status(404).json({ error: "Comment not found" });
   res.json(comment);
+  } catch (err) { next(err); }
 });
 
 // Delete comment
-router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "admin"]), async (req, res) => {
+router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
+  try {
   const comment = await PodcastComment.findOneAndDelete({
     _id: req.params.commentId,
     podcastId: req.params.podcastId,
@@ -139,6 +158,7 @@ router.delete("/:podcastId/comments/:commentId", requireAuth(["superadmin", "adm
   if (!comment) return res.status(404).json({ error: "Comment not found" });
   await Podcast.findByIdAndUpdate(req.params.podcastId, { $inc: { commentsCount: -1 } });
   res.status(204).send();
+  } catch (err) { next(err); }
 });
 
 export default router;

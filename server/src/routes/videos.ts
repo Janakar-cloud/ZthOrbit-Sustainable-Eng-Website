@@ -16,7 +16,8 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
+  try {
   const { tag, status } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
@@ -47,6 +48,7 @@ router.get("/", async (req, res) => {
   );
 
   res.json({ items: signedItems, total: canonicalItems.length, page, pageSize });
+  } catch (err) { next(err); }
 });
 
 const videoSchema = z.object({
@@ -64,25 +66,31 @@ const videoSchema = z.object({
   partTitle: z.string().min(1).optional(),
 });
 
-router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = videoSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const video = await Video.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(video);
+  } catch (err) { next(err); }
 });
 
-router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = videoSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const video = await Video.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
   if (!video) return res.status(404).json({ error: "Not found" });
   res.json(video);
+  } catch (err) { next(err); }
 });
 
-router.delete("/:id", requireAuth(["superadmin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin"]), async (req, res, next) => {
+  try {
   const deleted = await Video.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
+  } catch (err) { next(err); }
 });
 
 export default router;

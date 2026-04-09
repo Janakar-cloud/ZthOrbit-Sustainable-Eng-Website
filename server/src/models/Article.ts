@@ -50,6 +50,7 @@ articleSchema.index(
   { normalizedTitle: 1 },
   { unique: true, partialFilterExpression: { normalizedTitle: { $type: "string" } } }
 );
+articleSchema.index({ status: 1, publishDate: -1 });
 
 articleSchema.pre("validate", function (next) {
   if (this.title) {

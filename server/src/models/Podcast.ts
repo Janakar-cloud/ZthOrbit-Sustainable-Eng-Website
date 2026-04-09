@@ -50,6 +50,7 @@ podcastSchema.index(
   { normalizedTitle: 1 },
   { unique: true, partialFilterExpression: { normalizedTitle: { $type: "string" } } }
 );
+podcastSchema.index({ status: 1, publishDate: -1 });
 
 podcastSchema.pre("validate", function (next) {
   if (this.title) {

@@ -58,6 +58,7 @@ videoSchema.index(
   { normalizedTitle: 1 },
   { unique: true, partialFilterExpression: { normalizedTitle: { $type: "string" } } }
 );
+videoSchema.index({ status: 1, publishDate: -1 });
 
 videoSchema.pre("validate", function (next) {
   if (this.title) {

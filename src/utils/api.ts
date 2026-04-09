@@ -488,7 +488,12 @@ export interface UserItem {
 export function getUsers(params?: { page?: number }) {
   const qs = new URLSearchParams();
   if (params?.page) qs.set("page", String(params.page));
-  return request<PaginatedResponse<UserItem>>(`/users?${qs}`);
+  return request<{ data: UserItem[]; meta: { page: number; limit: number; total: number } }>(`/users?${qs}`).then((res) => ({
+    items: res.data ?? [],
+    total: res.meta?.total ?? 0,
+    page: res.meta?.page ?? 1,
+    pageSize: res.meta?.limit ?? 20,
+  }));
 }
 
 export function createUser(data: { email: string; password: string; role?: string; name?: string; status?: string }) {

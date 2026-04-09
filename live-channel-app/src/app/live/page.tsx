@@ -40,7 +40,7 @@ export default function LivePage() {
     // Attach HLS once we have a stream URL and a video element
     if (!config?.streamUrl || !videoRef.current) return;
 
-    let hlsInstance: any = null;
+    let hlsInstance: InstanceType<typeof import("hls.js").default> | null = null;
     const videoEl = videoRef.current;
     const streamUrl = config.streamUrl; // Capture for TypeScript
     setStreamError(null);
@@ -68,7 +68,7 @@ export default function LivePage() {
       hlsInstance.loadSource(streamUrl);
       hlsInstance.attachMedia(videoEl);
 
-      hlsInstance.on(Hls.Events.ERROR, (_event: any, data: any) => {
+      hlsInstance.on(Hls.Events.ERROR, (_event: string, data: { fatal: boolean; type: string; details: string }) => {
         if (data?.fatal) {
           setStreamError("The live stream encountered an error. Please retry.");
           hlsInstance?.destroy();

@@ -11,7 +11,7 @@ const router = Router();
  * Global search across all content types
  * GET /search?q=query&type=all|media|articles&limit=20
  */
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   const { q, type = "all", limit = "20" } = req.query;
 
   if (!q || typeof q !== "string") {
@@ -21,11 +21,11 @@ router.get("/", async (req, res) => {
   const searchLimit = Math.min(Number(limit), 50); // Max 50 results per type
   const searchRegex = new RegExp(escapeRegex(q), "i");
 
-  // Resolve tag ObjectIds whose name matches the query — used to search by tag name
-  const matchingTags = await Tag.find({ name: searchRegex }).select("_id").lean();
-  const matchingTagIds = matchingTags.map((t) => t._id);
-
   try {
+    // Resolve tag ObjectIds whose name matches the query — used to search by tag name
+    const matchingTags = await Tag.find({ name: searchRegex }).select("_id").lean();
+    const matchingTagIds = matchingTags.map((t) => t._id);
+
     const results: any = {
       query: q,
       results: {

@@ -7,56 +7,62 @@ import { Tag, normalizeTagKey, normalizeTagName } from "../models/Tag.js";
 const router = Router();
 
 // Get categories (aggregated from tags/content)
-router.get("/categories", async (req, res) => {
-  const type = (req.query.type as string | undefined)?.toLowerCase();
-  const tags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
-  const seen = new Set<string>();
+router.get("/categories", async (req, res, next) => {
+  try {
+    const type = (req.query.type as string | undefined)?.toLowerCase();
+    const tags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
+    const seen = new Set<string>();
 
-  const data = tags
-    .map((tag) => ({
-      id: String(tag._id),
-      name: normalizeTagName(tag.name),
-      kind: tag.kind,
-      appliesTo:
-        type === "article"
-          ? ["articles"]
-          : type === "media"
-            ? ["videos", "podcasts", "articles"]
-            : ["videos", "podcasts", "articles"],
-    }))
-    .filter((tag) => {
-      const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const data = tags
+      .map((tag) => ({
+        id: String(tag._id),
+        name: normalizeTagName(tag.name),
+        kind: tag.kind,
+        appliesTo:
+          type === "article"
+            ? ["articles"]
+            : type === "media"
+              ? ["videos", "podcasts", "articles"]
+              : ["videos", "podcasts", "articles"],
+      }))
+      .filter((tag) => {
+        const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
-  res.json({ data });
+    res.json({ data });
+  } catch (err) { next(err); }
 });
 
 // Get menus (static list)
-router.get("/menus", async (_req, res) => {
-  res.json({ data: ["LiveTv", "Podcast"] });
+router.get("/menus", async (_req, res, next) => {
+  try {
+    res.json({ data: ["LiveTv", "Podcast"] });
+  } catch (err) { next(err); }
 });
 
 // Get tags (from Tag model, already exists but adding here for completeness)
-router.get("/tags", async (req, res) => {
-  const type = req.query.type as string | undefined;
-  let tags: string[] = [];
+router.get("/tags", async (req, res, next) => {
+  try {
+    const type = req.query.type as string | undefined;
+    let tags: string[] = [];
 
-  if (type === "article") {
-    tags = (await Article.distinct("tags")).map(String);
-  } else if (type === "media") {
-    const videoTags = await Video.distinct("tags");
-    const podcastTags = await Podcast.distinct("tags");
-    tags = [...new Set([...videoTags.map(String), ...podcastTags.map(String)])];
-  } else {
-    // Return all tags from Tag model
-    const allTags = await Tag.find().sort({ name: 1 });
-    tags = allTags.map((t) => t.name);
-  }
+    if (type === "article") {
+      tags = (await Article.distinct("tags")).map(String);
+    } else if (type === "media") {
+      const videoTags = await Video.distinct("tags");
+      const podcastTags = await Podcast.distinct("tags");
+      tags = [...new Set([...videoTags.map(String), ...podcastTags.map(String)])];
+    } else {
+      // Return all tags from Tag model
+      const allTags = await Tag.find().sort({ name: 1 });
+      tags = allTags.map((t) => t.name);
+    }
 
-  res.json({ data: tags.sort() });
+    res.json({ data: tags.sort() });
+  } catch (err) { next(err); }
 });
 
 export default router;

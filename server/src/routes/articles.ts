@@ -7,7 +7,8 @@ import { escapeRegex } from "../utils/regex.js";
 const router = Router();
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
+  try {
   const { tag, featured, status, search } = req.query;
   const page = Number(req.query.page || 1);
   const pageSize = Number(req.query.pageSize || 20);
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
   const filter: any = {};
   if (tag) filter.tags = tag;
   if (featured !== undefined) filter.featured = featured === "true";
-  if (status) filter.status = status;
+  filter.status = (status as string) || "published";
   filter.coverImage = HAS_IMAGE;
   if (search) {
     const safe = escapeRegex(search as string);
@@ -30,19 +31,22 @@ router.get("/", async (req, res) => {
     Article.countDocuments(filter),
   ]);
   res.json({ items, total, page, pageSize });
+  } catch (err) { next(err); }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
+  try {
   const article = await Article.findById(req.params.id).populate("tags", "name kind");
   if (!article) return res.status(404).json({ error: "Not found" });
   res.json(article);
+  } catch (err) { next(err); }
 });
 
 const articleSchema = z.object({
   title: z.string().min(1),
   subtitle: z.string().optional(),
   bodyMd: z.string().default(""),
-  bodyHtml: z.string().url().optional(),
+  bodyHtml: z.string().optional(),
   readTime: z.string().optional(),
   coverImage: z.string().url().optional(),
   publishDate: z.string().datetime().optional(),
@@ -51,29 +55,36 @@ const articleSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 });
 
-router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = articleSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const created = await Article.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(created);
+  } catch (err) { next(err); }
 });
 
-router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = articleSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const updated = await Article.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
   if (!updated) return res.status(404).json({ error: "Not found" });
   res.json(updated);
+  } catch (err) { next(err); }
 });
 
-router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
+  try {
   const deleted = await Article.findByIdAndDelete(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Not found" });
   res.status(204).send();
+  } catch (err) { next(err); }
 });
 
 // PATCH endpoint for status updates (publish/draft)
-router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
+router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
   const parsed = z.object({
     status: z.enum(["published", "draft"]),
   }).safeParse(req.body);
@@ -88,6 +99,7 @@ router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), asyn
   
   if (!updated) return res.status(404).json({ error: "Not found" });
   res.json(updated);
+  } catch (err) { next(err); }
 });
 
 export default router;

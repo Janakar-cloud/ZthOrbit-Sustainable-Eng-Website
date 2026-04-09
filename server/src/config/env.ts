@@ -80,3 +80,13 @@ export const env = {
   // S3 → DB auto-sync interval in ms. Default: 15 minutes. Set to 0 to disable.
   syncIntervalMs: Number(process.env.SYNC_INTERVAL_MS ?? 5 * 60 * 1000),
 };
+
+// Guard: reject weak placeholder secrets in production to prevent auth exploits
+if (env.nodeEnv === "production") {
+  if (env.jwtSecret === "changeme" || env.jwtSecret.length < 32) {
+    throw new Error("[env] JWT_SECRET is missing or insecure. Set a strong secret (≥32 chars) in production.");
+  }
+  if (env.jwtRefreshSecret === "changeme-refresh" || env.jwtRefreshSecret.length < 32) {
+    throw new Error("[env] JWT_REFRESH_SECRET is missing or insecure. Set a strong secret (≥32 chars) in production.");
+  }
+}

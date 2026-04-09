@@ -3,6 +3,6 @@ export const API_ENDPOINTS = {
   CATEGORIES: "/media/categories",
   PODCAST: "/media?menu=Podcast&mediaType=audio&status=published",
   VIDEO: "/media?menu=LiveTv&mediaType=video&status=published",
-  ARTICLE:"/articles?"
+  ARTICLE: "/articles?status=published"
 
 };

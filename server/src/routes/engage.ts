@@ -105,81 +105,85 @@ router.get("/stats/:type/:id", async (req, res) => {
 // ─── GET /trending ──────────────────────────────────────────────────────────
 // Returns top content by views across all types.
 // Query params: limit (default 10), type (video|podcast|article|all), days (default 30)
-router.get("/trending", async (req, res) => {
-  const limit = Math.min(Number(req.query.limit || 10), 50);
-  const type = (req.query.type as string) || "all";
-  const days = Number(req.query.days || 30);
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+router.get("/trending", async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 10), 50);
+    const type = (req.query.type as string) || "all";
+    const days = Number(req.query.days || 30);
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const baseFilter = { status: "published", createdAt: { $gte: since } };
-  const fields = "title views likes commentsCount thumbnailUrl imageUrl coverImage publishDate createdAt";
+    const baseFilter = { status: "published", createdAt: { $gte: since } };
+    const fields = "title views likes commentsCount thumbnailUrl imageUrl coverImage publishDate createdAt";
 
-  const [videos, podcasts, articles] = await Promise.all([
-    type === "all" || type === "video"
-      ? Video.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-    type === "all" || type === "podcast"
-      ? Podcast.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-    type === "all" || type === "article"
-      ? Article.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-  ]);
+    const [videos, podcasts, articles] = await Promise.all([
+      type === "all" || type === "video"
+        ? Video.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+      type === "all" || type === "podcast"
+        ? Podcast.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+      type === "all" || type === "article"
+        ? Article.find(baseFilter).select(fields).sort({ views: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+    ]);
 
-  if (type !== "all") {
-    const result = [...videos, ...podcasts, ...articles]
+    if (type !== "all") {
+      const result = [...videos, ...podcasts, ...articles]
+        .sort((a: any, b: any) => (b.views ?? 0) - (a.views ?? 0))
+        .slice(0, limit);
+      return res.json({ items: result, total: result.length });
+    }
+
+    // Mixed trending: tag each item with its type
+    const tagged = [
+      ...videos.map((v: any) => ({ ...v, _type: "video" })),
+      ...podcasts.map((p: any) => ({ ...p, _type: "podcast" })),
+      ...articles.map((a: any) => ({ ...a, _type: "article" })),
+    ]
       .sort((a: any, b: any) => (b.views ?? 0) - (a.views ?? 0))
       .slice(0, limit);
-    return res.json({ items: result, total: result.length });
-  }
 
-  // Mixed trending: tag each item with its type
-  const tagged = [
-    ...videos.map((v: any) => ({ ...v, _type: "video" })),
-    ...podcasts.map((p: any) => ({ ...p, _type: "podcast" })),
-    ...articles.map((a: any) => ({ ...a, _type: "article" })),
-  ]
-    .sort((a: any, b: any) => (b.views ?? 0) - (a.views ?? 0))
-    .slice(0, limit);
-
-  res.json({ items: tagged, total: tagged.length });
+    res.json({ items: tagged, total: tagged.length });
+  } catch (err) { next(err); }
 });
 
 // ─── GET /latest ─────────────────────────────────────────────────────────────
 // Returns the most recently published content across all types.
 // Query params: limit (default 10), type (video|podcast|article|all)
-router.get("/latest", async (req, res) => {
-  const limit = Math.min(Number(req.query.limit || 10), 50);
-  const type = (req.query.type as string) || "all";
-  const fields = "title views likes commentsCount thumbnailUrl imageUrl coverImage publishDate createdAt";
+router.get("/latest", async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 10), 50);
+    const type = (req.query.type as string) || "all";
+    const fields = "title views likes commentsCount thumbnailUrl imageUrl coverImage publishDate createdAt";
 
-  const filter = { status: "published" };
+    const filter = { status: "published" };
 
-  const [videos, podcasts, articles] = await Promise.all([
-    type === "all" || type === "video"
-      ? Video.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-    type === "all" || type === "podcast"
-      ? Podcast.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-    type === "all" || type === "article"
-      ? Article.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
-      : Promise.resolve([]),
-  ]);
+    const [videos, podcasts, articles] = await Promise.all([
+      type === "all" || type === "video"
+        ? Video.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+      type === "all" || type === "podcast"
+        ? Podcast.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+      type === "all" || type === "article"
+        ? Article.find(filter).select(fields).sort({ publishDate: -1, createdAt: -1 }).limit(limit).lean()
+        : Promise.resolve([]),
+    ]);
 
-  const tagged = [
-    ...videos.map((v: any) => ({ ...v, _type: "video" })),
-    ...podcasts.map((p: any) => ({ ...p, _type: "podcast" })),
-    ...articles.map((a: any) => ({ ...a, _type: "article" })),
-  ]
-    .sort((a: any, b: any) => {
-      const da = new Date(a.publishDate ?? a.createdAt ?? 0).getTime();
-      const db = new Date(b.publishDate ?? b.createdAt ?? 0).getTime();
-      return db - da;
-    })
-    .slice(0, limit);
+    const tagged = [
+      ...videos.map((v: any) => ({ ...v, _type: "video" })),
+      ...podcasts.map((p: any) => ({ ...p, _type: "podcast" })),
+      ...articles.map((a: any) => ({ ...a, _type: "article" })),
+    ]
+      .sort((a: any, b: any) => {
+        const da = new Date(a.publishDate ?? a.createdAt ?? 0).getTime();
+        const db = new Date(b.publishDate ?? b.createdAt ?? 0).getTime();
+        return db - da;
+      })
+      .slice(0, limit);
 
-  res.json({ items: tagged, total: tagged.length });
+    res.json({ items: tagged, total: tagged.length });
+  } catch (err) { next(err); }
 });
 
 export default router;

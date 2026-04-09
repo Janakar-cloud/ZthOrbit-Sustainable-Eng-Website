@@ -8,10 +8,12 @@ import { listVideosFromFolder } from "../utils/s3.js";
 
 const router = Router();
 
-router.get("/config", async (_req, res) => {
-  const config = await LiveConfig.findOne();
-  if (!config) return res.json({ streamUrl: "", title: "", description: "" });
-  res.json(config);
+router.get("/config", async (_req, res, next) => {
+  try {
+    const config = await LiveConfig.findOne();
+    if (!config) return res.json({ streamUrl: "", title: "", description: "" });
+    res.json(config);
+  } catch (err) { next(err); }
 });
 
 // New endpoint: Get playlist of videos from S3
@@ -149,17 +151,19 @@ const liveSchema = z.object({
   description: z.string().optional().default(""),
 });
 
-router.put("/config", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
-  const parsed = liveSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+router.put("/config", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
+    const parsed = liveSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const data = parsed.data;
-  const config = await LiveConfig.findOneAndUpdate(
-    {},
-    { ...data, updatedBy: req.user?.email, updatedAt: new Date() },
-    { upsert: true, new: true }
-  );
-  res.json(config);
+    const data = parsed.data;
+    const config = await LiveConfig.findOneAndUpdate(
+      {},
+      { ...data, updatedBy: req.user?.email, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    res.json(config);
+  } catch (err) { next(err); }
 });
 
 export default router;

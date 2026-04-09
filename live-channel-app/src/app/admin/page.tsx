@@ -53,7 +53,8 @@ export default function AdminPage() {
           setLiveConfig((await liveRes.json()) as LiveConfig);
         }
         if (podcastRes.ok) {
-          setEpisodes((await podcastRes.json()) as PodcastEpisode[]);
+          const pj = await podcastRes.json();
+          setEpisodes((Array.isArray(pj) ? pj : (pj.items ?? [])) as PodcastEpisode[]);
         }
       } catch (error) {
         console.error("Failed to load admin data", error);

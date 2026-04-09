@@ -106,7 +106,10 @@ async function main() {
   app.use("/api/v1", apiLimiter, routes);
 
   app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
-  app.get("/readyz", (_req, res) => res.json({ status: "ready", envPath: env.envPath || "unknown" }));
+  app.get("/readyz", (_req, res) => res.json({
+    status: "ready",
+    ...(env.nodeEnv !== "production" ? { envPath: env.envPath || "unknown" } : {}),
+  }));
 
   app.use((req, res) => res.status(404).json({ error: `Not found: ${req.path}` }));
   app.use(errorHandler);

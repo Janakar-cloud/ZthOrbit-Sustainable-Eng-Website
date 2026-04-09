@@ -5,8 +5,14 @@ import { createPresignedUpload } from "../utils/s3.js";
 
 const router = Router();
 
+// Allowed S3 key prefixes. Prevents callers from writing outside intended folders.
+const ALLOWED_PREFIXES = ["videos", "podcasts", "articles", "thumbnails", "images", "covers", "LiveTV"];
+
 const schema = z.object({
-  prefix: z.string().min(1),
+  prefix: z.string().min(1).refine(
+    (p) => ALLOWED_PREFIXES.some((a) => p === a || p.startsWith(`${a}/`)),
+    { message: `prefix must start with one of: ${ALLOWED_PREFIXES.join(", ")}` }
+  ),
   contentType: z.string().min(1),
 });
 

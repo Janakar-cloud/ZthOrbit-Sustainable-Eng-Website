@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://13.205.72.30:4000', // your backend IP
+        target: 'http://localhost:4000', // your backend IP
         changeOrigin: true,
         secure: false,
       }

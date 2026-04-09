@@ -34,7 +34,7 @@ router.use("/users", users);
 router.use("/media", media);
 router.use("/notifications", notifications);
 // Reference data endpoints
-router.use("/api", reference); // /api/categories, /api/menus directly
+router.use("/reference", reference); // /reference/categories, /reference/menus, /reference/tags
 // Global search
 router.use("/search", search);
 // Engagement: views, likes, trending, latest

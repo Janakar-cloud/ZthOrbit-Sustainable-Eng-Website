@@ -38,8 +38,9 @@ async function resolveCategoryIds(category: unknown): Promise<string[] | null> {
 }
 
 // Unified media list (combines videos and podcasts)
-router.get("/", async (req, res) => {
-  const { search, category, menu, mediaType, status } = req.query;
+router.get("/", async (req, res, next) => {
+  try {
+    const { search, category, menu, mediaType, status } = req.query;
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 20);
   const skip = (page - 1) * limit;
@@ -183,76 +184,81 @@ router.get("/", async (req, res) => {
   }
 
   res.json({ data: items, meta: { page, limit, total } });
+  } catch (err) { next(err); }
 });
 
-router.get("/categories", async (_req, res) => {
-  const categoryTags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
-  const seen = new Set<string>();
-  res.json({
-    data: categoryTags
-      .map((tag) => ({
-        id: String(tag._id),
-        name: normalizeTagName(tag.name),
-        kind: tag.kind,
-      }))
-      .filter((tag) => {
-        const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }),
-  });
+router.get("/categories", async (_req, res, next) => {
+  try {
+    const categoryTags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");
+    const seen = new Set<string>();
+    res.json({
+      data: categoryTags
+        .map((tag) => ({
+          id: String(tag._id),
+          name: normalizeTagName(tag.name),
+          kind: tag.kind,
+        }))
+        .filter((tag) => {
+          const key = `${tag.kind}:${normalizeTagKey(tag.name)}`;
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }),
+    });
+  } catch (err) { next(err); }
 });
 
 // Get single media item
-router.get("/:id", async (req, res) => {
-  const video = await Video.findById(req.params.id).populate("tags", "name kind");
-  if (video) {
-    return res.json({
-      id: video.id,
-      title: video.title,
-      description: video.description,
-      mediaType: "video",
-      menu: "LiveTv",
-      category: extractCategoryNames(video.tags as any[])[0] || "",
-      categories: extractCategoryNames(video.tags as any[]),
-      tags: video.tags || [],
-      duration: video.duration ? parseDuration(video.duration) : 0,
-      fileUrl: video.streamUrl,
-      thumbnailUrl: video.thumbnailUrl || "",
-      status: video.status === "published" ? "ready" : "processing",
-      views: (video as any).views ?? 0,
-      likes: (video as any).likes ?? 0,
-      commentsCount: (video as any).commentsCount ?? 0,
-      createdAt: video.createdAt,
-      updatedAt: video.updatedAt,
-    });
-  }
+router.get("/:id", async (req, res, next) => {
+  try {
+    const video = await Video.findById(req.params.id).populate("tags", "name kind");
+    if (video) {
+      return res.json({
+        id: video.id,
+        title: video.title,
+        description: video.description,
+        mediaType: "video",
+        menu: "LiveTv",
+        category: extractCategoryNames(video.tags as any[])[0] || "",
+        categories: extractCategoryNames(video.tags as any[]),
+        tags: video.tags || [],
+        duration: video.duration ? parseDuration(video.duration) : 0,
+        fileUrl: video.streamUrl,
+        thumbnailUrl: video.thumbnailUrl || "",
+        status: video.status === "published" ? "ready" : "processing",
+        views: (video as any).views ?? 0,
+        likes: (video as any).likes ?? 0,
+        commentsCount: (video as any).commentsCount ?? 0,
+        createdAt: video.createdAt,
+        updatedAt: video.updatedAt,
+      });
+    }
 
-  const podcast = await Podcast.findById(req.params.id).populate("tags", "name kind");
-  if (podcast) {
-    return res.json({
-      id: podcast.id,
-      title: podcast.title,
-      description: podcast.description,
-      mediaType: "audio",
-      menu: "Podcast",
-      category: extractCategoryNames(podcast.tags as any[])[0] || "",
-      categories: extractCategoryNames(podcast.tags as any[]),
-      tags: podcast.tags || [],
-      duration: podcast.duration ? parseDuration(podcast.duration) : 0,
-      fileUrl: podcast.audioUrl,
-      thumbnailUrl: podcast.imageUrl || "",
-      status: podcast.status === "published" ? "ready" : "processing",
-      views: (podcast as any).views ?? 0,
-      likes: (podcast as any).likes ?? 0,
-      commentsCount: (podcast as any).commentsCount ?? 0,
-      createdAt: podcast.createdAt,
-      updatedAt: podcast.updatedAt,
-    });
-  }
+    const podcast = await Podcast.findById(req.params.id).populate("tags", "name kind");
+    if (podcast) {
+      return res.json({
+        id: podcast.id,
+        title: podcast.title,
+        description: podcast.description,
+        mediaType: "audio",
+        menu: "Podcast",
+        category: extractCategoryNames(podcast.tags as any[])[0] || "",
+        categories: extractCategoryNames(podcast.tags as any[]),
+        tags: podcast.tags || [],
+        duration: podcast.duration ? parseDuration(podcast.duration) : 0,
+        fileUrl: podcast.audioUrl,
+        thumbnailUrl: podcast.imageUrl || "",
+        status: podcast.status === "published" ? "ready" : "processing",
+        views: (podcast as any).views ?? 0,
+        likes: (podcast as any).likes ?? 0,
+        commentsCount: (podcast as any).commentsCount ?? 0,
+        createdAt: podcast.createdAt,
+        updatedAt: podcast.updatedAt,
+      });
+    }
 
-  return res.status(404).json({ error: "Media not found" });
+    return res.status(404).json({ error: "Media not found" });
+  } catch (err) { next(err); }
 });
 
 const mediaSchema = z.object({
@@ -270,8 +276,9 @@ const mediaSchema = z.object({
 });
 
 // Create media (routes to video or podcast)
-router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
-  const parsed = mediaSchema.safeParse(req.body);
+router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
+    const parsed = mediaSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const data = parsed.data;
@@ -332,11 +339,13 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
       tags: tagIds,
     });
   }
+  } catch (err) { next(err); }
 });
 
 // Update media
-router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
-  const parsed = mediaSchema.partial().safeParse(req.body);
+router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
+    const parsed = mediaSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const data = parsed.data;
@@ -395,65 +404,70 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
   }
 
   return res.status(404).json({ error: "Media not found" });
+  } catch (err) { next(err); }
 });
 
 // Delete media
-router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
-  const video = await Video.findByIdAndDelete(req.params.id);
-  if (video) return res.status(204).send();
+router.delete("/:id", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
+  try {
+    const video = await Video.findByIdAndDelete(req.params.id);
+    if (video) return res.status(204).send();
 
-  const podcast = await Podcast.findByIdAndDelete(req.params.id);
-  if (podcast) return res.status(204).send();
+    const podcast = await Podcast.findByIdAndDelete(req.params.id);
+    if (podcast) return res.status(204).send();
 
-  return res.status(404).json({ error: "Media not found" });
+    return res.status(404).json({ error: "Media not found" });
+  } catch (err) { next(err); }
 });
 
 // Update media status (PATCH endpoint for encoder callbacks)
-router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
-  const parsed = z.object({
-    status: z.enum(["processing", "ready", "failed"]),
-    fileUrl: z.string().url().optional(),
-    thumbnailUrl: z.string().url().optional(),
-    duration: z.number().optional(),
-  }).safeParse(req.body);
+router.patch("/:id/status", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
+  try {
+    const parsed = z.object({
+      status: z.enum(["processing", "ready", "failed"]),
+      fileUrl: z.string().url().optional(),
+      thumbnailUrl: z.string().url().optional(),
+      duration: z.number().optional(),
+    }).safeParse(req.body);
 
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const data = parsed.data;
+    const data = parsed.data;
 
-  // Try video first
-  const video = await Video.findById(req.params.id);
-  if (video) {
-    video.status = data.status === "ready" ? "published" : "draft";
-    if (data.fileUrl) video.streamUrl = data.fileUrl;
-    if (data.thumbnailUrl) video.thumbnailUrl = data.thumbnailUrl;
-    if (data.duration) video.duration = formatDuration(data.duration);
-    await video.save();
-    return res.json({
-      id: video.id,
-      status: data.status,
-      fileUrl: video.streamUrl,
-      thumbnailUrl: video.thumbnailUrl,
-    });
-  }
+    // Try video first
+    const video = await Video.findById(req.params.id);
+    if (video) {
+      video.status = data.status === "ready" ? "published" : "draft";
+      if (data.fileUrl) video.streamUrl = data.fileUrl;
+      if (data.thumbnailUrl) video.thumbnailUrl = data.thumbnailUrl;
+      if (data.duration) video.duration = formatDuration(data.duration);
+      await video.save();
+      return res.json({
+        id: video.id,
+        status: data.status,
+        fileUrl: video.streamUrl,
+        thumbnailUrl: video.thumbnailUrl,
+      });
+    }
 
-  // Try podcast
-  const podcast = await Podcast.findById(req.params.id);
-  if (podcast) {
-    podcast.status = data.status === "ready" ? "published" : "draft";
-    if (data.fileUrl) podcast.audioUrl = data.fileUrl;
-    if (data.thumbnailUrl) podcast.imageUrl = data.thumbnailUrl;
-    if (data.duration) podcast.duration = formatDuration(data.duration);
-    await podcast.save();
-    return res.json({
-      id: podcast.id,
-      status: data.status,
-      fileUrl: podcast.audioUrl,
-      thumbnailUrl: podcast.imageUrl,
-    });
-  }
+    // Try podcast
+    const podcast = await Podcast.findById(req.params.id);
+    if (podcast) {
+      podcast.status = data.status === "ready" ? "published" : "draft";
+      if (data.fileUrl) podcast.audioUrl = data.fileUrl;
+      if (data.thumbnailUrl) podcast.imageUrl = data.thumbnailUrl;
+      if (data.duration) podcast.duration = formatDuration(data.duration);
+      await podcast.save();
+      return res.json({
+        id: podcast.id,
+        status: data.status,
+        fileUrl: podcast.audioUrl,
+        thumbnailUrl: podcast.imageUrl,
+      });
+    }
 
-  return res.status(404).json({ error: "Media not found" });
+    return res.status(404).json({ error: "Media not found" });
+  } catch (err) { next(err); }
 });
 
 // Helper functions

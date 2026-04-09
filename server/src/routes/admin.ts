@@ -11,8 +11,10 @@ const router = Router();
 
 router.get("/summary", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {
   // Get date range filters if provided
-  const from = req.query.from ? new Date(req.query.from as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const to = req.query.to ? new Date(req.query.to as string) : new Date();
+  const fromRaw = req.query.from ? new Date(req.query.from as string) : null;
+  const toRaw = req.query.to ? new Date(req.query.to as string) : null;
+  const from = fromRaw && !isNaN(fromRaw.getTime()) ? fromRaw : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const to = toRaw && !isNaN(toRaw.getTime()) ? toRaw : new Date();
 
   // Basic metrics
   const onlineThreshold = new Date(Date.now() - 5 * 60 * 1000); // active in last 5 min

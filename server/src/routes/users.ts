@@ -4,6 +4,7 @@ import { User } from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
 import bcrypt from "bcryptjs";
 import { escapeRegex } from "../utils/regex.js";
+import { issueVerificationCode } from "../utils/mailer.js";
 
 const router = Router();
 
@@ -76,6 +77,10 @@ router.post("/", requireAuth(["superadmin", "admin"]), async (req, res, next) =>
     if (existing) return res.status(400).json({ error: "Email already exists" });
     const passwordHash = await bcrypt.hash(parsed.data.password, 10);
     const user = await User.create({ ...parsed.data, passwordHash });
+    // Send verification email — fire-and-forget so creation still succeeds if SMTP fails
+    issueVerificationCode(user.email, String(user._id)).catch((err) =>
+      console.warn("[mailer] verification email failed for admin-created user", err)
+    );
     const { passwordHash: _ph, ...safeUser } = user.toObject();
     res.status(201).json(safeUser);
   } catch (err) { next(err); }

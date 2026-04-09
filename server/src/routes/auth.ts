@@ -7,10 +7,9 @@ import { RefreshToken } from "../models/RefreshToken.js";
 import { PasswordReset } from "../models/PasswordReset.js";
 import { EmailVerification } from "../models/EmailVerification.js";
 import { signAccess } from "../utils/jwt.js";
-import { sendMail } from "../utils/mailer.js";
+import { sendMail, issueVerificationCode } from "../utils/mailer.js";
 import { env } from "../config/env.js";
 import { AuthUser, requireAuth } from "../middleware/auth.js";
-import { randomInt } from "crypto";
 
 const router = Router();
 
@@ -283,25 +282,6 @@ async function issueRefresh(userId: string, payload: AuthUser) {
   await RefreshToken.create({ userId, token, expiresAt, revoked: false });
   // Return JWT-based refresh for verification plus stored token for revocation
   return token;
-}
-
-async function issueVerificationCode(email: string, userId: string) {
-  const code = randomInt(100000, 999999).toString();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 15);
-  await EmailVerification.deleteMany({ userId, used: false });
-  await EmailVerification.create({ userId, code, expiresAt, used: false });
-
-  const html = `
-    <p>Hi,</p>
-    <p>Your verification code is <strong>${code}</strong>.</p>
-    <p>This code expires in 15 minutes.</p>
-  `;
-
-  try {
-    await sendMail(email, "Verify your email", html);
-  } catch (err) {
-    console.warn("[mailer] failed to send verification email", err);
-  }
 }
 
 export default router;

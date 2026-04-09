@@ -16,6 +16,13 @@
       "Resource": "arn:aws:s3:::greentv-s3/videos/*"
     },
     {
+      "Sid": "PublicReadThumbnails",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::greentv-s3/thumbnails/*"
+    },
+    {
       "Sid": "PublicReadVideoThumbnails",
       "Effect": "Allow",
       "Principal": "*",
@@ -38,6 +45,13 @@
     },
     {
       "Sid": "PublicReadPodcasts",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::greentv-s3/podcasts/*"
+    },
+    {
+      "Sid": "PublicReadPodcastLegacy",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",

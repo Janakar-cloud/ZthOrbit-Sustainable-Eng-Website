@@ -8,17 +8,14 @@ import { env } from "../config/env.js";
 
 const s3 = new S3Client({ region: env.s3.region });
 
+console.log(`🌐 Using CORS origins from env: ${env.corsOrigins.join(", ")}`);
+
 const corsConfig = {
   CORSRules: [
     {
       AllowedHeaders: ["*"],
       AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
-      AllowedOrigins: [
-        "http://13.205.72.30:3039",
-        "http://13.205.72.30:5173",
-        "http://localhost:3039",
-        "http://localhost:5173",
-      ],
+      AllowedOrigins: env.corsOrigins,
       ExposeHeaders: ["ETag", "x-amz-request-id", "x-amz-id-2"],
       MaxAgeSeconds: 3000,
     },

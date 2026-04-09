@@ -38,11 +38,12 @@ export async function signStreamUrl(storedUrl: string, expiresIn = 3600): Promis
 
 export async function createPresignedUpload(keyPrefix: string, contentType: string) {
   const key = `${keyPrefix}/${randomUUID()}`;
+  // Do NOT include ContentType in the command — if it's in the signed headers,
+  // S3 will reject the PUT if the browser sends a slightly different MIME type.
+  // The browser still sends Content-Type via XHR/fetch; S3 just won't validate it.
   const command = new PutObjectCommand({
     Bucket: env.s3.bucket,
     Key: key,
-    ContentType: contentType,
-    ChecksumAlgorithm: undefined,
   });
   const uploadUrl = await getSignedUrl(s3, command, {
     expiresIn: 300,

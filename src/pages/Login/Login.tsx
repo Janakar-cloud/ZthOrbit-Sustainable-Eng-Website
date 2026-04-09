@@ -62,7 +62,12 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
           setIsLoading(false);
           return;
         }
-        await register({ email: email.trim(), password: password.trim(), name: name.trim() || undefined, phone: phone.trim() || undefined });
+        if (!name.trim()) {
+          setStatus({ message: 'Name is required to register.', variant: 'error' });
+          setIsLoading(false);
+          return;
+        }
+        await register({ email: email.trim(), password: password.trim(), name: name.trim(), phone: phone.trim() || undefined });
         setMode('verify');
         setStatus({ message: 'Code sent. Check your email.', variant: 'success' });
         return;
@@ -238,7 +243,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
 
               {mode === 'register' && (
                 <div className="login-form-group">
-                  <label htmlFor="name">Name <span className="optional-label">(Optional)</span></label>
+                  <label htmlFor="name">Name <span className="required">*</span></label>
                   <div className="input-wrapper">
                     <span className="material-icons">person</span>
                     <input
@@ -247,6 +252,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
                       placeholder="Enter your name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      required
                     />
                   </div>
                 </div>

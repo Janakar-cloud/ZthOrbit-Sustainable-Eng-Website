@@ -47,7 +47,7 @@ export type AuthTokens = {
   app?: AppTargets;
 };
 
-export function register(data: { email: string; password: string; name?: string; phone?: string }) {
+export function register(data: { email: string; password: string; name: string; phone?: string }) {
   return request<{ message: string }>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),

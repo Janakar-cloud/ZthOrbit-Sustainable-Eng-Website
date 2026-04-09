@@ -1,4 +1,13 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "../config/env.js";
 import { randomUUID } from "crypto";
@@ -58,6 +67,66 @@ export async function createPresignedUpload(keyPrefix: string, contentType: stri
     bucket: env.s3.bucket, 
     region: env.s3.region 
   };
+}
+
+// ─── Multipart upload helpers ────────────────────────────────────────────────
+
+/** Initiate an S3 multipart upload. Returns uploadId + key + public fileUrl. */
+export async function createMultipartUpload(keyPrefix: string) {
+  const key = `${keyPrefix}/${randomUUID()}`;
+  const command = new CreateMultipartUploadCommand({
+    Bucket: env.s3.bucket,
+    Key: key,
+  });
+  const result = await s3.send(command);
+  const fileUrl = `https://${env.s3.bucket}.s3.${env.s3.region}.amazonaws.com/${key}`;
+  return {
+    uploadId: result.UploadId!,
+    key,
+    fileUrl,
+    bucket: env.s3.bucket,
+    region: env.s3.region,
+  };
+}
+
+/** Return a presigned PUT URL for a single multipart part (1-indexed). */
+export async function createPresignedPartUpload(key: string, uploadId: string, partNumber: number) {
+  const command = new UploadPartCommand({
+    Bucket: env.s3.bucket,
+    Key: key,
+    UploadId: uploadId,
+    PartNumber: partNumber,
+  });
+  const url = await getSignedUrl(s3, command, {
+    expiresIn: 3600,
+    unhoistableHeaders: new Set(["x-amz-checksum-crc32", "x-amz-sdk-checksum-algorithm"]),
+  });
+  return { url };
+}
+
+/** Finalise a multipart upload by supplying all part ETags. */
+export async function completeMultipartUpload(
+  key: string,
+  uploadId: string,
+  parts: { PartNumber: number; ETag: string }[]
+) {
+  const command = new CompleteMultipartUploadCommand({
+    Bucket: env.s3.bucket,
+    Key: key,
+    UploadId: uploadId,
+    MultipartUpload: { Parts: parts },
+  });
+  await s3.send(command);
+}
+
+/** Abort an in-progress multipart upload to avoid partial-upload storage charges. */
+export async function abortMultipartUpload(key: string, uploadId: string) {
+  const command = new AbortMultipartUploadCommand({
+    Bucket: env.s3.bucket,
+    Key: key,
+    UploadId: uploadId,
+  });
+  await s3.send(command);
 }
 
 export interface S3Video {

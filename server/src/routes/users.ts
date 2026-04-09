@@ -67,6 +67,7 @@ const createSchema = z.object({
   name: z.string().optional(),
   phone: z.string().max(30).optional(),
   status: z.enum(["active", "inactive"]).default("active"),
+  sendVerification: z.boolean().default(true),
 });
 
 router.post("/", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
@@ -76,11 +77,14 @@ router.post("/", requireAuth(["superadmin", "admin"]), async (req, res, next) =>
     const existing = await User.findOne({ email: parsed.data.email });
     if (existing) return res.status(400).json({ error: "Email already exists" });
     const passwordHash = await bcrypt.hash(parsed.data.password, 10);
-    const user = await User.create({ ...parsed.data, passwordHash });
-    // Send verification email — fire-and-forget so creation still succeeds if SMTP fails
-    issueVerificationCode(user.email, String(user._id)).catch((err) =>
-      console.warn("[mailer] verification email failed for admin-created user", err)
-    );
+    const { sendVerification, ...userData } = parsed.data;
+    const user = await User.create({ ...userData, passwordHash });
+    if (sendVerification) {
+      // Fire-and-forget — creation succeeds even if SMTP is misconfigured
+      issueVerificationCode(user.email, String(user._id)).catch((err) =>
+        console.warn("[mailer] verification email failed for admin-created user", err)
+      );
+    }
     const { passwordHash: _ph, ...safeUser } = user.toObject();
     res.status(201).json(safeUser);
   } catch (err) { next(err); }
@@ -139,6 +143,17 @@ router.patch("/:id/status", requireAuth(["superadmin", "admin"]), async (req, re
     
     if (!user) return res.status(404).json({ error: "Not found" });
     res.json(user);
+  } catch (err) { next(err); }
+});
+
+/** Admin-triggered resend of verification email for any user by their ID. */
+router.post("/:id/send-verification", requireAuth(["superadmin", "admin"]), async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select("email emailVerified");
+    if (!user) return res.status(404).json({ error: "Not found" });
+    if (user.emailVerified) return res.json({ message: "Email already verified" });
+    await issueVerificationCode(user.email, String(user._id));
+    res.json({ message: "Verification email sent" });
   } catch (err) { next(err); }
 });
 

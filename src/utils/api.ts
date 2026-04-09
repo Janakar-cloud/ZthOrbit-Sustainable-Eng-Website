@@ -482,6 +482,7 @@ export interface UserItem {
   phone?: string;
   role: string;
   status: string;
+  isVerified?: boolean;
   avatarUrl?: string;
   createdAt: string;
 }
@@ -497,7 +498,7 @@ export function getUsers(params?: { page?: number }) {
   }));
 }
 
-export function createUser(data: { email: string; password: string; role?: string; name?: string; phone?: string; status?: string }) {
+export function createUser(data: { email: string; password: string; role?: string; name?: string; phone?: string; status?: string; sendVerification?: boolean }) {
   return request<UserItem>("/users", { method: "POST", body: JSON.stringify(data) });
 }
 
@@ -507,6 +508,10 @@ export function updateUser(id: string, data: { name?: string; phone?: string; ro
 
 export function deleteUser(id: string) {
   return request<void>(`/users/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export function resendVerificationEmail(id: string) {
+  return request<{ message: string }>(`/users/${encodeURIComponent(id)}/send-verification`, { method: "POST" });
 }
 
 // ─── Search ──────────────────────────────────────────────────────

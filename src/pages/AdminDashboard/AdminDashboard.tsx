@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser as apiDeleteUser,
+  resendVerificationEmail,
   getVideos,
   getPodcasts,
   getPresignedUpload,
@@ -47,6 +48,7 @@ interface User {
   phone?: string
   role: string
   status: string
+  isVerified?: boolean
   joinDate: string
   profilePicture?: string
   instagram?: string
@@ -162,6 +164,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   // Password field for new users
   const [userPassword, setUserPassword] = useState('')
+  // Whether to send verification email on user creation
+  const [sendVerificationEmail, setSendVerificationEmail] = useState(true)
 
   // Load data from API on mount
   useEffect(() => {
@@ -175,6 +179,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             email: u.email,
             role: u.role.charAt(0).toUpperCase() + u.role.slice(1),
             status: u.status.charAt(0).toUpperCase() + u.status.slice(1),
+            isVerified: u.isVerified,
             joinDate: u.createdAt?.split('T')[0] || '',
           })))
         }
@@ -236,6 +241,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       linkedin: '',
       twitter: ''
     })
+    setSendVerificationEmail(true)
     setShowUserModal(true)
   }
 
@@ -319,6 +325,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         phone: userForm.phone || undefined,
         role: userForm.role.toLowerCase(),
         status: userForm.status.toLowerCase(),
+        sendVerification: sendVerificationEmail,
       })
         .then((created) => {
           const newUser: User = {
@@ -1290,6 +1297,20 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     />
                   </div>
                 )}
+                {!editingUser && (
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="checkbox"
+                      id="sendVerificationEmail"
+                      checked={sendVerificationEmail}
+                      onChange={(e) => setSendVerificationEmail(e.target.checked)}
+                      style={{ width: 'auto', margin: 0 }}
+                    />
+                    <label htmlFor="sendVerificationEmail" style={{ margin: 0, cursor: 'pointer' }}>
+                      Send verification email to user
+                    </label>
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Role *</label>
@@ -1366,6 +1387,21 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               </div>
               <div className="modal-footer">
                 <button className="cancel-btn" onClick={() => setShowUserModal(false)}>Cancel</button>
+                {editingUser && !users.find(u => u.id === editingUser.id)?.isVerified && (
+                  <button
+                    className="cancel-btn"
+                    style={{ color: '#2563eb', borderColor: '#2563eb' }}
+                    onClick={() => {
+                      const apiId = editingUser._apiId
+                      if (!apiId) return alert('User not synced with server')
+                      resendVerificationEmail(apiId)
+                        .then(() => alert('Verification email sent!'))
+                        .catch((err) => alert(`Failed: ${err.message}`))
+                    }}
+                  >
+                    Resend Verification Email
+                  </button>
+                )}
                 <button className="save-btn" onClick={handleSaveUser}>
                   {editingUser ? 'Update User' : 'Add User'}
                 </button>

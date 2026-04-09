@@ -75,6 +75,7 @@ router.post("/", requireAuth(["superadmin", "admin"]), async (req, res) => {
 
 const updateSchema = z.object({
   name: z.string().optional(),
+  email: z.string().email().optional(),
   role: z.enum(["superadmin", "admin", "editor", "viewer"]).optional(),
   status: z.enum(["active", "inactive"]).optional(),
   password: z.string().min(8).optional(),
@@ -84,6 +85,10 @@ router.put("/:id", requireAuth(["superadmin", "admin"]), async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data: any = { ...parsed.data };
+  if (data.email) {
+    const conflict = await User.findOne({ email: data.email, _id: { $ne: req.params.id } });
+    if (conflict) return res.status(400).json({ error: "Email already in use by another user" });
+  }
   if (data.password) {
     data.passwordHash = await bcrypt.hash(data.password, 10);
     delete data.password;

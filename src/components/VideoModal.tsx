@@ -27,8 +27,10 @@ export default function VideoModal({
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
 
+  const isMongoId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id)
+
   useEffect(() => {
-    if (!video.id) return
+    if (!video.id || !isMongoId(String(video.id))) return
     getEngageStats('video', String(video.id))
       .then((stats) => setLikeCount(stats.likes))
       .catch(() => {})
@@ -38,6 +40,7 @@ export default function VideoModal({
     const action = liked ? 'unlike' : 'like'
     setLiked(!liked)
     setLikeCount((c) => liked ? c - 1 : c + 1)
+    if (!isMongoId(String(video.id))) return
     try {
       const updated = await recordLike('video', String(video.id), action)
       setLikeCount(updated)
@@ -48,7 +51,7 @@ export default function VideoModal({
   }
 
   const handlePlay = () => {
-    if (!viewTracked.current && video.id) {
+    if (!viewTracked.current && video.id && isMongoId(String(video.id))) {
       viewTracked.current = true
       recordView('video', String(video.id))
     }

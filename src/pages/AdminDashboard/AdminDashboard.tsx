@@ -44,6 +44,7 @@ interface User {
   _apiId?: string
   name: string
   email: string
+  phone?: string
   role: string
   status: string
   joinDate: string
@@ -81,6 +82,7 @@ interface Podcast {
 interface UserFormData {
   name: string
   email: string
+  phone: string
   role: string
   status: string
   profilePicture: string
@@ -148,6 +150,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [userForm, setUserForm] = useState<UserFormData>({
     name: '',
     email: '',
+    phone: '',
     role: 'Viewer',
     status: 'Active',
     profilePicture: '',
@@ -224,6 +227,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setUserForm({
       name: '',
       email: '',
+      phone: '',
       role: 'Viewer',
       status: 'Active',
       profilePicture: '',
@@ -240,6 +244,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setUserForm({
       name: user.name,
       email: user.email,
+      phone: user.phone || '',
       role: user.role,
       status: user.status,
       profilePicture: user.profilePicture || '',
@@ -279,6 +284,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       if (apiId) {
         updateUser(apiId, {
           name: userForm.name,
+          phone: userForm.phone || undefined,
           role: userForm.role.toLowerCase(),
           status: userForm.status.toLowerCase(),
         })
@@ -310,6 +316,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         email: userForm.email,
         password: userPassword,
         name: userForm.name,
+        phone: userForm.phone || undefined,
         role: userForm.role.toLowerCase(),
         status: userForm.status.toLowerCase(),
       })
@@ -1261,6 +1268,15 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       placeholder="Enter email address"
                     />
                   </div>
+                </div>
+                <div className="form-group">
+                  <label>Phone Number <span style={{ fontWeight: 400, color: '#888', fontSize: '0.8rem' }}>(Optional)</span></label>
+                  <input
+                    type="tel"
+                    value={userForm.phone}
+                    onChange={(e) => setUserForm({ ...userForm, phone: e.target.value })}
+                    placeholder="Enter phone number"
+                  />
                 </div>
                 {!editingUser && (
                   <div className="form-group">

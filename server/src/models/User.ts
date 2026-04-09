@@ -5,6 +5,7 @@ export interface IUser {
   passwordHash: string;
   role: "superadmin" | "admin" | "editor" | "viewer";
   name?: string;
+  phone?: string;
   avatarUrl?: string;
   socials?: Record<string, string>;
   status: "active" | "inactive";
@@ -20,6 +21,7 @@ const userSchema = new Schema<IUser>(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ["superadmin", "admin", "editor", "viewer"], default: "viewer" },
     name: { type: String, trim: true, maxlength: 100 },
+    phone: { type: String, trim: true, maxlength: 30 },
     avatarUrl: { type: String },
     socials: { type: Schema.Types.Mixed },
     status: { type: String, enum: ["active", "inactive"], default: "active" },

@@ -45,7 +45,7 @@ function buildAppTargets(role: AuthUser["role"], requestedApp?: "public" | "dash
   };
 }
 
-function toAuthUser(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null }) {
+function toAuthUser(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null; phone?: string | null }) {
   const id = user.id ?? user._id?.toString();
   if (!id) throw new Error("User id is missing");
 
@@ -54,10 +54,11 @@ function toAuthUser(user: { _id?: { toString(): string }; id?: string; email: st
     email: user.email,
     role: user.role,
     name: user.name || null,
+    phone: user.phone || null,
   };
 }
 
-function buildAuthResponse(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null }, refreshToken?: string) {
+function buildAuthResponse(user: { _id?: { toString(): string }; id?: string; email: string; role: AuthUser["role"]; name?: string | null; phone?: string | null }, refreshToken?: string) {
   const authUser = toAuthUser(user);
   const payload: AuthUser = { id: authUser.id, role: authUser.role, email: authUser.email };
 
@@ -69,6 +70,7 @@ function buildAuthResponse(user: { _id?: { toString(): string }; id?: string; em
       email: authUser.email,
       role: authUser.role,
       name: authUser.name,
+      phone: authUser.phone,
     },
     app: buildAppTargets(authUser.role),
   };
@@ -78,6 +80,7 @@ const registerSchema = z.object({
   email: z.string().email().max(320),
   password: z.string().min(8),
   name: z.string().max(100).optional(),
+  phone: z.string().max(30).optional(),
 });
 
 router.post("/register", async (req, res, next) => {
@@ -85,12 +88,12 @@ router.post("/register", async (req, res, next) => {
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-    const { email, password, name } = parsed.data;
+    const { email, password, name, phone } = parsed.data;
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ error: "Email already registered" });
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, passwordHash, name, role: "viewer" });
+    const user = await User.create({ email, passwordHash, name, phone, role: "viewer" });
 
     await issueVerificationCode(user.email, user.id);
 
@@ -143,7 +146,7 @@ router.post("/refresh", async (req, res) => {
 
 router.get("/me", requireAuth(), async (req, res, next) => {
   try {
-    const user = await User.findById(req.user?.id).select("email name role emailVerified");
+    const user = await User.findById(req.user?.id).select("email name phone role emailVerified");
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({
@@ -151,6 +154,7 @@ router.get("/me", requireAuth(), async (req, res, next) => {
         id: user.id,
         email: user.email,
         name: user.name || null,
+        phone: user.phone || null,
         role: user.role,
         emailVerified: user.emailVerified,
       },

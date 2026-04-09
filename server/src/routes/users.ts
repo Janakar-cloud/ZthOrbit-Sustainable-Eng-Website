@@ -44,6 +44,7 @@ router.get("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res,
       return {
         id: String(obj._id),
         name: obj.name || "",
+        phone: obj.phone || null,
         email: obj.email,
         role: obj.role,
         status: obj.status,
@@ -63,6 +64,7 @@ const createSchema = z.object({
   password: z.string().min(8),
   role: z.enum(["superadmin", "admin", "editor", "viewer"]).default("viewer"),
   name: z.string().optional(),
+  phone: z.string().max(30).optional(),
   status: z.enum(["active", "inactive"]).default("active"),
 });
 
@@ -81,6 +83,7 @@ router.post("/", requireAuth(["superadmin", "admin"]), async (req, res, next) =>
 
 const updateSchema = z.object({
   name: z.string().optional(),
+  phone: z.string().max(30).optional(),
   email: z.string().email().optional(),
   role: z.enum(["superadmin", "admin", "editor", "viewer"]).optional(),
   status: z.enum(["active", "inactive"]).optional(),

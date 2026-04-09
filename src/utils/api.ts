@@ -479,6 +479,7 @@ export interface UserItem {
   _id: string;
   email: string;
   name?: string;
+  phone?: string;
   role: string;
   status: string;
   avatarUrl?: string;
@@ -496,11 +497,11 @@ export function getUsers(params?: { page?: number }) {
   }));
 }
 
-export function createUser(data: { email: string; password: string; role?: string; name?: string; status?: string }) {
+export function createUser(data: { email: string; password: string; role?: string; name?: string; phone?: string; status?: string }) {
   return request<UserItem>("/users", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function updateUser(id: string, data: { name?: string; role?: string; status?: string; password?: string }) {
+export function updateUser(id: string, data: { name?: string; phone?: string; role?: string; status?: string; password?: string }) {
   return request<UserItem>(`/users/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(data) });
 }
 

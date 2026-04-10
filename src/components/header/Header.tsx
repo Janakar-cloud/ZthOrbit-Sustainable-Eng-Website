@@ -99,7 +99,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
 
                   {/* Learn More */}
                   <button onClick={() => {
-                    setMoreMenuOpen(false); // 👈 close menu
+                    setMoreMenuOpen(false); //  close menu
                     window.open('https://seetharaman.com/', '_blank');
                   }}>
                     <FaInfoCircle /> Learn More

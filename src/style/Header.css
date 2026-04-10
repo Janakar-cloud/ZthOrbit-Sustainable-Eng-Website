@@ -356,8 +356,8 @@ body.dark .mobile-nav a:hover {
 }
 
 /* Brand colors */
-.more-dropdown button:nth-child(4) svg { color: #1877f2; } /* Facebook */
-.more-dropdown button:nth-child(5) svg { color: #1da1f2; } /* Twitter */
-.more-dropdown button:nth-child(6) svg { color: #0077b5; } /* LinkedIn */
-.more-dropdown button:nth-child(7) svg { color: #ff0000; } /* YouTube */
-.more-dropdown button:nth-child(8) svg { color: #e1306c; } /* Instagram */
+.more-dropdown button:nth-child(2) svg { color: #1877f2; } /* Facebook */
+.more-dropdown button:nth-child(3) svg { color: #1da1f2; } /* Twitter */
+.more-dropdown button:nth-child(4) svg { color: #0077b5; } /* LinkedIn */
+.more-dropdown button:nth-child(5) svg { color: #ff0000; } /* YouTube */
+.more-dropdown button:nth-child(6) svg { color: #e1306c; } /* Instagram */

@@ -41,11 +41,11 @@ const ContactSection: React.FC = () => {
             label: 'Visit our office',
             value: (
                 <>
-                    145, Abbusali St, Logaiah Colony
+                    145, Abbusali St,Logaiah
                     <br />
-                    Saligramam, Chennai
+                    Colony, Saligramam,
                     <br />
-                    Tamil Nadu 600092
+                    Chennai Tamil Nadu 600092
                 </>
             ),
             action: () =>
@@ -94,7 +94,7 @@ const ContactSection: React.FC = () => {
                             </div>
                             <h2>{item.title}</h2>
                             <p className="contact-label">{item.label}</p>
-                            <div className="contact-value">
+                            <div className= {item.title != "Location"? "contact-value":"contact-value address-box"}>
                                 {item.value}
                             </div>
                             <button className="contact-action" onClick={item.action}>

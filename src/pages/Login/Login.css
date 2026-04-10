@@ -440,7 +440,7 @@
 
 /* Brand Logo Image Styles */
 .brand-logo-image {
-  height: 50px;
+  height: 80px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }

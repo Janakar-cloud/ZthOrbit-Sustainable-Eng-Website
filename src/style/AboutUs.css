@@ -1576,3 +1576,12 @@
   transform: scale(1.5);
   transform-origin: center;
 }
+
+
+.address-box {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #555;
+  padding: 0px 0rem;
+}
+

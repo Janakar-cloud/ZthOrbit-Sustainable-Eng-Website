@@ -4,7 +4,7 @@ import { User } from "../models/User.js";
 import { Video } from "../models/Video.js";
 import { Podcast } from "../models/Podcast.js";
 import { Article } from "../models/Article.js";
-import { sendMail } from "../utils/mailer.js";
+import { sendMail, verifySmtp } from "../utils/mailer.js";
 import { env } from "../config/env.js";
 
 const router = Router();
@@ -137,6 +137,12 @@ router.post("/test-email", requireAuth(["superadmin", "admin", "editor"]), async
     console.error("[mailer:test]", err);
     res.status(500).json({ error: err?.message || "Failed to send" });
   }
+});
+
+/** Diagnostic: check SMTP config and test the live connection without sending a real email. */
+router.get("/smtp-status", requireAuth(["superadmin", "admin"]), async (_req, res) => {
+  const status = await verifySmtp();
+  res.status(status.connectionOk ? 200 : 503).json(status);
 });
 
 export default router;

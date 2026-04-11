@@ -17,10 +17,37 @@ const transporter = enabled
     })
   : null;
 
+/** Returns SMTP config status (masked) and tests the live connection. */
+export async function verifySmtp(): Promise<{ configured: boolean; host: string; port: number; secure: boolean; user: string; connectionOk: boolean; error?: string }> {
+  const config = {
+    configured: enabled,
+    host: env.smtp.host || "(not set)",
+    port: env.smtp.port,
+    secure: env.smtp.secure,
+    user: env.smtp.user
+      ? env.smtp.user.replace(/(.).+(@.+)/, "$1***$2")
+      : "(not set)",
+    connectionOk: false,
+    error: undefined as string | undefined,
+  };
+  if (!enabled || !transporter) {
+    config.error = "SMTP not configured — check SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM in .env";
+    return config;
+  }
+  try {
+    await transporter.verify();
+    config.connectionOk = true;
+  } catch (err: any) {
+    config.error = err?.message || "Unknown connection error";
+  }
+  return config;
+}
+
 export async function sendMail(to: string, subject: string, html: string) {
   if (!enabled || !transporter) {
-    console.warn("[mailer] SMTP not configured; email skipped");
-    return;
+    throw new Error(
+      "SMTP is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS and SMTP_FROM in the server .env file."
+    );
   }
   await transporter.sendMail({
     from: env.smtp.from,
@@ -46,9 +73,6 @@ export async function issueVerificationCode(email: string, userId: string) {
     <p>This code expires in 15 minutes.</p>
   `;
 
-  try {
-    await sendMail(email, "Verify your email", html);
-  } catch (err) {
-    console.warn("[mailer] failed to send verification email", err);
-  }
+  // Let errors propagate so callers can surface them properly
+  await sendMail(email, "Verify your email", html);
 }

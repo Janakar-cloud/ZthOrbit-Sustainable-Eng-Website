@@ -94,9 +94,14 @@ router.post("/register", async (req, res, next) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ email, passwordHash, name, phone, role: "viewer" });
 
-    await issueVerificationCode(user.email, user.id);
-
-    res.status(202).json({ message: "Verification code sent to email. Please verify before logging in." });
+    try {
+      await issueVerificationCode(user.email, user.id);
+      res.status(202).json({ message: "Verification code sent to email. Please verify before logging in." });
+    } catch (mailErr) {
+      console.error("[mailer] registration email failed:", mailErr);
+      // Account created but email failed — tell user to request a resend
+      res.status(202).json({ message: "Account created. Verification email could not be sent — please use 'Resend verification'." });
+    }
   } catch (err) {
     next(err);
   }

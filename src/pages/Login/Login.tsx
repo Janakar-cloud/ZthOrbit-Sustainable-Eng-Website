@@ -62,6 +62,11 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
           setIsLoading(false);
           return;
         }
+        if (password.trim().length < 8) {
+          setStatus({ message: 'Password must be at least 8 characters.', variant: 'error' });
+          setIsLoading(false);
+          return;
+        }
         if (!name.trim()) {
           setStatus({ message: 'Name is required to register.', variant: 'error' });
           setIsLoading(false);

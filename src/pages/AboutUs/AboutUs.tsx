@@ -58,7 +58,12 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
                 key={img.url}
                 className={`slideshow-image ${index === currentSlide ? 'active' : ''}`}
               >
-                <img src={img.url} alt={img.name} />
+                <img src={img.url} alt={img.name} loading="lazy"
+                  onLoad={(e) => {
+                    e.currentTarget.classList.add("loaded");
+                    e.currentTarget.previousElementSibling?.classList.add("hide-loader");
+                  }}
+                />
               </div>
             ))}
           </div>
@@ -71,12 +76,12 @@ export default function AboutUs({ onNavigate }: AboutUsProps) {
         </section>
 
         <section className="greentv-section">
-          <div className={`${darkMode ? "greentv-hero-dark":"greentv-hero"}`}>
+          <div className={`${darkMode ? "greentv-hero-dark" : "greentv-hero"}`}>
             <GreenTVSection />
           </div>
         </section>
 
-        <ContactSection/>
+        <ContactSection />
       </main>
 
       <Footer onNavigate={onNavigate} />

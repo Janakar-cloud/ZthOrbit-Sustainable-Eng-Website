@@ -506,6 +506,10 @@
   color: #1e293b;
   margin: 0 0 1rem 0;
   line-height: 1.4;
+   display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dark .episode-title {

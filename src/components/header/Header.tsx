@@ -65,6 +65,10 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
               src="/assets/images/GREENTVLOGO.png"
               alt="Green TV Logo"
               className="header-logo-image"
+                onLoad={(e) => {
+                    e.currentTarget.classList.add("loaded");
+                    e.currentTarget.previousElementSibling?.classList.add("hide-loader");
+                  }}
             />
             <h1 className="Header-logo">
               Green Generation <span className="logo-highlight">TV</span>
@@ -98,12 +102,12 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                 <div className="more-dropdown">
 
                   {/* Learn More */}
-                  <button onClick={() => {
+                  {/* <button onClick={() => {
                     setMoreMenuOpen(false); //  close menu
                     window.open('https://seetharaman.com/', '_blank');
                   }}>
                     <FaInfoCircle /> Learn More
-                  </button>
+                  </button> */}
 
                   {isAdmin && (
                     <button onClick={() => handleNavigate('admin')}>

@@ -6,6 +6,10 @@ export default function VideoGrid({
   className = '',
   cardClassName = '',
 }: VideoGridProps) {
+  const TEXT_LIMIT = 120;
+  const truncateText = (text: string = "", limit: number = TEXT_LIMIT) => {
+    return text.length > limit ? text.slice(0, limit) + "..." : text;
+  };
   return (
     <div className={`video-grid ${className}`}>
       {videos.map(video => (
@@ -19,7 +23,7 @@ export default function VideoGrid({
             <div className="video-overlay">
               <span className="material-icons play-icon">play_circle</span>
             </div>
-            <span className="video-category">{video.category}</span>
+            <span className="video-category">{truncateText(video.category, 15)}</span>
           </div>
 
           <div className="video-info">

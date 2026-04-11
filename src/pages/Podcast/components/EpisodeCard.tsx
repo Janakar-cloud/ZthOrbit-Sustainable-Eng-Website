@@ -8,6 +8,13 @@ const EpisodeCard = React.memo(function EpisodeCard({
   onPlay,
   onToggleComments
 }: EpisodeCardProps) {
+
+
+ const TEXT_LIMIT = 120;
+  const truncateText = (text: string = "", limit: number = TEXT_LIMIT) => {
+    return text.length > limit ? text.slice(0, limit) + "..." : text;
+  };
+
   return (
     <div key={podcast.id} className={`episode-card ${isPlaying ? 'playing' : ''}`}>
       <div className="episode-image-container">
@@ -16,10 +23,12 @@ const EpisodeCard = React.memo(function EpisodeCard({
           alt={podcast.title}
           className="episode-image"
         />
-        <div className="episode-category-badge">
-          {(podcast.categories?.length ? podcast.categories : [podcast.category]).map(c => (
+       <div className="episode-category-badge">
+          <span>{truncateText(podcast.category, 15)}</span>
+
+          {/* {(podcast.categories?.length ? podcast.categories : [podcast.category]).map(c => (
             <span key={c} style={{ marginRight: 4 }}>{c}</span>
-          ))}
+          ))} */}
         </div>
       </div>
 

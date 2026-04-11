@@ -8,6 +8,14 @@ export default function ArticleCard({
 }: ArticleCardProps) {
   const category = categories.find(c => c.id === normalizeCategoryKey(article.category))
 
+
+
+ const TEXT_LIMIT = 120;
+  const truncateText = (text: string = "", limit: number = TEXT_LIMIT) => {
+    return text.length > limit ? text.slice(0, limit) + "..." : text;
+  };
+
+
   return (
     <div
       className="article-card"
@@ -20,7 +28,7 @@ export default function ArticleCard({
           <span className="material-icons">
             {category?.icon}
           </span>
-          <span>{category?.name ?? article.category}</span>
+          <span>{truncateText(article.category,15)}</span>
         </div>
       </div>
 

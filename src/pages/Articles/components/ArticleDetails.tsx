@@ -93,7 +93,7 @@ export default function ArticleDetails({
         </div>
 
         {/* Footer */}
-        <div className="article-footer-section">
+        {/* <div className="article-footer-section">
           <div className="article-share">
             <h3>Share this article</h3>
 
@@ -109,7 +109,7 @@ export default function ArticleDetails({
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </article>

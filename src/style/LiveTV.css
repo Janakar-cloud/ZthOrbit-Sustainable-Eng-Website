@@ -258,7 +258,7 @@
   width: 100%;
   height: 100%;
   border: none;
-  object-fit: cover;
+  /* object-fit: cover; */
   pointer-events: none;  /* allow clicks to pass to video */
 
 }
@@ -312,6 +312,10 @@
   opacity: 0.95;
   max-width: 700px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .hero-video-controls {
@@ -521,6 +525,10 @@
   margin-bottom: 0.5rem;
   color: #1e293b;
   line-height: 1.4;
+   display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .livetv.dark .video-title {

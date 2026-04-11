@@ -44,7 +44,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h5 className="footer-heading">Company</h5>
             <ul className="footer-list">
               <li><a onClick={() => { setActivePage('about'); onNavigate('about') }}>About Us</a></li>
-              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles') }}>Blog</a></li>
+              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles') }}>Articles</a></li>
+              <li><a onClick={() => { setActivePage('podcast'); onNavigate('podcast') }}>Podcast</a></li>
               <li><a onClick={() => {
                 setActivePage('about');
                 onNavigate('about')
@@ -63,7 +64,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <p className="newsletter-description">
               Get the latest sustainability updates from our team.
             </p>
-            <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
+            {/* <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -72,7 +73,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <button type="submit" className="newsletter-button">
                 Subscribe
               </button>
-            </form>
+            </form> */}
           </div>
         </div>
 

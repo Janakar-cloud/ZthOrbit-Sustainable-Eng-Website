@@ -62,7 +62,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
           {/* Logo */}
           <div className="logo-container" onClick={() => handleNavigate('home')}>
             <img
-              src="/assets/images/GREENTVLOGO.png"
+              src="/assets/images/GREENTVLOGOHEADER.png"
               alt="Green TV Logo"
               className="header-logo-image"
                 onLoad={(e) => {

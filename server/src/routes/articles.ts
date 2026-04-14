@@ -1,11 +1,37 @@
 import { Router } from "express";
 import { z } from "zod";
 import { Article } from "../models/Article.js";
+import { Tag } from "../models/Tag.js";
 import { requireAuth } from "../middleware/auth.js";
 import { escapeRegex } from "../utils/regex.js";
 
 const router = Router();
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
+
+/**
+ * Accept either a 24-char hex ObjectId OR a human-readable tag name.
+ * Names are upserted into the Tag collection so they are always resolvable.
+ */
+async function resolveTagIds(values: string[]): Promise<string[]> {
+  if (!values.length) return [];
+  const ids: string[] = [];
+  for (const v of values) {
+    const trimmed = v.trim();
+    if (!trimmed) continue;
+    if (/^[0-9a-fA-F]{24}$/.test(trimmed)) {
+      ids.push(trimmed);
+      continue;
+    }
+    const name = trimmed.toUpperCase();
+    const tag = await Tag.findOneAndUpdate(
+      { name },
+      { $setOnInsert: { name, kind: "category" } },
+      { upsert: true, new: true }
+    );
+    ids.push(String(tag!._id));
+  }
+  return ids;
+}
 
 router.get("/", async (req, res, next) => {
   try {
@@ -74,7 +100,8 @@ router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res
   try {
   const parsed = articleSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const created = await Article.create({ ...parsed.data, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
+  const tagIds = await resolveTagIds(parsed.data.tags ?? []);
+  const created = await Article.create({ ...parsed.data, tags: tagIds, publishDate: parsed.data.publishDate ? new Date(parsed.data.publishDate) : undefined });
   res.status(201).json(created);
   } catch (err) { next(err); }
 });
@@ -83,7 +110,11 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
   try {
   const parsed = articleSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const updated = await Article.findByIdAndUpdate(req.params.id, parsed.data, { new: true, runValidators: true });
+  const updateData: any = { ...parsed.data };
+  if (parsed.data.tags !== undefined) {
+    updateData.tags = await resolveTagIds(parsed.data.tags);
+  }
+  const updated = await Article.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
   if (!updated) return res.status(404).json({ error: "Not found" });
   res.json(updated);
   } catch (err) { next(err); }

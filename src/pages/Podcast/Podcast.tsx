@@ -218,7 +218,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
         <div className={`podcast-page ${darkMode ? 'dark' : ''}`}>
           <Header onNavigate={onNavigate} />
           <PodcastHero
-            title="Green Generation Podcast"
+            title="The Green TV Podcast"
             subtitle="Conversations that inspire sustainable action and conscious leadership"
             imgStatus={true}
             className="podcast-hero"
@@ -241,7 +241,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       <Header onNavigate={onNavigate} />
 
       <PodcastHero
-        title="Green Generation Podcast"
+        title="The Green TV Podcast"
         subtitle="Conversations that inspire sustainable action and conscious leadership"
         imgStatus={true}
         className="podcast-hero"

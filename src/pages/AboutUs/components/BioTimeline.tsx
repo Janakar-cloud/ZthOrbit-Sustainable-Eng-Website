@@ -19,8 +19,8 @@ export default function BioTimeline() {
       />
 
       <TimelineItem
-        title="Green Generation TV"
-        text="Green Generation TV emerged from this vision, reflecting Dr. Seetharaman's belief that sustainability should not remain confined to policy documents, classrooms, or boardrooms—but must become part of everyday thinking and living."
+        title="The Green TV"
+        text="The Green TV emerged from this vision, reflecting Dr. Seetharaman's belief that sustainability should not remain confined to policy documents, classrooms, or boardrooms—but must become part of everyday thinking and living."
       />
 
       <TimelineItem

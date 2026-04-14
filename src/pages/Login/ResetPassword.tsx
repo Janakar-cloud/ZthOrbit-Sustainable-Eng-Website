@@ -48,7 +48,7 @@ export default function ResetPassword({ onNavigate }: ResetPasswordProps) {
             <div className="brand-icon">
               <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="brand-logo-image" />
             </div>
-            <h1>Green Generation TV</h1>
+            <h1>The Green TV</h1>
             <p className="brand-tagline">Empowering Sustainability Through Conscious Leadership</p>
           </div>
         </div>

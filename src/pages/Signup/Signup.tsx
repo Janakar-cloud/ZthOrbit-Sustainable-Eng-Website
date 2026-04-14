@@ -98,7 +98,7 @@ export default function Signup({ onNavigate }: SignupProps) {
           </div>
           <div className="logo-small">
             <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="logo-small-image" />
-            <span>Green Generation TV</span>
+            <span>The Green TV</span>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ export default function Signup({ onNavigate }: SignupProps) {
                     <textarea
                       id="goals"
                       rows={6}
-                      placeholder="Share what you hope to learn or achieve through Green Generation TV..."
+                      placeholder="Share what you hope to learn or achieve through The Green TV..."
                       value={formData.goals}
                       onChange={(e) => handleInputChange('goals', e.target.value)}
                     ></textarea>

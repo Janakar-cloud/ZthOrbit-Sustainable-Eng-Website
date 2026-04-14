@@ -21,7 +21,7 @@ describe('AboutUs Component', () => {
   it('renders header and contact section', () => {
     renderAboutUs()
 
-    expect(screen.getAllByText(/Green Generation/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/The Green TV/i).length).toBeGreaterThan(0)
     expect(screen.getByText(/Contact Information/i)).toBeInTheDocument()
   })
 
@@ -54,7 +54,7 @@ describe('AboutUs Component', () => {
     const user = userEvent.setup()
     renderAboutUs()
 
-    const logo = screen.getAllByText(/Green Generation/i)[0]
+    const logo = screen.getAllByText(/The Green TV/i)[0]
     await user.click(logo)
     expect(mockOnNavigate).toHaveBeenCalledWith('home')
   })

@@ -60,7 +60,7 @@ describe('App Component', () => {
     await user.click(screen.getAllByText('Podcast')[0])
     expect(screen.getByText(/Green Generation Podcast/i)).toBeInTheDocument()
 
-    await user.click(screen.getAllByText(/Green Generation/i)[0])
+    await user.click(screen.getAllByText(/The Green TV/i)[0])
     expect(screen.getByText(/EMPOWERING SUSTAINABILITY/i)).toBeInTheDocument()
   })
 })

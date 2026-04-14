@@ -24,10 +24,6 @@ export default function WorkSection<
                {subtitle}
               </p>
             </div>
-            <a href="#" className="work-view-all" onClick={(e) => { e.preventDefault(); viewAll() }}>
-              View All
-              <span className="material-icons">arrow_forward</span>
-            </a>
           </div>
           <div className="work-grid" style={{ cursor: 'pointer' }}>
             {items.map((item, i) => (

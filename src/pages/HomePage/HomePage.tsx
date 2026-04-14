@@ -103,10 +103,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 Discover our latest productions and featured content.
               </p>
             </div>
-            <a href="#" className="work-view-all">
-              View All
-              <span className="material-icons">arrow_forward</span>
-            </a>
           </div>
           <div className="work-grid" style={{ cursor: 'pointer' }}>
             {ourVideo.map((item, i) => (

@@ -40,7 +40,7 @@ router.get("/diagnose", requireAuth(["admin", "superadmin"]), async (_req, res) 
     };
 
     const [s3VideoKeys, s3PodcastKeys, dbVideos, dbPodcasts] = await Promise.all([
-      listKeys("LiveTV/"),
+      listKeys("videos/"),
       listKeys("podcast/"),
       Video.find({}, "title streamUrl thumbnailUrl").lean(),
       Podcast.find({}, "title audioUrl thumbnailUrl").lean(),

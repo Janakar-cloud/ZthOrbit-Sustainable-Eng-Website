@@ -72,7 +72,7 @@ export const env = {
       if (mode === "s3_playlist") return "s3_playlist";
       return "direct";
     })(),
-    s3Folder: process.env.LIVE_S3_FOLDER || "LiveTV",
+    s3Folder: process.env.LIVE_S3_FOLDER || "videos",
   },
   cloudFront: {
     streamDomain: process.env.CF_STREAM_DOMAIN || "",

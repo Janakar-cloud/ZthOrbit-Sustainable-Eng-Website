@@ -11,7 +11,7 @@ export const categories = [
 
 export const articles: Article[] = [
     {
-        id: 1,
+        id: '1',
         title: 'The Digital Ecosystem as the New Driver of Sustainable Economic Growth',
         subtitle: 'From Economic Fixes to Structural Transformation',
         category: 'economy',
@@ -28,7 +28,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 2,
+        id: '2',
         title: "India's Digital Convergence and the Imperative of Financial Inclusion in 2026",
         subtitle: 'India at a Strategic Inflection Point',
         category: 'economy',
@@ -48,7 +48,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 3,
+        id: '3',
         title: 'Global Economic Shifts, Technology Disruption, and the Future of Banking in 2026',
         subtitle: 'A Changing Global Financial Order',
         category: 'technology',
@@ -69,7 +69,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 4,
+        id: '4',
         title: "Global Investor Confidence and Qatar's Reaffirmed Financial Credibility",
         subtitle: 'A Bond Sale That Redefined Market Sentiment',
         category: 'economy',
@@ -87,7 +87,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 5,
+        id: '5',
         title: 'Banking Transformation in Qatar—From Crisis Response to Strategic Reinvention',
         subtitle: 'A Shift from Stability to Strategy',
         category: 'economy',
@@ -106,7 +106,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 6,
+        id: '6',
         title: 'Why India Is Central to the Next Phase of Emerging-Market Banking Strategy',
         subtitle: 'Emerging Markets in a Multipolar World',
         category: 'economy',
@@ -125,7 +125,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 7,
+        id: '7',
         title: 'Sustainable Development Goals as a Strategic Framework for Global Stability',
         subtitle: 'From Global Vision to Economic Imperative',
         category: 'sustainability',
@@ -146,7 +146,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 8,
+        id: '8',
         title: 'Delivering the SDGs Through Technology, Governance, and Measurable Impact',
         subtitle: 'The Shift from Commitment to Execution',
         category: 'sustainability',
@@ -166,7 +166,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 9,
+        id: '9',
         title: 'Sustainability as the Foundation of Long-Term Value Creation',
         subtitle: 'From Optional Initiative to Strategic Necessity',
         category: 'sustainability',
@@ -185,7 +185,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 10,
+        id: '10',
         title: 'Corporate Consciousness—Redefining the Role of Leadership',
         subtitle: 'Beyond Shareholder Primacy',
         category: 'leadership',
@@ -203,7 +203,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 11,
+        id: '11',
         title: 'Ethical Decision-Making in an Era of Complexity and Disruption',
         subtitle: 'Ethics Under Pressure',
         category: 'ethics',
@@ -221,7 +221,7 @@ export const articles: Article[] = [
         ]
     },
     {
-        id: 12,
+        id: '12',
         title: 'Aligning Sustainability, Ethics, and Governance for the Future',
         subtitle: 'The Role of Systems and Governance',
         category: 'ethics',

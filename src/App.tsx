@@ -76,7 +76,7 @@ function App() {
   }, [handleNavigate])
 
   const handleLogin = () => {
-    handleNavigate('admin')
+    handleNavigate(isAdmin ? 'admin' : 'home')
   }
 
   const handleSignupComplete = () => {

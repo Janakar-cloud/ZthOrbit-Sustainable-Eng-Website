@@ -44,6 +44,21 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
     loginWithTokens(accessToken, refreshToken);
   };
 
+  const redirectToDashboard = (preferredUrl: string, accessToken: string, refreshToken: string) => {
+    // Open dashboard in same tab. Tokens are passed via postMessage after the
+    // new window fires a "ready" ping — never appear in URLs, logs, or history.
+    const win = window.open(preferredUrl, '_self');
+    if (!win) return; // blocked — fall through to onLogin()
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== new URL(preferredUrl).origin) return;
+      if (e.data === 'dashboard:ready') {
+        win.postMessage({ type: 'auth:tokens', accessToken, refreshToken }, new URL(preferredUrl).origin);
+        window.removeEventListener('message', onMsg);
+      }
+    };
+    window.addEventListener('message', onMsg);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus(null);
@@ -88,10 +103,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
         storeTokens(tokens.accessToken, tokens.refreshToken);
         setStatus({ message: 'Verified! Logging you in...', variant: 'success' });
         if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
-          const url = new URL(tokens.app.preferredUrl);
-          url.searchParams.set('access_token', tokens.accessToken);
-          if (tokens.refreshToken) url.searchParams.set('refresh_token', tokens.refreshToken);
-          window.location.href = url.toString();
+          redirectToDashboard(tokens.app.preferredUrl, tokens.accessToken, tokens.refreshToken);
           return;
         }
         onLogin();
@@ -108,10 +120,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
       storeTokens(tokens.accessToken, tokens.refreshToken);
       setStatus({ message: 'Welcome back! Redirecting...', variant: 'success' });
       if (tokens.app?.shouldUseDashboard && tokens.app.preferredUrl) {
-        const url = new URL(tokens.app.preferredUrl);
-        url.searchParams.set('access_token', tokens.accessToken);
-        if (tokens.refreshToken) url.searchParams.set('refresh_token', tokens.refreshToken);
-        window.location.href = url.toString();
+        redirectToDashboard(tokens.app.preferredUrl, tokens.accessToken, tokens.refreshToken);
         return;
       }
       onLogin();
@@ -200,7 +209,7 @@ export default function Login({ onNavigate, onLogin }: LoginProps) {
             <div className="brand-icon">
               <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="brand-logo-image" />
             </div>
-            <h1>Green Generation TV</h1>
+            <h1>The Green TV</h1>
             <p className="brand-tagline">Empowering Sustainability Through Conscious Leadership</p>
           </div>
 

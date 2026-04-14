@@ -14,6 +14,18 @@ const router = Router();
 // Allowed S3 key prefixes. Prevents callers from writing outside intended folders.
 const ALLOWED_PREFIXES = ["videos", "podcasts", "articles", "thumbnails", "images", "covers", "LiveTV"];
 
+// Allowed content types for upload. Prevents presigned URLs for executable content.
+const ALLOWED_CONTENT_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif",
+  "video/mp4", "video/quicktime", "video/webm", "video/x-matroska", "video/x-msvideo",
+  "audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/ogg", "audio/wav", "audio/aac", "audio/flac",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+  "text/html",
+  "text/plain",
+];
+
 const prefixSchema = z.string().min(1).refine(
   (p) => ALLOWED_PREFIXES.some((a) => p === a || p.startsWith(`${a}/`)),
   { message: `prefix must start with one of: ${ALLOWED_PREFIXES.join(", ")}` }
@@ -21,7 +33,10 @@ const prefixSchema = z.string().min(1).refine(
 
 const schema = z.object({
   prefix: prefixSchema,
-  contentType: z.string().min(1),
+  contentType: z.string().min(1).refine(
+    (ct) => ALLOWED_CONTENT_TYPES.includes(ct.split(";")[0].trim().toLowerCase()),
+    { message: `contentType must be one of the allowed media types` }
+  ),
 });
 
 router.post("/presign", requireAuth(["superadmin", "admin", "editor"]), async (req, res) => {

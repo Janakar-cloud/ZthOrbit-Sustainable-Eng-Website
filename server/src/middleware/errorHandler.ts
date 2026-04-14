@@ -11,7 +11,10 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     });
   }
   const status = err.status || 500;
-  res.status(status).json({
-    error: err.message || "Unexpected error",
-  });
+  // Never leak internal error details in production for 5xx responses
+  const message =
+    status < 500 || process.env.NODE_ENV !== "production"
+      ? err.message || "Unexpected error"
+      : "An unexpected error occurred. Please try again later.";
+  res.status(status).json({ error: message });
 }

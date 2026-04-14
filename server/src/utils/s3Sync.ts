@@ -211,16 +211,20 @@ export async function ensureMediaUniqueIndexes(): Promise<void> {
 async function deleteMissingS3BackedRecords(
   videoFiles: { key: string }[],
   podcastFiles: { key: string }[],
-  articleFiles: { key: string }[]
+  articleFiles: { key: string }[],
+  articleContentFiles: { key: string }[] = []
 ): Promise<{ videos: number; podcasts: number; articles: number }> {
   const videoKeys = new Set(videoFiles.map(({ key }) => key));
   const podcastKeys = new Set(podcastFiles.map(({ key }) => key));
+  // Legacy DOCX/PDF files under articels/ (typo prefix)
   const articleKeys = new Set(articleFiles.map(({ key }) => key));
+  // HTML body files uploaded via dashboard API under articles/
+  const articleContentKeys = new Set(articleContentFiles.map(({ key }) => key));
 
   const [videos, podcasts, articles] = await Promise.all([
     Video.find({}, "streamUrl").lean(),
     Podcast.find({}, "audioUrl").lean(),
-    Article.find({}, "bodyMd").lean(),
+    Article.find({}, "bodyMd bodyHtml").lean(),
   ]);
 
   const videoIdsToDelete = (videos as Array<{ _id: MongoIdLike; streamUrl?: string }>)
@@ -237,10 +241,19 @@ async function deleteMissingS3BackedRecords(
     })
     .map((doc) => doc._id);
 
-  const articleIdsToDelete = (articles as Array<{ _id: MongoIdLike; bodyMd?: string }>)
+  const articleIdsToDelete = (articles as Array<{ _id: MongoIdLike; bodyMd?: string; bodyHtml?: string }>)
     .filter((doc) => {
-      const key = doc.bodyMd ? extractArticleFileKey(doc.bodyMd) : null;
-      return key ? !articleKeys.has(key) : false;
+      // Legacy S3-drop articles: bodyMd contains an articels/ S3 URL
+      if (doc.bodyMd) {
+        const key = extractArticleFileKey(doc.bodyMd);
+        if (key) return !articleKeys.has(key);
+      }
+      // Dashboard-uploaded articles: bodyHtml is a URL under articles/
+      if (doc.bodyHtml) {
+        const key = extractS3KeyFromPublicUrl(doc.bodyHtml, "articles/");
+        if (key) return !articleContentKeys.has(key);
+      }
+      return false;
     })
     .map((doc) => doc._id);
 
@@ -285,17 +298,13 @@ async function syncVideos(files: { key: string; lastModified: Date }[], thumbMap
         updated++;
       }
     } else {
-      await Video.create({
-        title,
-        description: "",
-        streamUrl,
-        thumbnailUrl: thumbnail,
-        publishDate: lastModified,
-        status: "published",
-        isLive: false,
-        tags: [],
-      });
-      added++;
+      const normalizedTitle = normalizeMediaTitle(title);
+      const upserted = await Video.findOneAndUpdate(
+        { normalizedTitle },
+        { $setOnInsert: { title, description: "", streamUrl, thumbnailUrl: thumbnail, publishDate: lastModified, status: "published", isLive: false, tags: [] } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+      if (upserted) added++;
     }
   }
   return { added, updated };
@@ -326,15 +335,12 @@ async function syncPodcasts(files: { key: string; lastModified: Date }[], thumbM
         updated++;
       }
     } else {
-      await Podcast.create({
-        title,
-        description: "",
-        audioUrl,
-        imageUrl,
-        publishDate: lastModified,
-        status: "published",
-        tags: [],
-      });
+      const normalizedTitle = normalizeMediaTitle(title);
+      await Podcast.findOneAndUpdate(
+        { normalizedTitle },
+        { $setOnInsert: { title, description: "", audioUrl, imageUrl, publishDate: lastModified, status: "published", tags: [] } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
       added++;
     }
   }
@@ -367,16 +373,12 @@ async function syncArticles(files: { key: string; lastModified: Date }[], thumbM
         updated++;
       }
     } else {
-      await Article.create({
-        title,
-        subtitle: "",
-        bodyMd,
-        coverImage,
-        publishDate: lastModified,
-        status: "published",
-        featured: false,
-        tags: [],
-      });
+      const normalizedTitle = normalizeMediaTitle(title);
+      await Article.findOneAndUpdate(
+        { normalizedTitle },
+        { $setOnInsert: { title, subtitle: "", bodyMd, coverImage, publishDate: lastModified, status: "published", featured: false, tags: [] } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
       added++;
     }
   }
@@ -400,10 +402,11 @@ export async function syncS3ToDb(): Promise<SyncResult> {
   const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
   const ARTICLE_EXTS = [".docx", ".doc", ".pdf"];
 
-  const [videoItems, podcastItems, articleItems, videoThumbs, podcastThumbs, articleThumbs] = await Promise.all([
+  const [videoItems, podcastItems, articleItems, articleContentItems, videoThumbs, podcastThumbs, articleThumbs] = await Promise.all([
     listAllKeys("LiveTV"),
     listAllKeys("podcast"),
     listAllKeys("articels"),
+    listAllKeys("articles"),
     buildThumbnailMap("Thumbnail/videos"),
     buildThumbnailMap("Thumbnail/podcast"),
     buildThumbnailMap("Thumbnail/articels"),
@@ -412,8 +415,10 @@ export async function syncS3ToDb(): Promise<SyncResult> {
   const videoFiles = videoItems.filter(({ key }) => VIDEO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
   const podcastFiles = podcastItems.filter(({ key }) => AUDIO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
   const articleFiles = articleItems.filter(({ key }) => ARTICLE_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
+  // HTML content files uploaded via dashboard API (used only for deletion tracking)
+  const articleContentFiles = articleContentItems.filter(({ key }) => key.toLowerCase().endsWith(".html"));
 
-  const removed = await deleteMissingS3BackedRecords(videoFiles, podcastFiles, articleFiles);
+  const removed = await deleteMissingS3BackedRecords(videoFiles, podcastFiles, articleFiles, articleContentFiles);
   await cleanupDuplicateTitles();
 
   // Sync each collection in parallel

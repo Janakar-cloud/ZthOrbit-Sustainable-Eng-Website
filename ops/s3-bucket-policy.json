@@ -23,11 +23,11 @@
       "Resource": "arn:aws:s3:::greentv-s3/thumbnails/*"
     },
     {
-      "Sid": "PublicReadVideoThumbnails",
+      "Sid": "PublicReadThumbnailAll",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::greentv-s3/Thumbnail/videos/*"
+      "Resource": "arn:aws:s3:::greentv-s3/Thumbnail/*"
     },
     {
       "Sid": "PublicReadArticles",
@@ -37,11 +37,11 @@
       "Resource": "arn:aws:s3:::greentv-s3/articles/*"
     },
     {
-      "Sid": "PublicReadArticleThumbnails",
+      "Sid": "PublicReadArticlesLegacyTypo",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::greentv-s3/Thumbnail/articles/*"
+      "Resource": "arn:aws:s3:::greentv-s3/articels/*"
     },
     {
       "Sid": "PublicReadPodcasts",
@@ -58,11 +58,18 @@
       "Resource": "arn:aws:s3:::greentv-s3/podcast/*"
     },
     {
-      "Sid": "PublicReadPodcastThumbnails",
+      "Sid": "PublicReadImages",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::greentv-s3/Thumbnail/podcast/*"
+      "Resource": "arn:aws:s3:::greentv-s3/images/*"
+    },
+    {
+      "Sid": "PublicReadCovers",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::greentv-s3/covers/*"
     }
   ]
 }

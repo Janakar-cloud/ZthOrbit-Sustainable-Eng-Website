@@ -92,7 +92,7 @@ export function logout(refreshTk: string) {
 export function requestPasswordReset(email: string) {
   return request<{ success: boolean }>("/auth/request-reset", {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, app: "public" }),
   });
 }
 

@@ -30,15 +30,20 @@ for (const key of required) {
   }
 }
 
+// In production CORS_ORIGINS must be explicit — wildcard is not safe
+if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGINS) {
+  console.warn("[env] CORS_ORIGINS not set in production — defaulting to restrictive empty list. Set CORS_ORIGINS to allow frontend access.");
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT || 4000),
   mongoUri: process.env.MONGODB_URI || "mongodb://localhost:27017/zthorbit",
   jwtSecret: process.env.JWT_SECRET || "changeme",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "changeme-refresh",
-  appUrl: process.env.APP_URL || "http://localhost:3000",
-  dashboardUrl: process.env.DASHBOARD_URL || process.env.APP_URL || "http://localhost:3000",
-  corsOrigins: (process.env.CORS_ORIGINS || "*")
+  appUrl: process.env.APP_URL || "http://localhost:5173",
+  dashboardUrl: process.env.DASHBOARD_URL || "http://localhost:3039",
+  corsOrigins: (process.env.CORS_ORIGINS || (process.env.NODE_ENV === "production" ? "" : "*"))
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean),

@@ -252,33 +252,44 @@ async function deleteMissingS3BackedRecords(
 
 async function syncVideos(files: { key: string; lastModified: Date }[], thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
   let added = 0, updated = 0;
+  // UUID pattern — keys like videos/0268ab14-cbde-4c76-843e-1bca53273840 (dashboard uploads)
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
   for (const { key, lastModified } of files) {
     const streamUrl = s3Url(key);
     const fileName  = key.split("/").pop() ?? key;
+    const fileBase  = baseName(fileName);
+    const isUuidKey = UUID_RE.test(fileBase);
     const thumbnail = matchThumbnail(fileName, thumbMap);
-    const title     = titleFromKey(key);
+    const title     = isUuidKey ? fileBase : titleFromKey(key);
 
-    const titleRegex = new RegExp(`^${escapeRegex(title)}$`, "i");
-    const existing = await Video.findOne({
-      $or: [{ streamUrl }, { title: titleRegex }],
-    });
+    // For UUID keys, find only by streamUrl (title match would be meaningless)
+    const existing = await Video.findOne(
+      isUuidKey
+        ? { streamUrl }
+        : { $or: [{ streamUrl }, { title: new RegExp(`^${escapeRegex(title)}$`, "i") }] }
+    );
+
     if (existing) {
-      // Always re-sync title and thumbnail so renames/new thumbnails in S3 reflect immediately
+      // Never overwrite a dashboard-set title with a raw UUID
+      const titleToSet = isUuidKey ? existing.title : title;
       const needsUpdate =
-        existing.title !== title ||
+        (!isUuidKey && existing.title !== titleToSet) ||
         (thumbnail && existing.thumbnailUrl !== thumbnail);
       if (needsUpdate) {
         await Video.updateOne(
           { _id: existing._id },
-          { title, ...(thumbnail && { thumbnailUrl: thumbnail }) }
+          { title: titleToSet, ...(thumbnail && { thumbnailUrl: thumbnail }) }
         );
         updated++;
       }
     } else {
-      const normalizedTitle = normalizeMediaTitle(title);
+      // New record — use UUID as placeholder title if no better name available
+      const insertTitle = isUuidKey ? `Video ${fileBase.slice(0, 8)}` : title;
+      const normalizedTitle = normalizeMediaTitle(insertTitle);
       const upserted = await Video.findOneAndUpdate(
         { normalizedTitle },
-        { $setOnInsert: { title, description: "", streamUrl, thumbnailUrl: thumbnail, publishDate: lastModified, status: "published", isLive: false, tags: [] } },
+        { $setOnInsert: { title: insertTitle, description: "", streamUrl, thumbnailUrl: thumbnail, publishDate: lastModified, status: "published", isLive: false, tags: [] } },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       if (upserted) added++;
@@ -375,7 +386,6 @@ export interface SyncResult {
 export async function syncS3ToDb(): Promise<SyncResult> {
   const start = Date.now();
 
-  const VIDEO_EXTS = [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".ts"];
   const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
 
   const [videoItems, podcastItems, videoThumbs, podcastThumbs] = await Promise.all([
@@ -385,7 +395,8 @@ export async function syncS3ToDb(): Promise<SyncResult> {
     buildThumbnailMap("Thumbnail/podcast"),
   ]);
 
-  const videoFiles = videoItems.filter(({ key }) => VIDEO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
+  // Accept all objects under videos/ regardless of extension (dashboard uploads use UUID keys with no extension)
+  const videoFiles = videoItems;
   const podcastFiles = podcastItems.filter(({ key }) => AUDIO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
 
   // Articles are managed exclusively via the dashboard API — no S3 folder sync

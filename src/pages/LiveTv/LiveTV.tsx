@@ -1,18 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
-
-function getMimeType(url: string): string {
-  const ext = (url ?? '').split('?')[0].split('.').pop()?.toLowerCase() ?? '';
-  const map: Record<string, string> = {
-    mp4: 'video/mp4', m4v: 'video/mp4',
-    mov: 'video/quicktime',
-    webm: 'video/webm',
-    mkv: 'video/x-matroska',
-    avi: 'video/x-msvideo',
-    ts: 'video/mp2t',
-    ogv: 'video/ogg',
-  };
-  return map[ext] ?? 'video/mp4';
-}
+import { useState, useEffect } from 'react'
 import '../../style/LiveTV.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -36,17 +22,13 @@ interface LiveTVProps {
 export default function LiveTV({ onNavigate }: LiveTVProps) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
-  const [liveVideos, setLiveVideos] = useState<Video[]>([]);
-  const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const { darkMode } = useAppContext()
-  const [currentTime, setCurrentTime] = useState(new Date())
   const [videos, setVideos] = useState<Video[]>([])
   const [videoCategories, setVideoCategories] = useState<VideoCategory[]>([{
     key: 'all',
     label: 'ALL VIDEOS',
     icon: 'apps'
   }])
-  const videoRef = useRef<HTMLVideoElement | null>(null)
   const { videocast, loading, error, refetch } = LiveVideo();
   const { categories: sharedCategories } = useSharedCategories();
 
@@ -84,16 +66,12 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       }
     };
 
-    // Hero player: all videos that have a playable stream URL
-    const heroVideos: Video[] = videocast.items
-      .filter((item: any) => !!(item.streamUrl || item.fileUrl || item.hlsUrl || item.url))
-      .map(mapVideo);
-
     // Grid: only videos that also have a thumbnail (for card display)
-    const gridVideos: Video[] = heroVideos
+    const gridVideos: Video[] = videocast.items
+      .filter((item: any) => !!(item.streamUrl || item.fileUrl || item.hlsUrl || item.url))
+      .map(mapVideo)
       .filter((v) => typeof v.thumbnail === 'string' && v.thumbnail.trim().length > 0);
 
-    setLiveVideos(heroVideos);
     setVideos(gridVideos);
     const categoryList = buildCategoryList(sharedCategories, gridVideos);
     setVideoCategories(categoryList);
@@ -124,69 +102,6 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
         }))
     ];
   };
-
-  //  Load saved session (index + time)
-  useEffect(() => {
-    const savedIndex = localStorage.getItem("currentVideoIndex")
-    const savedTime = localStorage.getItem("videoTime")
-
-    if (savedIndex !== null) {
-      setCurrentHeroVideoIndex(Number(savedIndex))
-      // index will be clamped after videos load in the reset effect
-    }
-
-    // restore time after video loads
-    setTimeout(() => {
-      if (savedTime && videoRef.current) {
-        videoRef.current.currentTime = Number(savedTime)
-      }
-    }, 500)
-
-    // Clock
-    const clockTimer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => clearInterval(clockTimer)
-  }, [])
-
-  // Clamp hero index to valid range whenever videos change
-  useEffect(() => {
-    if (liveVideos.length > 0) {
-      setCurrentHeroVideoIndex(prev => Math.min(prev, liveVideos.length - 1))
-    }
-  }, [liveVideos])
-
-  // Save playback time
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      localStorage.setItem(
-        "videoTime",
-        videoRef.current.currentTime.toString()
-      )
-    }
-  }
-
-  // Auto next video + save index
-  const handleVideoEnd = () => {
-    setCurrentHeroVideoIndex((prev) => {
-      const nextIndex = liveVideos.length ? (prev + 1) % liveVideos.length : 0
-      localStorage.setItem("currentVideoIndex", nextIndex.toString())
-      localStorage.setItem("videoTime", "0")
-      return nextIndex
-    })
-  }
-
-  // select popvideo make live video pause
-  useEffect(() => {
-    if (videoRef.current) {
-      if (selectedVideo) {
-        videoRef.current.muted = true;   // mute when modal opens
-      } else {
-        videoRef.current.muted = false;  // unmute when modal closes
-      }
-    }
-  }, [selectedVideo]);
 
   // Filter videos (grid section)
   const filteredVideos =
@@ -231,52 +146,6 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
     <div className={`livetv ${darkMode ? 'dark' : ''}`}>
 
       <Header onNavigate={onNavigate} />
-
-      <section className="livetv-hero">
-        <div className="hero-video-carousel">
-
-          {/*VIDEO PLAYER */}
-          <video
-            ref={videoRef}
-            key={currentHeroVideoIndex}
-            className="hero-video-player"
-            controls={false}
-            autoPlay
-            playsInline
-            preload="auto"
-            onEnded={handleVideoEnd}
-            onTimeUpdate={handleTimeUpdate}
-          >
-            <source
-              src={liveVideos[currentHeroVideoIndex]?.streamUrl || ''}
-              type={getMimeType(liveVideos[currentHeroVideoIndex]?.streamUrl || '')}
-            />
-          </video>
-
-          {/*  LIVE TAG */}
-          <div className="live-container">
-            <div className="live-tag">LIVE</div>
-            <div className="live-time">
-              {currentTime.toLocaleTimeString()}
-            </div>
-          </div>
-
-          {/* OVERLAY */}
-          <div className="hero-video-overlay">
-            <div className="hero-video-info">
-              <span className="hero-video-category">
-                {liveVideos[currentHeroVideoIndex]?.category}
-              </span>
-              <h2 className="hero-video-title">
-                {liveVideos[currentHeroVideoIndex]?.title}
-              </h2>
-              <p className="hero-video-description">
-                {liveVideos[currentHeroVideoIndex]?.description}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* VIDEO GRID */}
       <div className="livetv-container">

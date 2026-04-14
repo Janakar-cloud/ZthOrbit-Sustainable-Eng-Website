@@ -19,7 +19,8 @@ const PATH_TO_PAGE: Record<string, string> = {
   '/admin': 'admin',
   '/articles': 'articles',
   '/podcast': 'podcast',
-  '/livetv': 'livetv',
+  '/livetv': 'videos',
+  '/videos': 'videos',
   '/forgot-password': 'forgot-password',
   '/reset': 'reset',
   // '/casestories': 'casestories',
@@ -95,7 +96,7 @@ function App() {
       )}
       {activePage === 'articles' && <Articles onNavigate={handleNavigate} />}
       {activePage === 'podcast' && <Podcast onNavigate={handleNavigate} />}
-      {activePage === 'livetv' && <LiveTV onNavigate={handleNavigate} />}
+      {activePage === 'videos' && <LiveTV onNavigate={handleNavigate} />}
       {activePage === 'forgot-password' && <ForgotPassword onNavigate={handleNavigate} />}
       {activePage === 'reset' && <ResetPassword onNavigate={handleNavigate} />}
     </>

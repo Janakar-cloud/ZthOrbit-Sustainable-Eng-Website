@@ -6,6 +6,7 @@ import Footer from '../../components/footer/Footer'
 import PodcastModal from '../../components/PodcastModal'
 import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
+import LiveTvHeroPlayer from '../LiveTv/components/LiveTvHeroPlayer'
 import {Video, Podcast, HomePageProps} from './type/type'
 import {latestVideo,articlesData,liveTVVideos,liveTv,ourVideo,podcast,podcastEpisodes} from './data/data'
 import { useHomeData } from '../../hooks/home'
@@ -125,6 +126,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </section>
 
+        {/* Live TV Hero Player */}
+        <LiveTvHeroPlayer isModalOpen={!!selectedVideo || !!selectedPodcast} />
+
         <section className="work-section">
           <div className="work-header">
             <div className="work-header-left">
@@ -181,14 +185,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
 
 
-       {/* Live Tv */}
+       {/* Videos */}
         <WorkSection
-          title="Live TV"
-          subtitle="Discover our latest live broadcasts and streaming content."
+          title="Videos"
+          subtitle="Discover our latest videos and streaming content."
           items={liveTvItems}
           viewAll={() => {
-             onNavigate('livetv')
-             setActivePage('livetv')
+             onNavigate('videos')
+             setActivePage('videos')
           }}
           onItemClick={(_, position) => playVideo(videosForModal[position])}
         />

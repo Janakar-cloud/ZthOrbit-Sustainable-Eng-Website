@@ -35,7 +35,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h5 className="footer-heading">Explore</h5>
             <ul className="footer-list">
               <li><a onClick={() => { setActivePage('home'); onNavigate('home') }}>Home</a></li>
-              <li><a onClick={() => { setActivePage('livetv'); onNavigate('livetv') }}>Videos</a></li>
+              <li><a onClick={() => { setActivePage('videos'); onNavigate('videos') }}>Videos</a></li>
             </ul>
           </div>
 

@@ -2,9 +2,9 @@ import {ArticleItem,LiveTvItem,PodcastItem,Video, Podcast} from '../type/type'
 
 
 export const ourVideo = [
-    { title: "Latest Videos", desc: "Check out our newest visual creations.", onNavigation: "livetv", isPlay: false, imgurl: "/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" },
+    { title: "Latest Videos", desc: "Check out our newest visual creations.", onNavigation: "videos", isPlay: false, imgurl: "/assets/images/Sustainable development goals as a strategic framework for global stability (2).png" },
     { title: "Featured Podcasts", desc: "Tune in to our most popular series.", onNavigation: "podcast", isPlay: false, imgurl: "/assets/images/AI & Sustainability.jpeg" },
-    { title: "Recent Productions", desc: "Explore the work we're most proud of.", onNavigation: "livetv", isPlay: false, imgurl: "/assets/images/delivering the sdg through the technology, governance and measurable impact.png" },
+    { title: "Recent Productions", desc: "Explore the work we're most proud of.", onNavigation: "videos", isPlay: false, imgurl: "/assets/images/delivering the sdg through the technology, governance and measurable impact.png" },
     { title: "Top Documentaries", desc: "Stories that matter, told visually.", onNavigation: "articles", isPlay: false, imgurl: "/assets/images/Governance-Risk-Management-and-Compliance.webp" }
 ]
 

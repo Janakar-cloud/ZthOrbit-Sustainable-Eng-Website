@@ -77,7 +77,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
 
           {/* Desktop Navigation */}
           <nav className="desktop-nav">
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('livetv') }} className={isActive('livetv')}>LiveTV</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('videos') }} className={isActive('videos')}>Videos</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('podcast') }} className={isActive('podcast')}>Podcast</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('articles') }} className={isActive('articles')}>Articles</a>
             <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('about') }} className={isActive('about')}>About Us</a>
@@ -250,7 +250,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="mobile-nav">
-          <a onClick={() => handleNavigate('livetv')}>LiveTV</a>
+          <a onClick={() => handleNavigate('videos')}>Videos</a>
           <a onClick={() => handleNavigate('podcast')}>Podcast</a>
           <a onClick={() => handleNavigate('articles')}>Articles</a>
           <a onClick={() => handleNavigate('about')}>About Us</a>

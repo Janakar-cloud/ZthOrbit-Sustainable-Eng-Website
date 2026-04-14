@@ -92,40 +92,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <Header onNavigate={onNavigate} />
 
       <main className="main-container">
-        <section className="hero-section">
-          <div className="hero-background">
-            <img
-              src="/assets/images/seetharaman/Seetharaman2.jpg"
-              alt="Dr. R. Seetharaman - Sustainable Leadership"
-              className="hero-bg-image"
-            />
-            <div className="hero-overlay-bg"></div>
-          </div>
-          <div className="hero-content-container">
-            <div className="hero-text-box-home">
-              <div className="hero-icon-home">
-                <img src="/assets/images/GREENTVLOGO.png" alt="Green TV Logo" className="hero-logo-image" />
-              </div>
-              <h1 className="hero-heading-home">EMPOWERING SUSTAINABILITY</h1>
-              <p className="hero-subheading-home">Through Conscious Leadership and Media</p>
-              <div className="hero-stats-home">
-                <div className="hero-stat-home">
-                  <span className="stat-number-home">20+</span>
-                  <span className="stat-label-home">Years Leadership</span>
-                </div>
-                <div className="hero-stat-home">
-                  <span className="stat-number-home">Global</span>
-                  <span className="stat-label-home">Impact</span>
-                </div>
-                <div className="hero-stat-home">
-                  <span className="stat-number-home">Future</span>
-                  <span className="stat-label-home">Generation</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Live TV Hero Player */}
         <LiveTvHeroPlayer isModalOpen={!!selectedVideo || !!selectedPodcast} />
 

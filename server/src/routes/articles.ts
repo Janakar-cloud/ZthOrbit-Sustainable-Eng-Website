@@ -42,8 +42,12 @@ router.get("/", async (req, res, next) => {
   const filter: any = {};
   if (tag) filter.tags = tag;
   if (featured !== undefined) filter.featured = featured === "true";
-  filter.status = (status as string) || "published";
-  filter.coverImage = HAS_IMAGE;
+  // 'all' = dashboard admin view — no status or coverImage filter so every article is visible
+  const isAdminView = (status as string) === 'all';
+  if (!isAdminView) {
+    filter.status = (status as string) || "published";
+    filter.coverImage = HAS_IMAGE;
+  }
   if (search) {
     const safe = escapeRegex(search as string);
     filter.$or = [

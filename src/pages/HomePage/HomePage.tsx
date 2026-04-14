@@ -152,10 +152,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           title="Videos"
           subtitle="Discover our latest videos and streaming content."
           items={liveTvItems}
-          viewAll={() => {
-             onNavigate('videos')
-             setActivePage('videos')
-          }}
           onItemClick={(_, position) => playVideo(videosForModal[position])}
         />
 
@@ -164,11 +160,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           title="Podcasts"
           subtitle="Listen to inspiring conversations and insights on sustainability."
           items={podcastItems}
-          viewAll={() => {
-            onNavigate('podcast')
-            setActivePage('podcast')
-            }
-          }
           onItemClick={(_, position) => playPodcast(podcastsForModal[position])}
         />
 
@@ -178,11 +169,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           title="Articles"
           subtitle="Read thought leadership on sustainable development and innovation."
           items={articleItems}
-          viewAll={() => {
-            onNavigate('articles')
-            setActivePage('articles')
-           }
-          }
           onItemClick={() => {
             onNavigate('articles')
             setActivePage('articles')

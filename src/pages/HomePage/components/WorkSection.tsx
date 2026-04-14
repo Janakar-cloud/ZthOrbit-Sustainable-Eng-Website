@@ -2,7 +2,6 @@ interface Props<T> {
   title: string
   subtitle: string
   items: T[]
-  viewAll: () => void
   onItemClick: (item: T, poistion: number) => void
 }
 
@@ -12,7 +11,6 @@ export default function WorkSection<
   title,
   subtitle,
   items,
-  viewAll,
   onItemClick
 }: Props<T>) {
   return (

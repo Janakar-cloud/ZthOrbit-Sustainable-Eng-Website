@@ -368,8 +368,8 @@ router.put("/:id", requireAuth(["superadmin", "admin", "editor"]), async (req, r
 
   const data = parsed.data;
 
-  // Enforce min 2 when categories are being updated
-  if (data.categories !== undefined && data.categories.length < 2) {
+  // Enforce min 2 only when categories array is being explicitly updated
+  if (data.categories !== undefined && data.categories.length > 0 && data.categories.length < 2) {
     return res.status(400).json({ error: "At least 2 categories are required" });
   }
 

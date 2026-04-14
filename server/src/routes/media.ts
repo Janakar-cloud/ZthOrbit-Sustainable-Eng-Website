@@ -48,7 +48,12 @@ router.get("/", async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   const filter: any = {};
-  if (status) filter.status = status;
+  // Default to published-only for public access; admin can pass status=all or status=draft
+  if (status && status !== 'all') {
+    filter.status = status;
+  } else if (!status) {
+    filter.status = 'published';
+  }
 
   const resolvedCategoryIds = await resolveCategoryIds(category);
   if (resolvedCategoryIds?.length === 0) {
@@ -184,6 +189,19 @@ router.get("/", async (req, res, next) => {
   }
 
   res.json({ data: items, meta: { page, limit, total } });
+  } catch (err) { next(err); }
+});
+
+// Debug: count all videos in DB by status
+router.get("/debug/counts", async (_req, res, next) => {
+  try {
+    const [totalVideos, publishedVideos, draftVideos] = await Promise.all([
+      Video.countDocuments({}),
+      Video.countDocuments({ status: "published" }),
+      Video.countDocuments({ status: "draft" }),
+    ]);
+    const sample = await Video.find({}).sort({ createdAt: -1 }).limit(5).select("title status streamUrl thumbnailUrl createdAt");
+    res.json({ totalVideos, publishedVideos, draftVideos, recentSample: sample });
   } catch (err) { next(err); }
 });
 

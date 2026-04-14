@@ -210,21 +210,14 @@ export async function ensureMediaUniqueIndexes(): Promise<void> {
 
 async function deleteMissingS3BackedRecords(
   videoFiles: { key: string }[],
-  podcastFiles: { key: string }[],
-  articleFiles: { key: string }[],
-  articleContentFiles: { key: string }[] = []
+  podcastFiles: { key: string }[]
 ): Promise<{ videos: number; podcasts: number; articles: number }> {
   const videoKeys = new Set(videoFiles.map(({ key }) => key));
   const podcastKeys = new Set(podcastFiles.map(({ key }) => key));
-  // Legacy DOCX/PDF files under articels/ (typo prefix)
-  const articleKeys = new Set(articleFiles.map(({ key }) => key));
-  // HTML body files uploaded via dashboard API under articles/
-  const articleContentKeys = new Set(articleContentFiles.map(({ key }) => key));
 
-  const [videos, podcasts, articles] = await Promise.all([
+  const [videos, podcasts] = await Promise.all([
     Video.find({}, "streamUrl").lean(),
     Podcast.find({}, "audioUrl").lean(),
-    Article.find({}, "bodyMd bodyHtml").lean(),
   ]);
 
   const videoIdsToDelete = (videos as Array<{ _id: MongoIdLike; streamUrl?: string }>)
@@ -241,32 +234,16 @@ async function deleteMissingS3BackedRecords(
     })
     .map((doc) => doc._id);
 
-  const articleIdsToDelete = (articles as Array<{ _id: MongoIdLike; bodyMd?: string; bodyHtml?: string }>)
-    .filter((doc) => {
-      // Legacy S3-drop articles: bodyMd contains an articels/ S3 URL
-      if (doc.bodyMd) {
-        const key = extractArticleFileKey(doc.bodyMd);
-        if (key) return !articleKeys.has(key);
-      }
-      // Dashboard-uploaded articles: bodyHtml is a URL under articles/
-      if (doc.bodyHtml) {
-        const key = extractS3KeyFromPublicUrl(doc.bodyHtml, "articles/");
-        if (key) return !articleContentKeys.has(key);
-      }
-      return false;
-    })
-    .map((doc) => doc._id);
-
   await Promise.all([
     videoIdsToDelete.length ? Video.deleteMany({ _id: { $in: videoIdsToDelete } }) : Promise.resolve(),
     podcastIdsToDelete.length ? Podcast.deleteMany({ _id: { $in: podcastIdsToDelete } }) : Promise.resolve(),
-    articleIdsToDelete.length ? Article.deleteMany({ _id: { $in: articleIdsToDelete } }) : Promise.resolve(),
   ]);
 
   return {
     videos: videoIdsToDelete.length,
     podcasts: podcastIdsToDelete.length,
-    articles: articleIdsToDelete.length,
+    // Articles are managed exclusively via the dashboard API — never auto-deleted by S3 sync
+    articles: 0,
   };
 }
 
@@ -400,33 +377,25 @@ export async function syncS3ToDb(): Promise<SyncResult> {
 
   const VIDEO_EXTS = [".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".ts"];
   const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
-  const ARTICLE_EXTS = [".docx", ".doc", ".pdf"];
 
-  const [videoItems, podcastItems, articleItems, articleContentItems, videoThumbs, podcastThumbs, articleThumbs] = await Promise.all([
+  const [videoItems, podcastItems, videoThumbs, podcastThumbs] = await Promise.all([
     listAllKeys("LiveTV"),
     listAllKeys("podcast"),
-    listAllKeys("articels"),
-    listAllKeys("articles"),
     buildThumbnailMap("Thumbnail/videos"),
     buildThumbnailMap("Thumbnail/podcast"),
-    buildThumbnailMap("Thumbnail/articels"),
   ]);
 
   const videoFiles = videoItems.filter(({ key }) => VIDEO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
   const podcastFiles = podcastItems.filter(({ key }) => AUDIO_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
-  const articleFiles = articleItems.filter(({ key }) => ARTICLE_EXTS.some((ext) => key.toLowerCase().endsWith(ext)));
-  // HTML content files uploaded via dashboard API (used only for deletion tracking)
-  const articleContentFiles = articleContentItems.filter(({ key }) => key.toLowerCase().endsWith(".html"));
 
-  const removed = await deleteMissingS3BackedRecords(videoFiles, podcastFiles, articleFiles, articleContentFiles);
+  // Articles are managed exclusively via the dashboard API — no S3 folder sync
+  const removed = await deleteMissingS3BackedRecords(videoFiles, podcastFiles);
   await cleanupDuplicateTitles();
 
-  // Sync each collection in parallel
-  const [videos, podcasts, articles] = await Promise.all([
+  const [videos, podcasts] = await Promise.all([
     syncVideos(videoFiles, videoThumbs),
     syncPodcasts(podcastFiles, podcastThumbs),
-    syncArticles(articleFiles, articleThumbs),
   ]);
 
-  return { videos, podcasts, articles, removed, durationMs: Date.now() - start };
+  return { videos, podcasts, articles: { added: 0, updated: 0 }, removed, durationMs: Date.now() - start };
 }

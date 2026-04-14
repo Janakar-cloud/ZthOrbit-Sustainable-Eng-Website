@@ -46,10 +46,25 @@ const articleSchema = z.object({
   title: z.string().min(1),
   subtitle: z.string().optional(),
   bodyMd: z.string().default(""),
-  bodyHtml: z.string().url().optional(),
+  // Accept raw HTML from the dashboard editor OR an S3 URL (both are valid)
+  bodyHtml: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().optional()
+  ),
   readTime: z.string().optional(),
-  coverImage: z.string().url().optional(),
-  publishDate: z.string().datetime().optional(),
+  // Empty string counts as "no cover image" — strip it before URL-validating
+  coverImage: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().url().optional()
+  ),
+  // Accept full ISO datetime OR date-only strings (new Date() handles both)
+  publishDate: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().optional().refine(
+      (v) => !v || !isNaN(Date.parse(v)),
+      { message: "publishDate must be a valid date string" }
+    )
+  ),
   status: z.enum(["draft", "published"]).default("published"),
   featured: z.boolean().default(false),
   tags: z.array(z.string()).optional().default([]),

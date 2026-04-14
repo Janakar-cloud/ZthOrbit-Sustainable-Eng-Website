@@ -10,11 +10,18 @@ export default function ArticleDetails({
 
   useEffect(() => {
     if (!article.bodyHtml) return
-    setHtmlContent(null)
-    fetch(article.bodyHtml)
-      .then(r => r.text())
-      .then(setHtmlContent)
-      .catch(() => setHtmlContent(null))
+    const isUrl = article.bodyHtml.startsWith('http://') || article.bodyHtml.startsWith('https://')
+    if (isUrl) {
+      // Hosted in S3 — fetch the file
+      setHtmlContent(null)
+      fetch(article.bodyHtml)
+        .then(r => r.text())
+        .then(setHtmlContent)
+        .catch(() => setHtmlContent(null))
+    } else {
+      // Raw HTML from the dashboard editor — render directly
+      setHtmlContent(article.bodyHtml)
+    }
   }, [article.bodyHtml])
 
   const category = categories.find(c => c.id === normalizeCategoryKey(article.category))

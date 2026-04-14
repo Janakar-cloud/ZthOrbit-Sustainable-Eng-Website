@@ -19,7 +19,10 @@ export default function VideoGrid({
           onClick={() => onPlay(video)}
         >
           <div className="video-thumbnail">
-            <img src={video.thumbnail} alt={video.title} />
+            {video.thumbnail
+              ? <img src={video.thumbnail} alt={video.title} />
+              : <div className="video-thumbnail-placeholder"><span className="material-icons">play_circle</span></div>
+            }
             <div className="video-overlay">
               <span className="material-icons play-icon">play_circle</span>
             </div>

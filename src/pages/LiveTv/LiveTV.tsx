@@ -66,11 +66,10 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       }
     };
 
-    // Grid: only videos that also have a thumbnail (for card display)
+    // Grid: all videos that have a playable URL (thumbnail is optional)
     const gridVideos: Video[] = videocast.items
       .filter((item: any) => !!(item.streamUrl || item.fileUrl || item.hlsUrl || item.url))
-      .map(mapVideo)
-      .filter((v) => typeof v.thumbnail === 'string' && v.thumbnail.trim().length > 0);
+      .map(mapVideo);
 
     setVideos(gridVideos);
     const categoryList = buildCategoryList(sharedCategories, gridVideos);

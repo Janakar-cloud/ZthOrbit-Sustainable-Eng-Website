@@ -5,20 +5,14 @@ import { Article } from "../models/Article.js";
 
 const router = Router();
 const LIMIT = 4;
-const COPY_SUFFIX_RE = /\s*\(\d+\)\s*$/;
 const HAS_IMAGE = { $exists: true, $nin: ["", null] };
 
-function dedupeCanonical<T extends { title: string }>(docs: T[]): T[] {
+function dedupeByTitle<T extends { title: string }>(docs: T[]): T[] {
   const seen = new Set<string>();
-
   return docs.filter((doc) => {
-    const title = doc.title?.trim() ?? "";
-    if (!title || COPY_SUFFIX_RE.test(title)) return false;
-
-    const normalized = title.replace(COPY_SUFFIX_RE, "").replace(/\s+/g, " ").trim().toLowerCase();
-    if (!normalized || seen.has(normalized)) return false;
-
-    seen.add(normalized);
+    const key = (doc.title?.trim() ?? "").replace(/\s+/g, " ").toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
     return true;
   }).slice(0, LIMIT);
 }
@@ -40,11 +34,11 @@ router.get("/", async (_req, res) => {
         .select("title subtitle coverImage readTime publishDate"),
     ]);
 
-    // Deduplicate by normalised title (case-insensitive) — keeps the first (most recent)
+    // Deduplicate by exact title (case-insensitive) — keeps the most recently created
     res.json({
-      videos: dedupeCanonical(videos),
-      podcasts: dedupeCanonical(podcasts),
-      articles: dedupeCanonical(articles),
+      videos: dedupeByTitle(videos),
+      podcasts: dedupeByTitle(podcasts),
+      articles: dedupeByTitle(articles),
     });
   } catch (err) {
     console.error("[home] GET / failed:", err);

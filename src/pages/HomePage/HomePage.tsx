@@ -8,7 +8,7 @@ import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
 import LiveTvHeroPlayer from '../LiveTv/components/LiveTvHeroPlayer'
 import {Video, Podcast, HomePageProps} from './type/type'
-import {latestVideo,articlesData,liveTVVideos,liveTv,podcast,podcastEpisodes} from './data/data'
+
 import { useHomeData } from '../../hooks/home'
 
 export default function HomePage({ onNavigate }: HomePageProps) {
@@ -17,68 +17,58 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   const { darkMode,setActivePage } = useAppContext()
   const { data: homeData } = useHomeData()
 
-  // Map API videos → WorkSection items + modal items (fallback to static)
-  const liveTvItems = homeData
-    ? homeData.videos.slice(0, 4).map((v, i) => ({
-        id: i + 1,
-        title: v.title,
-        description: v.description,
-        image: v.thumbnailUrl,
-      }))
-    : liveTv
+  // Map API videos → WorkSection items + modal items
+  const liveTvItems = (homeData?.videos ?? []).slice(0, 4).map((v, i) => ({
+    id: i + 1,
+    title: v.title,
+    description: v.description,
+    image: v.thumbnailUrl,
+  }))
 
-  const videosForModal: Video[] = homeData
-    ? homeData.videos.slice(0, 4).map((v) => ({
-        id: v._id,
-        title: v.title,
-        description: v.description,
-        streamUrl: v.streamUrl,
-        thumbnail: v.thumbnailUrl || '',
-        isLive: v.isLive,
-        category: '',
-        categories: [],
-        publishDate: v.publishDate || '',
-      }))
-    : liveTVVideos
+  const videosForModal: Video[] = (homeData?.videos ?? []).slice(0, 4).map((v) => ({
+    id: v._id,
+    title: v.title,
+    description: v.description,
+    streamUrl: v.streamUrl,
+    thumbnail: v.thumbnailUrl || '',
+    isLive: v.isLive,
+    category: '',
+    categories: [],
+    publishDate: v.publishDate || '',
+  }))
 
-  // Map API podcasts → WorkSection items + modal items (fallback to static)
-  const podcastItems = homeData
-    ? homeData.podcasts.slice(0, 4).map((p, i) => ({
-        id: i + 1,
-        title: p.title,
-        description: p.description,
-        image: p.imageUrl || '',
-      }))
-    : podcast
+  // Map API podcasts → WorkSection items + modal items
+  const podcastItems = (homeData?.podcasts ?? []).slice(0, 4).map((p, i) => ({
+    id: i + 1,
+    title: p.title,
+    description: p.description,
+    image: p.imageUrl || '',
+  }))
 
-  const podcastsForModal: Podcast[] = homeData
-    ? homeData.podcasts.slice(0, 4).map((p) => ({
-        id: p._id,
-        title: p.title,
-        description: p.description,
-        audioFile: p.audioUrl,
-        image: p.imageUrl || '',
-        duration: p.duration || '',
-        category: '',
-        publishDate: p.publishDate || '',
-      }))
-    : podcastEpisodes
+  const podcastsForModal: Podcast[] = (homeData?.podcasts ?? []).slice(0, 4).map((p) => ({
+    id: p._id,
+    title: p.title,
+    description: p.description,
+    audioFile: p.audioUrl,
+    image: p.imageUrl || '',
+    duration: p.duration || '',
+    category: '',
+    publishDate: p.publishDate || '',
+  }))
 
-  // Map API articles → WorkSection items (fallback to static)
-  const articleItems = homeData
-    ? homeData.articles.slice(0, 4).map((a, i) => ({
-        id: i + 1,
-        title: a.title,
-        description: a.subtitle || '',
-        image: a.coverImage || '',
-      }))
-    : articlesData
+  // Map API articles → WorkSection items
+  const articleItems = (homeData?.articles ?? []).slice(0, 4).map((a, i) => ({
+    id: i + 1,
+    title: a.title,
+    description: a.subtitle || '',
+    image: a.coverImage || '',
+  }))
 
   
   /* -------------------- HANDLERS -------------------- */
 
   const playVideo = useCallback((video?: Video) => {
-    setSelectedVideo(video || latestVideo)
+    if (video) setSelectedVideo(video)
   }, [])
 
   const playPodcast = useCallback((podcast: Podcast) => {

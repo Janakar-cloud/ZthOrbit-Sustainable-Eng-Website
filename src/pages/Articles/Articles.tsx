@@ -8,7 +8,7 @@ import PodcastHero from '../Podcast/components/PodcastHero'
 import { ArticlesProps, Article } from './type/type'
 import { Category } from '../Podcast/type/type'
 import ArticlesList from './components/ArticlesList'
-import { categories as staticCategories } from './data/data'
+
 import ArticleDetails from './components/ArticleDetails'
 import { ArticlesHooks } from '../../hooks/articles'
 import { useSharedCategories } from '../../hooks/categories'
@@ -90,7 +90,7 @@ export default function Articles({ onNavigate }: ArticlesProps) {
       dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 
-    return dynamic.length > 1 ? dynamic : staticCategories
+    return dynamic
   }, [articles, sharedCategories])
 
   const filteredArticles = selectedCategory === 'all'

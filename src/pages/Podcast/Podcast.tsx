@@ -4,7 +4,7 @@ import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
 import Footer from '../../components/footer/Footer'
 import { PodcastProps, PodcastEpisode, Comment, Category } from './type/type'
-import { categories as staticCategories } from './data/data'
+
 import PodcastHero from './components/PodcastHero'
 import CategoryFilter from './components/CategoryFilter'
 import EpisodeCard from './components/EpisodeCard'
@@ -89,7 +89,7 @@ export default function Podcast({ onNavigate }: PodcastProps) {
       dynamic.push({ id: key, name, icon: iconMap[key] || 'label' })
     })
 
-    return dynamic.length > 1 ? dynamic : staticCategories
+    return dynamic
   }, [podcasts, sharedCategories])
 
   // Filter

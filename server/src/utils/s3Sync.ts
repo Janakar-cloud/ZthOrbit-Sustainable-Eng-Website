@@ -252,44 +252,42 @@ async function deleteMissingS3BackedRecords(
 
 async function syncVideos(files: { key: string; lastModified: Date }[], thumbMap: Map<string, string>): Promise<{ added: number; updated: number }> {
   let added = 0, updated = 0;
-  // UUID pattern — keys like videos/0268ab14-cbde-4c76-843e-1bca53273840 (dashboard uploads)
+  // UUID pattern — dashboard uploads use UUID keys; they already have proper DB records created at upload time
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   for (const { key, lastModified } of files) {
-    const streamUrl = s3Url(key);
     const fileName  = key.split("/").pop() ?? key;
     const fileBase  = baseName(fileName);
-    const isUuidKey = UUID_RE.test(fileBase);
-    const thumbnail = matchThumbnail(fileName, thumbMap);
-    const title     = isUuidKey ? fileBase : titleFromKey(key);
 
-    // For UUID keys, find only by streamUrl (title match would be meaningless)
-    const existing = await Video.findOne(
-      isUuidKey
-        ? { streamUrl }
-        : { $or: [{ streamUrl }, { title: new RegExp(`^${escapeRegex(title)}$`, "i") }] }
-    );
+    // Skip UUID-keyed files — these are dashboard uploads that already have a proper
+    // DB record with real title/thumbnail created at the time of upload.
+    // S3 sync should never create placeholder records for them.
+    if (UUID_RE.test(fileBase)) continue;
+
+    const streamUrl = s3Url(key);
+    const thumbnail = matchThumbnail(fileName, thumbMap);
+    const title     = titleFromKey(key);
+
+    const existing = await Video.findOne({
+      $or: [{ streamUrl }, { title: new RegExp(`^${escapeRegex(title)}$`, "i") }],
+    });
 
     if (existing) {
-      // Never overwrite a dashboard-set title with a raw UUID
-      const titleToSet = isUuidKey ? existing.title : title;
       const needsUpdate =
-        (!isUuidKey && existing.title !== titleToSet) ||
+        existing.title !== title ||
         (thumbnail && existing.thumbnailUrl !== thumbnail);
       if (needsUpdate) {
         await Video.updateOne(
           { _id: existing._id },
-          { title: titleToSet, ...(thumbnail && { thumbnailUrl: thumbnail }) }
+          { title, ...(thumbnail && { thumbnailUrl: thumbnail }) }
         );
         updated++;
       }
     } else {
-      // New record — use UUID as placeholder title if no better name available
-      const insertTitle = isUuidKey ? `Video ${fileBase.slice(0, 8)}` : title;
-      const normalizedTitle = normalizeMediaTitle(insertTitle);
+      const normalizedTitle = normalizeMediaTitle(title);
       const upserted = await Video.findOneAndUpdate(
         { normalizedTitle },
-        { $setOnInsert: { title: insertTitle, description: "", streamUrl, thumbnailUrl: thumbnail, publishDate: lastModified, status: "published", isLive: false, tags: [] } },
+        { $setOnInsert: { title, description: "", streamUrl, thumbnailUrl: thumbnail, publishDate: lastModified, status: "published", isLive: false, tags: [] } },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       if (upserted) added++;

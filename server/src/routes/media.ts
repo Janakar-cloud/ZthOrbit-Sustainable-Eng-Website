@@ -205,6 +205,24 @@ router.get("/debug/counts", async (_req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// One-time cleanup: remove placeholder "Video XXXXXXXX" records created by UUID sync
+// These are duplicates — the real dashboard-uploaded records have proper titles
+router.delete("/debug/cleanup-placeholders", requireAuth(["superadmin", "admin"]), async (_req, res, next) => {
+  try {
+    const PLACEHOLDER_RE = /^Video [0-9a-f]{8}$/i;
+    const all = await Video.find({}, "title streamUrl").lean() as Array<{ _id: any; title: string; streamUrl?: string }>;
+    const UUID_STREAM_RE = /\/videos\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const toDelete = all.filter(v =>
+      PLACEHOLDER_RE.test(v.title?.trim()) &&
+      UUID_STREAM_RE.test(v.streamUrl ?? "")
+    ).map(v => v._id);
+    if (toDelete.length) {
+      await Video.deleteMany({ _id: { $in: toDelete } });
+    }
+    res.json({ deleted: toDelete.length, message: `Removed ${toDelete.length} placeholder records` });
+  } catch (err) { next(err); }
+});
+
 router.get("/categories", async (_req, res, next) => {
   try {
     const categoryTags = await Tag.find({ kind: "category" }).sort({ name: 1 }).select("name kind");

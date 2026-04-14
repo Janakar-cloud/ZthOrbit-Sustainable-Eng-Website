@@ -43,8 +43,8 @@ describe('AboutUs Component', () => {
   it('shows correct contact links', () => {
     renderAboutUs()
 
-    const emailLink = screen.getByRole('link', { name: /greengenerationtvofficial@gmail.com/i })
-    expect(emailLink).toHaveAttribute('href', 'mailto:greengenerationtvofficial@gmail.com')
+    const emailLink = screen.getByRole('link', { name: /contact.thegreentv@gmail.com/i })
+    expect(emailLink).toHaveAttribute('href', 'mailto:contact.thegreentv@gmail.com')
 
     const phoneLink = screen.getByRole('link', { name: /\+91 75502 22600/i })
     expect(phoneLink).toHaveAttribute('href', 'tel:+917550222600')

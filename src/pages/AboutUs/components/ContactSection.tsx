@@ -18,13 +18,13 @@ const ContactSection: React.FC = () => {
             title: 'Email',
             label: 'Drop us a line',
             value: (
-                <a href="mailto:greengenerationtvofficial@gmail.com">
-                    greengenerationtvofficial@gmail.com
+                <a href="mailto:contact.thegreentv@gmail.com">
+                    contact.thegreentv@gmail.com
                 </a>
             ),
             action: () =>
             (window.location.href =
-                'mailto:greengenerationtvofficial@gmail.com'),
+                'mailto:contact.thegreentv@gmail.com'),
             delay: 0,
         },
         {

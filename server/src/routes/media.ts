@@ -39,6 +39,8 @@ async function resolveCategoryIds(category: unknown): Promise<string[] | null> {
 
 // Unified media list (combines videos and podcasts)
 router.get("/", async (req, res, next) => {
+  // Disable ETag caching so fresh data is always returned
+  res.setHeader("Cache-Control", "no-store");
   try {
     const { search, category, menu, mediaType, status } = req.query;
   const page = Number(req.query.page || 1);
@@ -68,7 +70,7 @@ router.get("/", async (req, res, next) => {
     ]);
     
     items = filterCanonicalMedia(videos as any[]).map((v) => ({
-      id: v.id,
+      id: v._id?.toString() ?? v.id,
       title: v.title,
       description: v.description,
       mediaType: "video",
@@ -98,7 +100,7 @@ router.get("/", async (req, res, next) => {
     ]);
     
     items = filterCanonicalMedia(podcasts as any[]).map((p) => ({
-      id: p.id,
+      id: p._id?.toString() ?? p.id,
       title: p.title,
       description: p.description,
       mediaType: "audio",
@@ -135,7 +137,7 @@ router.get("/", async (req, res, next) => {
     ]);
     
     const videoItems = filterCanonicalMedia(videos as any[]).map((v) => ({
-      id: v.id,
+      id: v._id?.toString() ?? v.id,
       title: v.title,
       description: v.description,
       mediaType: "video",
@@ -155,7 +157,7 @@ router.get("/", async (req, res, next) => {
     }));
     
     const podcastItems = filterCanonicalMedia(podcasts as any[]).map((p) => ({
-      id: p.id,
+      id: p._id?.toString() ?? p.id,
       title: p.title,
       description: p.description,
       mediaType: "audio",

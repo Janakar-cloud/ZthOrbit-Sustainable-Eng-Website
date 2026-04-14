@@ -27,10 +27,10 @@ export default function WorkSection<
             {items.map((item, i) => (
              <div key={i} className="work-card" onClick={() => onItemClick(item, i)} style={{ cursor: 'pointer' }}>
                 <div className="work-image-wrapper">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                  />
+                  {item.image || item.thumbnail
+                    ? <img src={item.image || item.thumbnail} alt={item.title} />
+                    : <div className="work-image-placeholder" />
+                  }
                 </div>
                 <div className="work-card-content">
                   <h3 className='work-sub-title'>{item.title}</h3>

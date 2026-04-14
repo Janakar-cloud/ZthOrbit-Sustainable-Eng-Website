@@ -8,13 +8,12 @@ export default function VideoCategoryFilters({
 }: VideoCategoryFiltersProps) {
   return (
     <div className="livetv-filters">
-      {categories.map(({ key, label, icon }) => (
+      {categories.map(({ key, label }) => (
         <button
           key={key}
           className={`filter-btn ${selectedCategory === key ? 'active' : ''}`}
           onClick={() => onCategoryChange(key)}
         >
-          <span className="material-icons">{icon}</span>
           {label}
         </button>
       ))}

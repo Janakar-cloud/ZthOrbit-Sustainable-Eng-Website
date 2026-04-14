@@ -8,7 +8,7 @@ import VideoModal from '../../components/VideoModal'
 import WorkSection from './components/WorkSection'
 import LiveTvHeroPlayer from '../LiveTv/components/LiveTvHeroPlayer'
 import {Video, Podcast, HomePageProps} from './type/type'
-import {latestVideo,articlesData,liveTVVideos,liveTv,ourVideo,podcast,podcastEpisodes} from './data/data'
+import {latestVideo,articlesData,liveTVVideos,liveTv,podcast,podcastEpisodes} from './data/data'
 import { useHomeData } from '../../hooks/home'
 
 export default function HomePage({ onNavigate }: HomePageProps) {
@@ -94,58 +94,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       <main className="main-container">
         {/* Live TV Hero Player */}
         <LiveTvHeroPlayer isModalOpen={!!selectedVideo || !!selectedPodcast} />
-
-        <section className="work-section">
-          <div className="work-header">
-            <div className="work-header-left">
-              <h2 className="work-title">Our Work</h2>
-              <p className="work-subtitle">
-                Discover our latest productions and featured content.
-              </p>
-            </div>
-          </div>
-          <div className="work-grid" style={{ cursor: 'pointer' }}>
-            {ourVideo.map((item, i) => (
-              item.isPlay ? (
-                <div key={i} className="work-card" onClick={() => playVideo()}>
-                  <div className="work-image-wrapper">
-                    <img
-                      src={item.imgurl}
-                      alt={item.title}
-                    />
-                    <div className="work-image-overlay" />
-                  </div>
-                  <div className="work-card-content" onClick={() => 
-                  {
-                    onNavigate(item.onNavigation);
-                    setActivePage(item.onNavigation)
-                  }}>
-                    <h3 className='work-sub-title'>{item.title}</h3>
-                    <p className='work-description'>{item.desc}</p>
-                  </div>
-                </div>) : (
-                <div key={i} className="work-card" onClick={() =>  {
-                    onNavigate(item.onNavigation);
-                    setActivePage(item.onNavigation)
-                  }}>
-                  <div className="work-image-wrapper">
-                    <img
-                      src={item.imgurl}
-                      alt={item.title}
-                    />
-                    <div className="work-image-overlay" />
-                  </div>
-                  <div className="work-card-content">
-                    <h3 className='work-sub-title'>{item.title}</h3>
-                    <p className='work-description'>{item.desc}</p>
-                  </div>
-                </div>
-              )
-            ))}
-          </div>
-        </section>
-
-
 
        {/* Videos */}
         <WorkSection

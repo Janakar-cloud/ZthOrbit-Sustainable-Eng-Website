@@ -10,11 +10,10 @@ import { Article } from "./models/Article.js";
 async function main() {
   await connectDb();
 
-  const categoryNames = ["AETHER", "MATERIA", "AQUA", "TERRA", "CIVITAS"];
+  const categoryNames = ["RAPID FIRE"];
   const tagDocs = await Promise.all(
     categoryNames.map((name) => Tag.findOneAndUpdate({ name }, { name, kind: "category" }, { upsert: true, new: true }))
   );
-  const tagMap = Object.fromEntries(tagDocs.map((t) => [t.name, t._id]));
 
   const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || "ChangeMe123!";
   const testUsers = [
@@ -58,7 +57,7 @@ async function main() {
       publishDate: new Date("2026-03-02"),
       status: "published",
       isLive: false,
-      tags: [tagMap.Aether],
+      tags: [],
       seriesId: "sanatana-dharma",
       partNumber: 2,
       partTitle: "Part 2",

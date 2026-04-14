@@ -35,7 +35,9 @@ export default function LiveTvHeroPlayer({ isModalOpen = false }: LiveTvHeroPlay
   const [liveVideos, setLiveVideos] = useState<VideoItem[]>([])
   const [currentHeroVideoIndex, setCurrentHeroVideoIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [overlayVisible, setOverlayVisible] = useState(true)
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { videocast } = LiveVideo()
   const { categories: sharedCategories } = useSharedCategories()
 
@@ -88,6 +90,16 @@ export default function LiveTvHeroPlayer({ isModalOpen = false }: LiveTvHeroPlay
       setCurrentHeroVideoIndex(prev => Math.min(prev, liveVideos.length - 1))
     }
   }, [liveVideos])
+
+  // Reset overlay visibility whenever the video changes
+  useEffect(() => {
+    setOverlayVisible(true)
+    if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+    overlayTimerRef.current = setTimeout(() => setOverlayVisible(false), 10000)
+    return () => {
+      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+    }
+  }, [currentHeroVideoIndex])
 
   // Mute hero while a modal is open
   useEffect(() => {
@@ -142,7 +154,7 @@ export default function LiveTvHeroPlayer({ isModalOpen = false }: LiveTvHeroPlay
         </div>
 
         {/* OVERLAY */}
-        <div className="hero-video-overlay">
+        <div className={`hero-video-overlay${overlayVisible ? '' : ' hero-video-overlay--hidden'}`}>
           <div className="hero-video-info">
             <span className="hero-video-category">
               {liveVideos[currentHeroVideoIndex]?.category}
@@ -150,9 +162,6 @@ export default function LiveTvHeroPlayer({ isModalOpen = false }: LiveTvHeroPlay
             <h2 className="hero-video-title">
               {liveVideos[currentHeroVideoIndex]?.title}
             </h2>
-            <p className="hero-video-description">
-              {liveVideos[currentHeroVideoIndex]?.description}
-            </p>
           </div>
         </div>
 

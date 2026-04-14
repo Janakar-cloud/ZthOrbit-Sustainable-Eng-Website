@@ -10,10 +10,12 @@ import { Article } from "./models/Article.js";
 async function main() {
   await connectDb();
 
-  const categoryNames = ["RAPID FIRE"];
+  const categoryNames = ["RAPID FIRE", "sustainability", "technology", "economy", "leadership", "ethics", "innovation"];
   const tagDocs = await Promise.all(
     categoryNames.map((name) => Tag.findOneAndUpdate({ name }, { name, kind: "category" }, { upsert: true, new: true }))
   );
+  const tagMap: Record<string, any> = {};
+  tagDocs.forEach((doc) => { if (doc) tagMap[doc.name] = doc._id; });
 
   const defaultPassword = process.env.SEED_DEFAULT_PASSWORD || "ChangeMe123!";
   const testUsers = [
@@ -126,7 +128,7 @@ async function main() {
       bodyMd:
         "Full article hosted in S3: https://greentv-s3.s3.ap-south-1.amazonaws.com/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.docx",
       readTime: "8 min",
-      coverImage: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/articels/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.png",
+      coverImage: "https://greentv-s3.s3.ap-south-1.amazonaws.com/Thumbnail/articles/The+Digital+Ecosystem+as+the+New+Driver+of+Sustainable+Economic+Growth.png",
       publishDate: new Date("2026-01-15"),
       status: "published",
       featured: true,

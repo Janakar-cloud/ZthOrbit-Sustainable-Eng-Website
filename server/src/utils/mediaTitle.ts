@@ -20,12 +20,13 @@ export function filterCanonicalMedia<T extends { title: string }>(items: T[]): T
 
   return items.filter((item) => {
     const title = item.title?.trim() ?? "";
-    if (!title || isCopyVariantTitle(title)) return false;
+    if (!title) return false;
 
-    const normalized = normalizeMediaTitle(title);
-    if (!normalized || seen.has(normalized)) return false;
+    // Deduplicate by exact title (case-insensitive) only — do not reject (1)-suffixed titles
+    const key = title.replace(/\s+/g, " ").toLowerCase();
+    if (seen.has(key)) return false;
 
-    seen.add(normalized);
+    seen.add(key);
     return true;
   });
 }

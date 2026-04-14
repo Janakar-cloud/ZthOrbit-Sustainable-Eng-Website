@@ -148,10 +148,11 @@ async function cleanupDuplicateTitles(): Promise<void> {
 
     for (const group of groups.values()) {
       if (group.length === 1) {
-        if (isCopyVariantTitle(group[0].title)) idsToDelete.push(group[0]._id);
+        // Only one entry with this normalized title — keep it even if it ends in (1)
         continue;
       }
 
+      // Multiple entries share the same normalized title — keep the highest-scored one
       const sorted = [...group].sort((left, right) => scoreDoc(right) - scoreDoc(left));
       idsToDelete.push(...sorted.slice(1).map((doc) => doc._id));
     }
@@ -222,7 +223,7 @@ async function deleteMissingS3BackedRecords(
 
   const videoIdsToDelete = (videos as Array<{ _id: MongoIdLike; streamUrl?: string }>)
     .filter((doc) => {
-      const key = doc.streamUrl ? extractS3KeyFromPublicUrl(doc.streamUrl, "LiveTV/") : null;
+      const key = doc.streamUrl ? extractS3KeyFromPublicUrl(doc.streamUrl, "videos/") : null;
       return key ? !videoKeys.has(key) : false;
     })
     .map((doc) => doc._id);
@@ -254,7 +255,6 @@ async function syncVideos(files: { key: string; lastModified: Date }[], thumbMap
   for (const { key, lastModified } of files) {
     const streamUrl = s3Url(key);
     const fileName  = key.split("/").pop() ?? key;
-    if (isCopyVariantTitle(baseName(fileName))) continue;
     const thumbnail = matchThumbnail(fileName, thumbMap);
     const title     = titleFromKey(key);
 
@@ -379,7 +379,7 @@ export async function syncS3ToDb(): Promise<SyncResult> {
   const AUDIO_EXTS = [".m4a", ".mp3", ".wav", ".ogg", ".aac", ".flac"];
 
   const [videoItems, podcastItems, videoThumbs, podcastThumbs] = await Promise.all([
-    listAllKeys("LiveTV"),
+    listAllKeys("videos"),
     listAllKeys("podcast"),
     buildThumbnailMap("Thumbnail/videos"),
     buildThumbnailMap("Thumbnail/podcast"),

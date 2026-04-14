@@ -155,10 +155,11 @@ export interface ArticleItem {
   title: string;
   subtitle?: string;
   bodyMd: string;
+  bodyHtml?: string;
   readTime?: string;
   coverImage?: string;
   publishDate?: string;
-  status: string;
+  status: "published" | "draft";
   featured: boolean;
   tags: string[];
 }

@@ -4,7 +4,7 @@ export interface ArticlesProps {
 }
 
 export interface Article {
-  id: number
+  id: string
   title: string
   subtitle: string
   category: string

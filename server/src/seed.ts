@@ -137,9 +137,9 @@ async function main() {
       subtitle: "Field notes for engineering leaders",
       bodyMd: "A concise guide to deploying AI responsibly across infrastructure and supply chains.",
       readTime: "6 min",
-      coverImage: "/assets/images/AI & Sustainability.jpeg",
+      // coverImage: upload to S3 at articles/covers/<uuid> and set URL here before seeding
       publishDate: new Date("2026-01-10"),
-      status: "published",
+      status: "draft",
       featured: false,
       tags: [tagMap.technology, tagMap.sustainability],
     },

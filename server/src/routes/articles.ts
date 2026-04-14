@@ -46,7 +46,7 @@ const articleSchema = z.object({
   title: z.string().min(1),
   subtitle: z.string().optional(),
   bodyMd: z.string().default(""),
-  bodyHtml: z.string().optional(),
+  bodyHtml: z.string().url().optional(),
   readTime: z.string().optional(),
   coverImage: z.string().url().optional(),
   publishDate: z.string().datetime().optional(),

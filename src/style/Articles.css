@@ -636,6 +636,38 @@
   margin: 3rem 0;
 }
 
+.article-html-content {
+  font-size: 1.125rem;
+  line-height: 2;
+  color: #334155;
+}
+
+.article-html-content p {
+  margin-bottom: 1.75rem;
+  line-height: 2;
+}
+
+.article-html-content h1,
+.article-html-content h2,
+.article-html-content h3,
+.article-html-content h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+  color: #1a1a1a;
+}
+
+.article-html-content ul,
+.article-html-content ol {
+  margin-bottom: 1.75rem;
+  padding-left: 1.5rem;
+}
+
+.article-html-content li {
+  margin-bottom: 0.6rem;
+  line-height: 2;
+}
+
 .article-paragraph {
   font-size: 1.125rem;
   line-height: 1.8;

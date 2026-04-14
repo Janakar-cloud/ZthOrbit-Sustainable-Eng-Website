@@ -60,7 +60,6 @@ router.get("/", async (req, res, next) => {
   // Filter by menu (LiveTv = videos, Podcast = podcasts)
   if (menu === "LiveTv" || mediaType === "video") {
     const videoFilter = { ...filter };
-    videoFilter.thumbnailUrl = HAS_IMAGE;
     if (search) videoFilter.title = new RegExp(escapeRegex(search as string), "i");
     
     const [videos, count] = await Promise.all([
@@ -122,7 +121,6 @@ router.get("/", async (req, res, next) => {
     // Return both if no menu filter
     const videoFilter = { ...filter };
     const podcastFilter = { ...filter };
-    videoFilter.thumbnailUrl = HAS_IMAGE;
     podcastFilter.imageUrl = HAS_IMAGE;
     if (search) {
       videoFilter.title = new RegExp(escapeRegex(search as string), "i");

@@ -71,7 +71,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
                   }}
             />
             <h1 className="Header-logo">
-              Green Generation <span className="logo-highlight">TV</span>
+              The Green <span className="logo-highlight">TV</span>
             </h1>
           </div>
 

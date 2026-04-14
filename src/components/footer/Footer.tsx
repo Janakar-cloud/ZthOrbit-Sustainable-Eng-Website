@@ -21,7 +21,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                 className="footer-logo-image"
               />
               <h1 className="footer-logo">
-                Green Generation <span className="footer-logo-highlight">TV</span>
+                The Green <span className="footer-logo-highlight">TV</span>
               </h1>
             </div>
             <p className="footer-description">
@@ -36,6 +36,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             <ul className="footer-list">
               <li><a onClick={() => { setActivePage('home'); onNavigate('home') }}>Home</a></li>
               <li><a onClick={() => { setActivePage('videos'); onNavigate('videos') }}>Videos</a></li>
+              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles') }}>Articles</a></li>
+              <li><a onClick={() => { setActivePage('podcast'); onNavigate('podcast') }}>Podcast</a></li>
             </ul>
           </div>
 
@@ -44,8 +46,6 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h5 className="footer-heading">Company</h5>
             <ul className="footer-list">
               <li><a onClick={() => { setActivePage('about'); onNavigate('about') }}>About Us</a></li>
-              <li><a onClick={() => { setActivePage('articles'); onNavigate('articles') }}>Articles</a></li>
-              <li><a onClick={() => { setActivePage('podcast'); onNavigate('podcast') }}>Podcast</a></li>
               <li><a onClick={() => {
                 setActivePage('about');
                 onNavigate('about')
@@ -79,7 +79,7 @@ export default function Footer({ onNavigate }: FooterProps) {
 
         {/* Bottom */}
         <div className="footer-bottom">
-          <p>© 2026 Green Generation TV. All rights reserved.</p>
+          <p>© 2026 The Green TV. All rights reserved.</p>
           <div className="footer-bottom-links">
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>

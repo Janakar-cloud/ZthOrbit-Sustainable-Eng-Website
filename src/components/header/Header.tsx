@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import '../../style/Header.css'
 import { useAppContext } from '../../context/AppContext'
 import { logout as apiLogout } from '../../utils/api'
+import LogoImage from '../../../assets/images/GREENTVLOGOHEADER.png'
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram, FaSun, FaMoon } from 'react-icons/fa'; // install react-icons if not added
 
 
@@ -62,7 +63,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
           {/* Logo */}
           <div className="logo-container" onClick={() => handleNavigate('home')}>
             <img
-              src="/assets/images/GREENTVLOGOHEADER.png"
+              src={LogoImage}
               alt="Green TV Logo"
               className="header-logo-image"
                 onLoad={(e) => {

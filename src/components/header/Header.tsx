@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import '../../style/Header.css'
 import { useAppContext } from '../../context/AppContext'
 import { logout as apiLogout } from '../../utils/api'
-import LogoImage from '../../../assets/images/GREENTVLOGOHEADER.png'
+import LogoImage from '../../../assets/images/HeaderLogo.png'
 import { FaFacebook, FaTwitter, FaLinkedin, FaYoutube, FaInstagram, FaSun, FaMoon } from 'react-icons/fa'; // install react-icons if not added
 
 

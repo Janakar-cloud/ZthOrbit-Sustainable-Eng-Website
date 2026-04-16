@@ -221,7 +221,7 @@
 
 
 .footer-logo-image {
-  width: 40px;
+  width: 60px;
   /* height: 100px; */
   object-fit: contain;
   transform: scale(1.5);
@@ -243,7 +243,7 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
-    height: 40px;
+  height: 60px;
 }
 
 

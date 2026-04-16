@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api/v1";
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("accessToken");
@@ -6,7 +6,6 @@ function authHeaders(): Record<string, string> {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  if (!API_BASE) throw new Error("Missing VITE_API_BASE");
   const res = await fetch(`${API_BASE}${path}`, {
     headers: {
       "Content-Type": "application/json",

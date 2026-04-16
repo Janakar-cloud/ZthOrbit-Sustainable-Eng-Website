@@ -16,7 +16,7 @@ const ALLOWED_PREFIXES = ["videos", "podcasts", "articles", "thumbnails", "image
 
 // Allowed content types for upload. Prevents presigned URLs for executable content.
 const ALLOWED_CONTENT_TYPES = [
-  "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif",
+  "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/svg+xml", "image/avif", "image/heic", "image/heif",
   "video/mp4", "video/quicktime", "video/webm", "video/x-matroska", "video/x-msvideo",
   "audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/ogg", "audio/wav", "audio/aac", "audio/flac",
   "application/pdf",

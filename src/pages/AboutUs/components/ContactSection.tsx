@@ -60,11 +60,11 @@ const ContactSection: React.FC = () => {
             title: 'Website',
             label: 'Explore online',
             value: (
-                <a href="https://greengen.tv" target="_blank" rel="noopener noreferrer">
-                    greengen.tv
+                <a href="https://thegreentv.com" target="_blank" rel="noopener noreferrer">
+                    thegreentv.com
                 </a>
             ),
-            action: () => window.open('https://greengen.tv', '_blank'),
+            action: () => window.open('https://thegreentv.com', '_blank'),
             delay: 300,
         },
     ]

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600&display=swap');
+
 /* =========================
    HEADER STYLES
 ========================= */
@@ -82,8 +84,10 @@
 }
 
 .nav-link {
+  font-family: 'League Spartan', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
+  letter-spacing: 0.02em;
   cursor: pointer;
   text-decoration: none;
   color: inherit;

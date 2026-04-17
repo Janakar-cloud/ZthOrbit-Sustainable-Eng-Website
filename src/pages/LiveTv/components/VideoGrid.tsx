@@ -31,7 +31,6 @@ export default function VideoGrid({
 
           <div className="video-info">
             <h3 className="video-title">{video.title}</h3>
-            <p className="video-description">{video.description}</p>
             <div className="video-meta">
               <span className="video-date">
                 <span className="material-icons">calendar_today</span>

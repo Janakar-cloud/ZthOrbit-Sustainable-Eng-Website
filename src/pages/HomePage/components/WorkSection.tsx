@@ -3,6 +3,7 @@ interface Props<T> {
   subtitle: string
   items: T[]
   onItemClick: (item: T, poistion: number) => void
+  showDescription?: boolean
 }
 
 export default function WorkSection<
@@ -11,7 +12,8 @@ export default function WorkSection<
   title,
   subtitle,
   items,
-  onItemClick
+  onItemClick,
+  showDescription = true,
 }: Props<T>) {
   return (
     <section className="work-section">
@@ -34,7 +36,7 @@ export default function WorkSection<
                 </div>
                 <div className="work-card-content">
                   <h3 className='work-sub-title'>{item.title}</h3>
-                  <p className='work-description'>{item.description}</p>
+                  {showDescription && <p className='work-description'>{item.description}</p>}
                 </div>
               </div>
             ))}

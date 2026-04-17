@@ -90,6 +90,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           title="Videos"
           subtitle="Discover our latest videos and streaming content."
           items={liveTvItems}
+          showDescription={false}
           onItemClick={(_, position) => playVideo(videosForModal[position])}
         />
 

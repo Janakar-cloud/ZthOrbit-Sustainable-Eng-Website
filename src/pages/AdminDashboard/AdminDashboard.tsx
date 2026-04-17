@@ -540,7 +540,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     try {
       const [audioPresign, coverPresign] = await Promise.all([
         getPresignedUpload('podcasts', podcastData.file.type),
-        getPresignedUpload('podcast-covers', podcastData.cover.type),
+        getPresignedUpload('covers', podcastData.cover.type),
       ])
       setUploadProgress(30)
 

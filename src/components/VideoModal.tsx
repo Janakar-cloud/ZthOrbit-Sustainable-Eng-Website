@@ -65,7 +65,7 @@ export default function VideoModal({
         </button>
         <div className="modal-video-wrapper">
           <video
-            className="hero-video-player-model"
+            className="modal-video"
             controls
             autoPlay
             playsInline

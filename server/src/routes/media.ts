@@ -311,6 +311,7 @@ const mediaSchema = z.object({
   status: z.enum(["processing", "ready", "failed"]).optional().default("processing"),
 });
 
+
 // Create media (routes to video or podcast)
 router.post("/", requireAuth(["superadmin", "admin", "editor"]), async (req, res, next) => {
   try {

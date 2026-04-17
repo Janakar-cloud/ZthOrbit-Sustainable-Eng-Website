@@ -26,6 +26,17 @@ const ALLOWED_CONTENT_TYPES = [
   "text/plain",
 ];
 
+function isAllowedContentType(contentType: string): boolean {
+  const normalized = contentType.split(";")[0].trim().toLowerCase();
+
+  if (!normalized) return false;
+  if (normalized.startsWith("image/")) return true;
+  if (normalized.startsWith("video/")) return true;
+  if (normalized.startsWith("audio/")) return true;
+
+  return ALLOWED_CONTENT_TYPES.includes(normalized);
+}
+
 const prefixSchema = z.string().min(1).refine(
   (p) => ALLOWED_PREFIXES.some((a) => p === a || p.startsWith(`${a}/`)),
   { message: `prefix must start with one of: ${ALLOWED_PREFIXES.join(", ")}` }
@@ -34,7 +45,7 @@ const prefixSchema = z.string().min(1).refine(
 const schema = z.object({
   prefix: prefixSchema,
   contentType: z.string().min(1).refine(
-    (ct) => ALLOWED_CONTENT_TYPES.includes(ct.split(";")[0].trim().toLowerCase()),
+    (ct) => isAllowedContentType(ct),
     { message: `contentType must be one of the allowed media types` }
   ),
 });

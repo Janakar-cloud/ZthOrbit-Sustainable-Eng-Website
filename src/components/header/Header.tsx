@@ -223,7 +223,7 @@ export default function Header({ onNavigate }: { onNavigate: (page: string) => v
             </div>
 
             {/* Auth Buttons */}
-            {!isLoggedIn ? (
+            {!isLoggedIn && activePage !== 'home' ? (
               <>
                 <button className="login-btn" onClick={() => handleNavigate('login')}>
                   Login

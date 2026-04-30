@@ -58,20 +58,6 @@ export default function Footer({ onNavigate }: FooterProps) {
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div className="footer-newsletter">
-            <h5 className="footer-heading">Engineering Insights</h5>
-            {/* <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="newsletter-input"
-              />
-              <button type="submit" className="newsletter-button">
-                Subscribe
-              </button>
-            </form> */}
-          </div>
         </div>
 
         {/* Bottom */}

@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { Video } from '../pages/HomePage/type/type'
 import { recordView, recordLike, getEngageStats } from '../api/engage'
+import VideoShareControls from './VideoShareControls'
+import './VideoShareControls.css'
 
 function getMimeType(url: string): string {
   const ext = url.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
@@ -77,30 +79,29 @@ export default function VideoModal({
               type={getMimeType(video.streamUrl || '')}
             />
           </video>
-
         </div>
+
+        <div className="modal-engage-bar">
+          <button
+            type="button"
+            className={`video-like-btn${liked ? ' is-liked' : ''}`}
+            onClick={handleLike}
+          >
+            <span className="material-icons">
+              {liked ? 'thumb_up' : 'thumb_up_off_alt'}
+            </span>
+            {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
+          </button>
+          <VideoShareControls
+            videoId={String(video.id)}
+            title={video.title}
+          />
+        </div>
+
         <div className="modal-info">
           <h3>{video.title}</h3>
           <p className="modal-date">{video.publishDate}</p>
           <p className="modal-description">{video.description}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
-            <button
-              onClick={handleLike}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                background: liked ? '#e8f5e9' : '#f3f4f6',
-                color: liked ? '#2e7d32' : '#6b7280',
-                border: liked ? '1px solid #a5d6a7' : '1px solid #e5e7eb',
-                borderRadius: '20px', padding: '6px 16px', cursor: 'pointer',
-                fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s',
-              }}
-            >
-              <span className="material-icons" style={{ fontSize: '18px' }}>
-                {liked ? 'thumb_up' : 'thumb_up_off_alt'}
-              </span>
-              {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
-            </button>
-          </div>
         </div>
       </div>
     </div>

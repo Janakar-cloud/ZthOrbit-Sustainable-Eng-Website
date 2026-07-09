@@ -41,6 +41,7 @@
 .footer-grid {
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: 3rem;
   margin-bottom: 5rem;
 }
@@ -53,7 +54,7 @@
 
 @media (min-width: 1024px) {
   .footer-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

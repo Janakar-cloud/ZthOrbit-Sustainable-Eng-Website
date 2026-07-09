@@ -1,0 +1,167 @@
+.video-engage-row,
+.modal-engage-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-engage-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.livetv.dark .modal-engage-bar,
+.homepage.dark .modal-engage-bar {
+  background: #0f172a;
+  border-bottom-color: #334155;
+}
+
+.video-engage-row {
+  margin-top: 12px;
+}
+
+.video-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.video-like-btn .material-icons {
+  font-size: 18px;
+}
+
+.video-like-btn:hover {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+.video-like-btn.is-liked {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+.video-share-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.video-share-controls__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.video-share-controls__buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.video-share-controls__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.video-share-controls__btn .material-icons {
+  font-size: 18px;
+}
+
+.video-share-controls__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.video-share-controls__btn--native:hover {
+  color: #5CB039;
+  border-color: #a5d6a7;
+  background: #e8f5e9;
+}
+
+.video-share-controls__btn--whatsapp:hover {
+  color: #fff;
+  background: #25d366;
+  border-color: #25d366;
+}
+
+.video-share-controls__btn--facebook:hover {
+  color: #fff;
+  background: #1877f2;
+  border-color: #1877f2;
+}
+
+.video-share-controls__btn--twitter:hover {
+  color: #fff;
+  background: #000;
+  border-color: #000;
+}
+
+.video-share-controls__btn--linkedin:hover {
+  color: #fff;
+  background: #0a66c2;
+  border-color: #0a66c2;
+}
+
+.video-share-controls__btn--copy:hover,
+.video-share-controls__btn--copy.is-copied {
+  color: #2e7d32;
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+}
+
+.livetv.dark .video-like-btn,
+.homepage.dark .video-like-btn {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+.livetv.dark .video-like-btn.is-liked,
+.livetv.dark .video-like-btn:hover,
+.homepage.dark .video-like-btn.is-liked,
+.homepage.dark .video-like-btn:hover {
+  background: #1e3a2f;
+  color: #7dcc5c;
+  border-color: #5CB039;
+}
+
+.livetv.dark .video-share-controls__label,
+.homepage.dark .video-share-controls__label {
+  color: #cbd5e1;
+}
+
+.livetv.dark .video-share-controls__btn,
+.homepage.dark .video-share-controls__btn {
+  background: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}

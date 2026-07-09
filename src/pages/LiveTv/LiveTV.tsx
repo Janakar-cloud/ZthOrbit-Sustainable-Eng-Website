@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import '../../style/LiveTV.css'
 import Header from '../../components/header/Header'
 import { useAppContext } from '../../context/AppContext'
@@ -14,6 +14,9 @@ import NoData from '../../components/Nodatafound'
 import ErrorMessage from '../../components/ErroMessage'
 import Loader from '../../components/Loader'
 import { canonicalizeCategoryNames, normalizeCategoryKey } from '../../utils/category'
+import { getMediaById } from '../../utils/api'
+import { mapApiItemToVideo } from '../../utils/mapVideo'
+import { getVideoIdFromUrl, setVideoShareParam } from '../../utils/videoShare'
 
 interface LiveTVProps {
   onNavigate: (page: string) => void
@@ -35,36 +38,8 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
   useEffect(() => {
     if (!Array.isArray(videocast?.items)) return;
 
-    const mapVideo = (item: any): Video => {
-      const categoryNames = canonicalizeCategoryNames(
-        [
-          item.category,
-          ...(Array.isArray(item.categories) ? item.categories : []),
-          ...(Array.isArray(item.tags)
-            ? item.tags
-                .filter((tag: any) => tag?.kind === 'category')
-                .map((tag: any) => tag?.name)
-            : []),
-        ],
-        sharedCategories
-      )
-      return {
-        id: item._id,
-        title: item.title,
-        description: item.description || "",
-        videoId: item.videoId || "",
-        streamUrl: item.streamUrl || item.fileUrl || item.hlsUrl || item.url || "",
-        category: categoryNames[0] || "",
-        categories: categoryNames,
-        isLive: item.isLive ?? false,
-        publishDate: new Date(item.publishDate).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        thumbnail: item.thumbnailUrl || "",
-      }
-    };
+    const mapVideo = (item: (typeof videocast.items)[number]): Video =>
+      mapApiItemToVideo(item, sharedCategories);
 
     // Grid: all videos that have a playable URL (thumbnail is optional)
     const gridVideos: Video[] = videocast.items
@@ -110,8 +85,51 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
           video.categories.some((cat) => normalizeCategoryKey(cat) === selectedCategory)
         )
 
+  const openVideoById = useCallback(async (videoId: string) => {
+    const found = videos.find((video) => String(video.id) === videoId)
+    if (found) {
+      setSelectedVideo(found)
+      return
+    }
+
+    try {
+      const item = await getMediaById(videoId)
+      if (item.mediaType !== 'video') return
+      setSelectedVideo(mapApiItemToVideo(item, sharedCategories))
+    } catch {
+      setSelectedVideo(null)
+    }
+  }, [videos, sharedCategories])
+
+  useEffect(() => {
+    if (loading) return
+    const videoId = getVideoIdFromUrl()
+    if (!videoId) return
+    void openVideoById(videoId)
+  }, [loading, openVideoById])
+
+  useEffect(() => {
+    const onPopState = () => {
+      const videoId = getVideoIdFromUrl()
+      if (videoId) {
+        void openVideoById(videoId)
+      } else {
+        setSelectedVideo(null)
+      }
+    }
+
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [openVideoById])
+
   const handlePlayVideo = (video: Video) => {
     setSelectedVideo(video)
+    setVideoShareParam(String(video.id))
+  }
+
+  const handleCloseVideo = () => {
+    setSelectedVideo(null)
+    setVideoShareParam(null)
   }
 
 
@@ -187,7 +205,7 @@ export default function LiveTV({ onNavigate }: LiveTVProps) {
       {selectedVideo && (
         <VideoModal
           video={selectedVideo}
-          onClose={() => setSelectedVideo(null)}
+          onClose={handleCloseVideo}
         />
       )}
 

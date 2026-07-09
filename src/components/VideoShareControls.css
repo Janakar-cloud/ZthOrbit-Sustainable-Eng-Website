@@ -1,9 +1,29 @@
-.video-engage-row {
+.video-engage-row,
+.modal-engage-bar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 12px;
   flex-wrap: wrap;
+}
+
+.modal-engage-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.livetv.dark .modal-engage-bar,
+.homepage.dark .modal-engage-bar {
+  background: #0f172a;
+  border-bottom-color: #334155;
+}
+
+.video-engage-row {
+  margin-top: 12px;
 }
 
 .video-like-btn {

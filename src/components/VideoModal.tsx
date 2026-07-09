@@ -79,28 +79,29 @@ export default function VideoModal({
               type={getMimeType(video.streamUrl || '')}
             />
           </video>
-
         </div>
+
+        <div className="modal-engage-bar">
+          <button
+            type="button"
+            className={`video-like-btn${liked ? ' is-liked' : ''}`}
+            onClick={handleLike}
+          >
+            <span className="material-icons">
+              {liked ? 'thumb_up' : 'thumb_up_off_alt'}
+            </span>
+            {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
+          </button>
+          <VideoShareControls
+            videoId={String(video.id)}
+            title={video.title}
+          />
+        </div>
+
         <div className="modal-info">
           <h3>{video.title}</h3>
           <p className="modal-date">{video.publishDate}</p>
           <p className="modal-description">{video.description}</p>
-          <div className="video-engage-row">
-            <button
-              type="button"
-              className={`video-like-btn${liked ? ' is-liked' : ''}`}
-              onClick={handleLike}
-            >
-              <span className="material-icons">
-                {liked ? 'thumb_up' : 'thumb_up_off_alt'}
-              </span>
-              {likeCount > 0 ? likeCount : ''} {liked ? 'Liked' : 'Like'}
-            </button>
-            <VideoShareControls
-              videoId={String(video.id)}
-              title={video.title}
-            />
-          </div>
         </div>
       </div>
     </div>
